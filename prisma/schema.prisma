@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  slug           String   @unique
+  author         String
+  description    String
+  price          Float
+  discountPrice  Float?
+  coverImage     String
+  images         String[]
+  categoryId     String   @db.ObjectId
+  category       Category @relation(fields: [categoryId], references: [id])
+  publisher      String?
+  isbn           String?
+  language       String   @default("Română")
+  pageCount      Int?
+  stock          Int      @default(0)
+  rating         Float    @default(0)
+  reviewCount    Int      @default(0)
+  isBestseller   Boolean  @default(false)
+  isNew          Boolean  @default(false)
+  tags           String[]
+  searchText     String
+  orderItems     OrderItem[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([categoryId])
+}
+
+model Category {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  name  String @unique
+  slug  String @unique
+  icon  String?
+  books Book[]
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber     String        @unique
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  city            String
+  items           OrderItem[]
+  subtotal        Float
+  shippingCost    Float
+  total           Float
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  paymentId       String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId  String @db.ObjectId
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bookId   String @db.ObjectId
+  book     Book   @relation(fields: [bookId], references: [id])
+  title    String
+  price    Float
+  quantity Int
+
+  @@index([orderId])
+  @@index([bookId])
+}
+
+model Admin {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique
+  password String
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
