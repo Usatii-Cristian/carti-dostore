@@ -1,15 +1,5 @@
 import { prisma } from "../lib/prisma";
-
-const DIACRITICS_REGEX = /[̀-ͯ]/g;
-
-function slugify(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(DIACRITICS_REGEX, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+import { slugify, DIACRITICS_REGEX } from "../lib/slugify";
 
 // Fotografii temporare de pe Unsplash (Faza 1) — înlocuite cu imagini reale
 // ale cărților prin Vercel Blob la Faza 5.

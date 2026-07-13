@@ -3,7 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { StoreHydration } from "@/components/providers/StoreHydration";
-import "./globals.css";
+import "../globals.css";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
