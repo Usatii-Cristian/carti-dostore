@@ -1,4 +1,4 @@
-import type { Book } from "@prisma/client";
+import type { BookCardData } from "@/lib/types";
 import { PackageX } from "lucide-react";
 import { BookCard } from "./BookCard";
 
@@ -12,7 +12,7 @@ export function BookGrid({
   variant = "wide",
   emptyMessage = "Nu am găsit nicio carte aici, momentan.",
 }: {
-  books: Book[];
+  books: BookCardData[];
   variant?: keyof typeof VARIANT_CLASSES;
   emptyMessage?: string;
 }) {

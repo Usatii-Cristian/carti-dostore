@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Heart, ShoppingCart } from "lucide-react";
 import { getBookBySlug, getSimilarBooks } from "@/lib/books";
 import { StarRating } from "@/components/books/StarRating";
 import { PriceTag } from "@/components/books/PriceTag";
 import { ImageGallery } from "@/components/books/ImageGallery";
 import { BookGrid } from "@/components/books/BookGrid";
+import { AddToCartButton } from "@/components/books/AddToCartButton";
+import { FavoriteButton } from "@/components/books/FavoriteButton";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -95,22 +96,8 @@ export default async function BookPage({ params }: PageProps) {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              disabled={outOfStock}
-              className="flex items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:bg-border disabled:text-ink-soft"
-            >
-              <ShoppingCart className="h-4.5 w-4.5" aria-hidden="true" />
-              {outOfStock ? "Stoc epuizat" : "Adaugă în coș"}
-            </button>
-            <button
-              type="button"
-              aria-label="Adaugă la favorite"
-              className="flex items-center gap-2 rounded-full border border-border px-5 py-3 font-semibold text-ink transition-colors hover:border-terracotta hover:text-terracotta"
-            >
-              <Heart className="h-4.5 w-4.5" aria-hidden="true" />
-              Favorite
-            </button>
+            <AddToCartButton book={book} outOfStock={outOfStock} variant="full" />
+            <FavoriteButton book={book} variant="full" />
           </div>
 
           <div className="mt-8 border-t border-border pt-6">
