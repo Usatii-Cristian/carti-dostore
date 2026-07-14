@@ -15,12 +15,12 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: "/livrare-si-plata", priority: 0.3, changeFrequency: "monthly" },
 ];
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [books, categories] = await Promise.all([
-    prisma.book.findMany({ select: { slug: true, updatedAt: true } }),
-    prisma.category.findMany({ select: { slug: true } }),
-  ]);
+// Generat la cerere (nu la build) ca să nu depindă de DATABASE_URL la build-ul
+// Vercel. În plus, dacă baza de date e indisponibilă, întoarcem măcar rutele
+// statice în loc să pice tot build-ul.
+export const dynamic = "force-dynamic";
 
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
     url: `${SITE_URL}${route.path}`,
     lastModified: new Date(),
@@ -28,19 +28,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.priority,
   }));
 
-  const categoryEntries: MetadataRoute.Sitemap = categories.map((category) => ({
-    url: `${SITE_URL}/carti/categorie/${category.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
+  let dynamicEntries: MetadataRoute.Sitemap = [];
+  try {
+    const [books, categories] = await Promise.all([
+      prisma.book.findMany({ select: { slug: true, updatedAt: true } }),
+      prisma.category.findMany({ select: { slug: true } }),
+    ]);
 
-  const bookEntries: MetadataRoute.Sitemap = books.map((book) => ({
-    url: `${SITE_URL}/carti/${book.slug}`,
-    lastModified: book.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.5,
-  }));
+    const categoryEntries: MetadataRoute.Sitemap = categories.map((category) => ({
+      url: `${SITE_URL}/carti/categorie/${category.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
 
-  return [...staticEntries, ...categoryEntries, ...bookEntries];
+    const bookEntries: MetadataRoute.Sitemap = books.map((book) => ({
+      url: `${SITE_URL}/carti/${book.slug}`,
+      lastModified: book.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.5,
+    }));
+
+    dynamicEntries = [...categoryEntries, ...bookEntries];
+  } catch (error) {
+    console.error("[sitemap] baza de date indisponibilă — doar rute statice:", error);
+  }
+
+  return [...staticEntries, ...dynamicEntries];
 }
