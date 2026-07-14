@@ -124,7 +124,13 @@ export function CheckoutView() {
             {items.map((item) => (
               <li key={item.id} className="flex items-center gap-3">
                 <span className="relative h-14 w-10 shrink-0 overflow-hidden rounded-md bg-cream-soft">
-                  <Image src={item.coverImage} alt="" fill sizes="40px" className="object-cover" />
+                  <Image
+                    src={item.coverImage}
+                    alt={`Coperta cărții ${item.title}`}
+                    fill
+                    sizes="40px"
+                    className="object-cover"
+                  />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-ink">{item.title}</span>

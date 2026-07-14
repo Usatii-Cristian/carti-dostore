@@ -48,6 +48,7 @@ export async function createCategory(
   }
 
   revalidatePath("/admin/categorii");
+  revalidatePath("/", "layout");
   redirect("/admin/categorii");
 }
 
@@ -75,6 +76,7 @@ export async function updateCategory(
   }
 
   revalidatePath("/admin/categorii");
+  revalidatePath("/", "layout");
   redirect("/admin/categorii");
 }
 
@@ -91,5 +93,6 @@ export async function deleteCategory(id: string) {
 
   await prisma.category.delete({ where: { id } });
   revalidatePath("/admin/categorii");
+  revalidatePath("/", "layout");
   redirect("/admin/categorii");
 }

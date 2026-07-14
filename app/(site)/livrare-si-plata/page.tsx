@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Truck, CreditCard, Banknote } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Livrare și plată — BookStore",
+  title: "Livrare și plată",
   description: "Află tot ce trebuie despre livrare și metodele de plată disponibile pe BookStore.",
 };
 

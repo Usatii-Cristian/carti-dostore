@@ -3,7 +3,7 @@ import { getTopRatedBooks } from "@/lib/books";
 import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 export const metadata: Metadata = {
-  title: "Top recomandări — BookStore",
+  title: "Top recomandări",
   description: "Cărțile cel mai bine evaluate de cititorii BookStore.",
 };
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Edituri — BookStore",
+  title: "Edituri",
   description: "Editurile cu care colaborăm pentru a-ți aduce cele mai bune cărți.",
 };
 

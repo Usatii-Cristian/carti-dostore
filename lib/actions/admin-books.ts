@@ -121,6 +121,7 @@ export async function createBook(
   }
 
   revalidatePath("/admin/carti");
+  revalidatePath("/", "layout");
   redirect("/admin/carti");
 }
 
@@ -149,10 +150,12 @@ export async function updateBook(
   }
 
   revalidatePath("/admin/carti");
+  revalidatePath("/", "layout");
   redirect("/admin/carti");
 }
 
 export async function deleteBook(id: string) {
   await prisma.book.delete({ where: { id } });
   revalidatePath("/admin/carti");
+  revalidatePath("/", "layout");
 }

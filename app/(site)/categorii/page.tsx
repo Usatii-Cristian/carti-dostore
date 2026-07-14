@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getAllCategories } from "@/lib/categories";
 
 export const metadata: Metadata = {
-  title: "Categorii — BookStore",
+  title: "Categorii",
   description: "Toate categoriile de cărți disponibile pe BookStore.",
 };
 

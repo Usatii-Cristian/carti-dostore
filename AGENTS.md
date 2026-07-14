@@ -9,9 +9,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Magazin online de cărți, în limba română, pentru piața din Moldova. Checkout ca oaspete
 (fără conturi de clienți), plată reală prin maib e-commerce API, admin panel protejat.
 
-Proiectul se construiește în 6 faze secvențiale (vezi planul original al utilizatorului).
-Faza curentă atinsă: **Faza 5 — admin panel** (auth, upload imagini, CRUD cărți/categorii,
-comenzi, dashboard). Rămâne Faza 6 (polish, SEO, verificare finală).
+Proiectul s-a construit în 6 faze secvențiale (vezi planul original al utilizatorului).
+Toate cele 6 faze sunt complete: fundație, catalog, căutare/coș/favorite, checkout+maib,
+admin panel, și **Faza 6 — polish final** (responsive, loading/empty/error states,
+performanță, SEO, accesibilitate, verificare E2E completă).
 
 ## Stack tehnic
 
@@ -133,6 +134,38 @@ Orice `export` dintr-un fișier cu `"use server"` la începutul lui (ex.
 (`export type X = ...`) sunt OK (se elimină la compilare, nu ajung în bundle-ul runtime).
 Dacă un formular client are nevoie de o stare inițială, definește constanta direct în
 componenta client, nu în fișierul de acțiuni.
+
+### Gotcha: paginile statice (○) nu se revalidează singure la modificări din admin
+
+Rutele fără API dinamic (`/`, `/carti/bestsellers`, `/carti/noutati`, `/carti/recomandate`,
+`/carti/reduceri`, `/categorii`) sunt prerandate static la build (○ în output-ul `next build`)
+și NU se actualizează automat când admin-ul creează/editează/șterge o carte sau categorie —
+asta apare DOAR în `next build`/`next start`, nu în `next dev` (unde totul e randat on-demand,
+deci bug-ul e invizibil în dezvoltare). Soluția: fiecare Server Action de mutație din
+`lib/actions/admin-books.ts` și `lib/actions/admin-categories.ts` (create/update/delete) cheamă
+`revalidatePath("/", "layout")` pe lângă `revalidatePath("/admin/...")` — asta invalidează tot
+subarborele de layout public, inclusiv paginile statice. Dacă adaugi o mutație nouă în admin
+care afectează date afișate public, nu uita acest apel.
+
+### Gotcha: `loading.tsx` pe o rută care poate apela `notFound()` produce 200 în loc de 404
+
+`loading.tsx` creează un Suspense boundary la nivel de rută — Next.js începe să transmită
+răspunsul HTTP cu status 200 înainte ca `notFound()` să apuce să schimbe statusul, deci
+rezultă un „soft 404": body-ul corect (pagina custom 404), dar `HTTP/1.1 200 OK`. Vizibil
+doar în build de producție (`curl -i`), nu în `next dev`. De-asta `/carti/[slug]` și
+`/carti/categorie/[slug]` (care pot apela `notFound()`) NU au `loading.tsx` — folosesc alt
+mecanism de loading state (skeleton randat direct în pagină, nu prin fișier `loading.tsx`).
+Păstrează `loading.tsx` doar pe rute care nu pot 404 (`/cautare`, `/carti/bestsellers`,
+`/carti/noutati`, `/carti/recomandate`, `/carti/reduceri`, `/categorii`).
+
+### Gotcha: `UntrustedHost` la `next start` local sau pe hosting non-Vercel
+
+NextAuth v5 (`@auth/core`) decide dacă are încredere în header-ul `Host` verificând DOAR
+`AUTH_URL` / `AUTH_TRUST_HOST` / `VERCEL` / `CF_PAGES` / `NODE_ENV !== "production"` — NU
+citește `NEXTAUTH_URL` pentru asta. Pe Vercel funcționează automat (variabila `VERCEL` e
+setată), dar la `next start` local sau pe alt hosting fără aceste variabile, orice
+autentificare eșuează silențios cu `[auth][error] UntrustedHost`. De asta `lib/auth.config.ts`
+setează explicit `trustHost: true` — nu-l scoate crezând că e redundant cu `NEXTAUTH_URL`.
 
 ## Comenzi
 

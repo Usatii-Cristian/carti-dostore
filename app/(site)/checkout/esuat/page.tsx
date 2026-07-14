@@ -4,7 +4,8 @@ import { XCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "Plată nereușită — BookStore",
+  title: "Plată nereușită",
+  robots: { index: false, follow: false },
 };
 
 type PageProps = {

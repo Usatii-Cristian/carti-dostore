@@ -65,7 +65,13 @@ export default async function AdminBooksPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <span className="relative h-14 w-10 shrink-0 overflow-hidden rounded-md bg-slate-100">
-                      <Image src={book.coverImage} alt="" fill sizes="40px" className="object-cover" />
+                      <Image
+                        src={book.coverImage}
+                        alt={`Coperta cărții ${book.title}`}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                      />
                     </span>
                     <div className="min-w-0">
                       <p className="truncate font-medium text-slate-900">{book.title}</p>

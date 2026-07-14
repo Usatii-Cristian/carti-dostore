@@ -36,9 +36,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!category) return {};
 
+  const description = `Descoperă cărți din categoria ${category.name}, cu livrare rapidă în Moldova.`;
+
   return {
-    title: `${category.name} — BookStore`,
-    description: `Descoperă cărți din categoria ${category.name}, cu livrare rapidă în Moldova.`,
+    title: category.name,
+    description,
+    openGraph: { title: category.name, description },
   };
 }
 

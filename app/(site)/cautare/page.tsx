@@ -4,7 +4,7 @@ import { searchBooks } from "@/lib/search";
 import { BookGrid } from "@/components/books/BookGrid";
 
 export const metadata: Metadata = {
-  title: "Căutare — BookStore",
+  title: "Căutare",
   description: "Caută cărți, autori sau categorii pe BookStore.",
 };
 

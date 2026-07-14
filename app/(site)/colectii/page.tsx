@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Colecții — BookStore",
+  title: "Colecții",
   description: "Colecții tematice de cărți, alese special pentru tine.",
 };
 

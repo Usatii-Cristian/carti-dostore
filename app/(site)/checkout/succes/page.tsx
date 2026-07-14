@@ -6,7 +6,8 @@ import { formatPrice } from "@/lib/format";
 import { ClearCartOnMount } from "@/components/checkout/ClearCartOnMount";
 
 export const metadata: Metadata = {
-  title: "Comandă înregistrată — BookStore",
+  title: "Comandă înregistrată",
+  robots: { index: false, follow: false },
 };
 
 type PageProps = {

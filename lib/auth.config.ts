@@ -7,6 +7,13 @@ import type { NextAuthConfig } from "next-auth";
 // Decizia de autorizare (redirect la login / 401) e implementată direct în
 // proxy.ts, care citește req.auth.
 export const authConfig: NextAuthConfig = {
+  // @auth/core decide dacă are încredere în header-ul Host doar din
+  // AUTH_URL / AUTH_TRUST_HOST / VERCEL / CF_PAGES — NU citește NEXTAUTH_URL
+  // pentru asta. Pe Vercel e automat (VERCEL e setat), dar la `next start`
+  // local sau pe alt hosting fără aceste variabile, fără trustHost explicit
+  // orice autentificare eșuează silențios cu "UntrustedHost". Setat explicit
+  // ca să nu depindem de detecția implicită.
+  trustHost: true,
   pages: {
     signIn: "/admin/login",
   },

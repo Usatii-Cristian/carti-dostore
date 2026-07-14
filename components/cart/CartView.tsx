@@ -55,7 +55,13 @@ export function CartView() {
               className="flex gap-4 rounded-xl bg-card p-4 shadow-sm ring-1 ring-border/70"
             >
               <Link href={`/carti/${item.slug}`} className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-cream-soft">
-                <Image src={item.coverImage} alt="" fill sizes="80px" className="object-cover" />
+                <Image
+                  src={item.coverImage}
+                  alt={`Coperta cărții ${item.title}`}
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
               </Link>
 
               <div className="flex flex-1 flex-col">

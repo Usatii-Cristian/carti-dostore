@@ -3,6 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { StoreHydration } from "@/components/providers/StoreHydration";
+import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -16,9 +17,21 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BookStore — Librăria ta online din Moldova",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "BookStore — Librăria ta online din Moldova",
+    template: "%s — BookStore",
+  },
   description:
     "Cărți alese cu grijă, livrate rapid oriunde în Moldova. Literatură română și universală, dezvoltare personală, psihologie, istorie și multe altele.",
+  openGraph: {
+    siteName: "BookStore",
+    type: "website",
+    locale: "ro_RO",
+    title: "BookStore — Librăria ta online din Moldova",
+    description:
+      "Cărți alese cu grijă, livrate rapid oriunde în Moldova. Literatură română și universală, dezvoltare personală, psihologie, istorie și multe altele.",
+  },
 };
 
 export default function RootLayout({

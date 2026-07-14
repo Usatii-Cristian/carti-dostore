@@ -68,7 +68,13 @@ export function ImageUploader({
       <div className="flex flex-wrap gap-3">
         {value.map((url, index) => (
           <div key={url + index} className="relative h-24 w-24 overflow-hidden rounded-lg border border-slate-200">
-            <Image src={url} alt="" fill sizes="96px" className="object-cover" />
+            <Image
+              src={url}
+              alt={`Previzualizare imagine încărcată ${index + 1}`}
+              fill
+              sizes="96px"
+              className="object-cover"
+            />
             <button
               type="button"
               onClick={() => removeAt(index)}

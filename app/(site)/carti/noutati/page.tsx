@@ -3,7 +3,7 @@ import { getNewBooks } from "@/lib/books";
 import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 export const metadata: Metadata = {
-  title: "Noutăți — BookStore",
+  title: "Noutăți",
   description: "Cele mai proaspete apariții editoriale, disponibile acum pe BookStore.",
 };
 

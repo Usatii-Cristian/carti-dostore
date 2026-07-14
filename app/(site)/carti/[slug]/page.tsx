@@ -22,10 +22,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = book.description.slice(0, 155);
 
   return {
-    title: `${book.title} — ${book.author} | BookStore`,
+    title: `${book.title} — ${book.author}`,
     description,
     openGraph: {
-      title: book.title,
+      title: `${book.title} — ${book.author}`,
       description,
       images: [{ url: book.coverImage }],
     },

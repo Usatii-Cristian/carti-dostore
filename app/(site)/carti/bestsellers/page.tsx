@@ -3,7 +3,7 @@ import { getBestsellers } from "@/lib/books";
 import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 export const metadata: Metadata = {
-  title: "Bestsellers — BookStore",
+  title: "Bestsellers",
   description: "Cărțile cele mai apreciate și cumpărate de cititorii din Moldova.",
 };
 

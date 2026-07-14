@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MapPin, Phone, Clock } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Librării — BookStore",
+  title: "Librării",
   description: "Vizitează una dintre librăriile noastre partenere din Moldova.",
 };
 

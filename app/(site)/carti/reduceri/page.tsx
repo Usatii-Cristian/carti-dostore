@@ -3,7 +3,7 @@ import { getDiscountedBooks } from "@/lib/books";
 import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 export const metadata: Metadata = {
-  title: "Reduceri — BookStore",
+  title: "Reduceri",
   description: "Cărți la preț redus, pentru o vreme limitată.",
 };
 
