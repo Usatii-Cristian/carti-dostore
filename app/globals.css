@@ -35,3 +35,47 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Rezervăm mereu spațiul pentru scrollbar — altfel, când se blochează scroll-ul
+   (deschiderea meniului mobil, modale), pagina „sare" lateral cu lățimea barei,
+   ceea ce arată ca o animație/glitch. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Scrollbar în paleta librăriei — subțire, rotunjit, terracotta pe cremă. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-terracotta) var(--color-cream-soft);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-cream-soft);
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-terracotta) 70%, transparent);
+  border-radius: 999px;
+  border: 3px solid var(--color-cream-soft);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-terracotta);
+}
+
+/* Zona de admin are fundal deschis/albăstrui — scrollbar potrivit pe navy. */
+.admin-scope ::-webkit-scrollbar-track {
+  background: #eef1f6;
+}
+.admin-scope ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-navy) 55%, transparent);
+  border-color: #eef1f6;
+}
+.admin-scope ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-navy);
+}

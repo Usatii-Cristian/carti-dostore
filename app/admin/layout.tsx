@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "BookStore Admin",
+  title: "Dostore Carti Admin",
   robots: { index: false, follow: false },
 };
 

@@ -3,7 +3,7 @@ import { BookOpen } from "lucide-react";
 import { LoginForm } from "@/components/admin/LoginForm";
 
 export const metadata: Metadata = {
-  title: "Admin — BookStore",
+  title: "Admin — Dostore Carti",
   robots: { index: false, follow: false },
 };
 
@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-navy text-white">
             <BookOpen className="h-6 w-6" aria-hidden="true" />
           </span>
-          <h1 className="text-xl font-semibold text-slate-900">BookStore Admin</h1>
+          <h1 className="text-xl font-semibold text-slate-900">Dostore Carti Admin</h1>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

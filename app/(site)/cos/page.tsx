@@ -3,7 +3,7 @@ import { CartView } from "@/components/cart/CartView";
 
 export const metadata: Metadata = {
   title: "Coșul tău",
-  description: "Vezi cărțile din coșul tău de cumpărături pe BookStore.",
+  description: "Vezi cărțile din coșul tău de cumpărături pe Dostore Carti.",
   robots: { index: false, follow: true },
 };
 

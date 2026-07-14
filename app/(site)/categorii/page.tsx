@@ -5,7 +5,7 @@ import { CategoryIcon } from "@/components/CategoryIcon";
 
 export const metadata: Metadata = {
   title: "Categorii",
-  description: "Toate categoriile de cărți disponibile pe BookStore.",
+  description: "Toate categoriile de cărți disponibile pe Dostore Carti.",
 };
 
 export default async function CategoriiPage() {

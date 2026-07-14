@@ -20,7 +20,7 @@ export function Footer() {
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="BookStore pe Facebook"
+                aria-label="Dostore Carti pe Facebook"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 transition-colors hover:bg-terracotta"
               >
                 <FacebookIcon className="h-4.5 w-4.5" />
@@ -29,7 +29,7 @@ export function Footer() {
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="BookStore pe Instagram"
+                aria-label="Dostore Carti pe Instagram"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 transition-colors hover:bg-terracotta"
               >
                 <InstagramIcon className="h-4.5 w-4.5" />
@@ -38,7 +38,7 @@ export function Footer() {
                 href="https://tiktok.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="BookStore pe TikTok"
+                aria-label="Dostore Carti pe TikTok"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 transition-colors hover:bg-terracotta"
               >
                 <TikTokIcon className="h-4.5 w-4.5" />
@@ -92,7 +92,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-2 border-t border-cream/10 pt-6 text-xs text-cream/60 sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} BookStore. Toate drepturile rezervate.</p>
+          <p>© {new Date().getFullYear()} Dostore Carti. Toate drepturile rezervate.</p>
           <p>Făcut cu drag pentru cititorii din Moldova.</p>
         </div>
       </div>

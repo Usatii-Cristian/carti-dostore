@@ -26,7 +26,7 @@ export function EmailLayout({
         <Container style={styles.container}>
           <Section style={styles.header}>
             <Heading as="h1" style={styles.brand}>
-              Book<span style={styles.brandAccent}>Store</span>
+              Dostore <span style={styles.brandAccent}>Carti</span>
             </Heading>
           </Section>
 
@@ -34,7 +34,7 @@ export function EmailLayout({
 
           <Section style={styles.footer}>
             <Text style={styles.footerText}>
-              BookStore — librăria ta online din Moldova.
+              Dostore Carti — librăria ta online din Moldova.
               <br />
               Str. Ismail 47, Chișinău · +373 22 000 000 · contact@bookstore.md
             </Text>

@@ -32,7 +32,7 @@ export function PaymentConfirmedEmail({
       </Section>
 
       <Text style={styles.paragraph}>
-        Vei fi anunțat când comanda pleacă la livrare. Îți mulțumim că ai ales BookStore!
+        Vei fi anunțat când comanda pleacă la livrare. Îți mulțumim că ai ales Dostore Carti!
       </Text>
     </EmailLayout>
   );

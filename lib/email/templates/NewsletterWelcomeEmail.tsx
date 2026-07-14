@@ -4,10 +4,10 @@ import { styles } from "./theme";
 
 export function NewsletterWelcomeEmail({ siteUrl }: { siteUrl: string }) {
   return (
-    <EmailLayout preview="Bine ai venit în comunitatea BookStore">
+    <EmailLayout preview="Bine ai venit în comunitatea Dostore Carti">
       <Text style={styles.heading}>Bine ai venit! 📚</Text>
       <Text style={styles.paragraph}>
-        Îți mulțumim că te-ai abonat la newsletterul BookStore. De acum vei primi primul
+        Îți mulțumim că te-ai abonat la newsletterul Dostore Carti. De acum vei primi primul
         printre cititori:
       </Text>
 

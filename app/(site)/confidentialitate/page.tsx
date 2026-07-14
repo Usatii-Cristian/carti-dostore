@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate",
-  description: "Cum colectează, folosește și protejează BookStore datele tale personale.",
+  description: "Cum colectează, folosește și protejează Dostore Carti datele tale personale.",
 };
 
 const sections = [

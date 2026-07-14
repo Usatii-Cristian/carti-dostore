@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, X, BookOpen } from "lucide-react";
+import Link from "next/link";
+import { Menu, X, BookOpen, ExternalLink } from "lucide-react";
 import { AdminNavLinks } from "./AdminNavLinks";
 import { LogoutButton } from "./LogoutButton";
 
@@ -25,7 +26,7 @@ export function AdminMobileNav({ adminEmail }: { adminEmail?: string | null }) {
     <div className="flex items-center justify-between border-b border-slate-200 bg-navy-dark px-4 py-3 lg:hidden">
       <div className="flex items-center gap-2 text-white">
         <BookOpen className="h-5 w-5" aria-hidden="true" />
-        <span className="font-semibold">BookStore Admin</span>
+        <span className="font-semibold">Dostore Carti Admin</span>
       </div>
 
       <button
@@ -60,9 +61,19 @@ export function AdminMobileNav({ adminEmail }: { adminEmail?: string | null }) {
             <div className="flex-1">
               <AdminNavLinks onNavigate={() => setOpen(false)} />
             </div>
-            <div className="border-t border-white/10 pt-4">
+            <div className="space-y-3 border-t border-white/10 pt-4">
+              <Link
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+              >
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                Vezi site-ul
+              </Link>
               {adminEmail && (
-                <p className="mb-2 truncate px-3 text-xs text-slate-400">{adminEmail}</p>
+                <p className="truncate px-3 text-xs text-slate-400">{adminEmail}</p>
               )}
               <LogoutButton />
             </div>

@@ -5,7 +5,7 @@ import { getDashboardStats } from "@/lib/admin/dashboard";
 import { formatPrice } from "@/lib/format";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusBadge";
 
-export const metadata: Metadata = { title: "Dashboard — Admin BookStore" };
+export const metadata: Metadata = { title: "Dashboard — Admin Dostore Carti" };
 
 export default async function AdminDashboardPage() {
   const { totalOrders, totalRevenue, lowStockBooks, recentOrders } = await getDashboardStats();

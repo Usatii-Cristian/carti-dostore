@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createCategory } from "@/lib/actions/admin-categories";
 import { CategoryForm } from "@/components/admin/CategoryForm";
 
-export const metadata: Metadata = { title: "Categorie nouă — Admin BookStore" };
+export const metadata: Metadata = { title: "Categorie nouă — Admin Dostore Carti" };
 
 export default function NewCategoryPage() {
   return (

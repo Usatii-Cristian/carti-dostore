@@ -6,7 +6,7 @@ import { deleteCategory } from "@/lib/actions/admin-categories";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { CategoryIcon } from "@/components/CategoryIcon";
 
-export const metadata: Metadata = { title: "Categorii — Admin BookStore" };
+export const metadata: Metadata = { title: "Categorii — Admin Dostore Carti" };
 
 type PageProps = {
   searchParams: Promise<{ error?: string }>;

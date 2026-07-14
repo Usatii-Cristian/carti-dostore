@@ -1,4 +1,4 @@
-// Paleta de brand BookStore, oglindită din app/globals.css. Emailurile au nevoie
+// Paleta de brand Dostore Carti, oglindită din app/globals.css. Emailurile au nevoie
 // de stiluri inline (clientii de email ignoră CSS extern / clase), deci ținem
 // culorile și obiectele de stil refolosibile aici.
 export const colors = {

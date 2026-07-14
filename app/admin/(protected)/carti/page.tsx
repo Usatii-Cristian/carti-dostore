@@ -8,7 +8,7 @@ import { formatPrice, formatBookCount } from "@/lib/format";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 
-export const metadata: Metadata = { title: "Cărți — Admin BookStore" };
+export const metadata: Metadata = { title: "Cărți — Admin Dostore Carti" };
 
 type PageProps = {
   searchParams: Promise<{ q?: string; page?: string }>;

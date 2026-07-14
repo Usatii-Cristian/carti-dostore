@@ -62,7 +62,7 @@ export async function sendPaymentConfirmedEmail(input: {
 export async function sendNewsletterWelcomeEmail(email: string): Promise<void> {
   await sendEmail({
     to: email,
-    subject: "Bine ai venit în comunitatea BookStore",
+    subject: "Bine ai venit în comunitatea Dostore Carti",
     react: NewsletterWelcomeEmail({ siteUrl: SITE_URL }),
   });
 }

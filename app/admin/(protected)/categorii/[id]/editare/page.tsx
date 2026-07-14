@@ -4,7 +4,7 @@ import { getCategoryForEdit } from "@/lib/admin/categories";
 import { updateCategory } from "@/lib/actions/admin-categories";
 import { CategoryForm } from "@/components/admin/CategoryForm";
 
-export const metadata: Metadata = { title: "Editează categoria — Admin BookStore" };
+export const metadata: Metadata = { title: "Editează categoria — Admin Dostore Carti" };
 
 type PageProps = {
   params: Promise<{ id: string }>;

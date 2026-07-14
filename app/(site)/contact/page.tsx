@@ -3,7 +3,7 @@ import { Phone, Mail, MapPin, Clock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Datele de contact BookStore — telefon, email, adresă și program de lucru.",
+  description: "Datele de contact Dostore Carti — telefon, email, adresă și program de lucru.",
 };
 
 export default function ContactPage() {

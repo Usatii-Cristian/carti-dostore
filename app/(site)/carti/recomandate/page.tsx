@@ -4,7 +4,7 @@ import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 export const metadata: Metadata = {
   title: "Top recomandări",
-  description: "Cărțile cel mai bine evaluate de cititorii BookStore.",
+  description: "Cărțile cel mai bine evaluate de cititorii Dostore Carti.",
 };
 
 export default async function RecomandatePage() {

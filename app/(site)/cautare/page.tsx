@@ -5,7 +5,7 @@ import { BookGrid } from "@/components/books/BookGrid";
 
 export const metadata: Metadata = {
   title: "Căutare",
-  description: "Caută cărți, autori sau categorii pe BookStore.",
+  description: "Caută cărți, autori sau categorii pe Dostore Carti.",
 };
 
 type PageProps = {
@@ -23,7 +23,7 @@ export default async function CautarePage({ searchParams }: PageProps) {
           <Search className="h-6 w-6" aria-hidden="true" />
         </span>
         <h1 className="mt-5 font-serif text-2xl font-semibold text-ink sm:text-3xl">
-          Caută pe BookStore
+          Caută pe Dostore Carti
         </h1>
         <p className="mt-3 text-ink-soft">
           Caută după titlu, autor sau categorie, folosind bara de căutare din antet.

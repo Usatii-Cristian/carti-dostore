@@ -5,7 +5,7 @@ import { getBookForEdit } from "@/lib/admin/books";
 import { updateBook } from "@/lib/actions/admin-books";
 import { BookForm } from "@/components/admin/BookForm";
 
-export const metadata: Metadata = { title: "Editează cartea — Admin BookStore" };
+export const metadata: Metadata = { title: "Editează cartea — Admin Dostore Carti" };
 
 type PageProps = {
   params: Promise<{ id: string }>;

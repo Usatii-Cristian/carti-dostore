@@ -11,7 +11,7 @@ import {
   PAYMENT_STATUS_LABELS,
 } from "@/components/admin/StatusBadge";
 
-export const metadata: Metadata = { title: "Detalii comandă — Admin BookStore" };
+export const metadata: Metadata = { title: "Detalii comandă — Admin Dostore Carti" };
 
 type PageProps = {
   params: Promise<{ id: string }>;

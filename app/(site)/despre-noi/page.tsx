@@ -3,7 +3,7 @@ import { BookOpen, Heart, Truck } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Despre noi",
-  description: "Povestea BookStore — librăria ta online din Moldova.",
+  description: "Povestea Dostore Carti — librăria ta online din Moldova.",
 };
 
 export default function DespreNoiPage() {
@@ -11,7 +11,7 @@ export default function DespreNoiPage() {
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <h1 className="font-serif text-3xl font-semibold text-ink sm:text-4xl">Despre noi</h1>
       <p className="mt-4 leading-relaxed text-ink-soft">
-        BookStore a pornit dintr-o pasiune simplă: cărțile bune ar trebui să ajungă ușor la
+        Dostore Carti a pornit dintr-o pasiune simplă: cărțile bune ar trebui să ajungă ușor la
         cititorii din Moldova, indiferent de oraș. Am construit o librărie online unde
         alegem cu grijă fiecare titlu — de la literatură română și universală, până la
         dezvoltare personală, psihologie și cărți pentru cei mici.

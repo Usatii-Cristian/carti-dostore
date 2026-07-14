@@ -5,7 +5,7 @@ import { formatPrice } from "@/lib/format";
 import { OrderStatusBadge, PaymentStatusBadge, ORDER_STATUS_LABELS } from "@/components/admin/StatusBadge";
 import { AdminPagination } from "@/components/admin/AdminPagination";
 
-export const metadata: Metadata = { title: "Comenzi — Admin BookStore" };
+export const metadata: Metadata = { title: "Comenzi — Admin Dostore Carti" };
 
 type PageProps = {
   searchParams: Promise<{ status?: string; page?: string }>;

@@ -19,16 +19,16 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BookStore — Librăria ta online din Moldova",
-    template: "%s — BookStore",
+    default: "Dostore Carti — Librăria ta online din Moldova",
+    template: "%s — Dostore Carti",
   },
   description:
     "Cărți alese cu grijă, livrate rapid oriunde în Moldova. Literatură română și universală, dezvoltare personală, psihologie, istorie și multe altele.",
   openGraph: {
-    siteName: "BookStore",
+    siteName: "Dostore Carti",
     type: "website",
     locale: "ro_RO",
-    title: "BookStore — Librăria ta online din Moldova",
+    title: "Dostore Carti — Librăria ta online din Moldova",
     description:
       "Cărți alese cu grijă, livrate rapid oriunde în Moldova. Literatură română și universală, dezvoltare personală, psihologie, istorie și multe altele.",
   },

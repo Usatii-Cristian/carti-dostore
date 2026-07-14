@@ -3,7 +3,7 @@ import { Truck, CreditCard, Banknote } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Livrare și plată",
-  description: "Află tot ce trebuie despre livrare și metodele de plată disponibile pe BookStore.",
+  description: "Află tot ce trebuie despre livrare și metodele de plată disponibile pe Dostore Carti.",
 };
 
 export default function LivrareSiPlataPage() {

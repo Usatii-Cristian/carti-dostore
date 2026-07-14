@@ -3,7 +3,7 @@ import { RotateCcw, Clock, Wallet } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Retur și rambursare",
-  description: "Politica de retur și rambursare pentru comenzile plasate pe BookStore.",
+  description: "Politica de retur și rambursare pentru comenzile plasate pe Dostore Carti.",
 };
 
 export default function ReturSiRambursarePage() {

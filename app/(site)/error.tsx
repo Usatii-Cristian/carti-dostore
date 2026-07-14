@@ -39,7 +39,7 @@ export default function ErrorPage({
           href="/"
           className="inline-flex items-center gap-2 rounded-full border border-border px-7 py-3 font-semibold text-ink transition-colors hover:border-terracotta hover:text-terracotta"
         >
-          Înapoi la BookStore
+          Înapoi la Dostore Carti
         </Link>
       </div>
     </div>

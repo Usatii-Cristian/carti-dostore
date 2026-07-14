@@ -19,7 +19,7 @@ export default function NotFound() {
           href="/"
           className="inline-flex items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
         >
-          Înapoi la BookStore
+          Înapoi la Dostore Carti
         </Link>
         <Link
           href="/carti/bestsellers"

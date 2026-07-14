@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Termeni și condiții",
-  description: "Termenii și condițiile de utilizare a magazinului online BookStore.",
+  description: "Termenii și condițiile de utilizare a magazinului online Dostore Carti.",
 };
 
 const sections = [
   {
     title: "1. Acceptarea termenilor",
-    body: "Prin plasarea unei comenzi pe BookStore ești de acord cu termenii și condițiile de mai jos. Dacă nu ești de acord cu ele, te rugăm să nu folosești acest site pentru achiziții.",
+    body: "Prin plasarea unei comenzi pe Dostore Carti ești de acord cu termenii și condițiile de mai jos. Dacă nu ești de acord cu ele, te rugăm să nu folosești acest site pentru achiziții.",
   },
   {
     title: "2. Produsele și prețurile",
@@ -32,7 +32,7 @@ const sections = [
   },
   {
     title: "7. Limitarea răspunderii",
-    body: "BookStore depune eforturi rezonabile pentru a asigura acuratețea informațiilor despre produse, dar nu poate garanta absența oricăror erori minore de descriere sau imagine.",
+    body: "Dostore Carti depune eforturi rezonabile pentru a asigura acuratețea informațiilor despre produse, dar nu poate garanta absența oricăror erori minore de descriere sau imagine.",
   },
   {
     title: "8. Modificarea termenilor",

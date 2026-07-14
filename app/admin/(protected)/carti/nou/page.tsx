@@ -3,7 +3,7 @@ import { getAllCategories } from "@/lib/categories";
 import { createBook } from "@/lib/actions/admin-books";
 import { BookForm } from "@/components/admin/BookForm";
 
-export const metadata: Metadata = { title: "Carte nouă — Admin BookStore" };
+export const metadata: Metadata = { title: "Carte nouă — Admin Dostore Carti" };
 
 export default async function NewBookPage() {
   const categories = await getAllCategories();

@@ -3,7 +3,7 @@ import { Briefcase, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Cariere",
-  description: "Alătură-te echipei BookStore.",
+  description: "Alătură-te echipei Dostore Carti.",
 };
 
 export default function CarierePage() {

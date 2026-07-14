@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Întrebări frecvente",
-  description: "Răspunsuri la cele mai frecvente întrebări despre comenzi, livrare și plată pe BookStore.",
+  description: "Răspunsuri la cele mai frecvente întrebări despre comenzi, livrare și plată pe Dostore Carti.",
 };
 
 const faqs = [

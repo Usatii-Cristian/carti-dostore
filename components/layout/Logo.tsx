@@ -1,19 +1,28 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import Image from "next/image";
 
 export function Logo({ variant = "dark" }: { variant?: "dark" | "light" }) {
   const textColor = variant === "light" ? "text-cream" : "text-navy";
-  const iconColor = variant === "light" ? "text-gold" : "text-terracotta";
+  const accentColor = variant === "light" ? "text-gold" : "text-terracotta";
 
   return (
     <Link
       href="/"
-      className="flex items-center gap-2 shrink-0"
-      aria-label="BookStore — pagina principală"
+      className="flex shrink-0 items-center gap-2.5"
+      aria-label="Dostore Carti — pagina principală"
     >
-      <BookOpen className={`h-7 w-7 ${iconColor}`} aria-hidden="true" />
-      <span className={`font-serif text-2xl font-semibold tracking-tight ${textColor}`}>
-        BookStore
+      <Image
+        src="/logo-round-icon.png"
+        alt=""
+        width={44}
+        height={44}
+        priority
+        className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-border/60"
+      />
+      <span
+        className={`font-serif text-2xl font-semibold leading-none tracking-tight ${textColor}`}
+      >
+        Dostore <span className={accentColor}>Carti</span>
       </span>
     </Link>
   );

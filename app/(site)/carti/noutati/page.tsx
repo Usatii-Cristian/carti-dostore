@@ -4,7 +4,7 @@ import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 export const metadata: Metadata = {
   title: "Noutăți",
-  description: "Cele mai proaspete apariții editoriale, disponibile acum pe BookStore.",
+  description: "Cele mai proaspete apariții editoriale, disponibile acum pe Dostore Carti.",
 };
 
 export default async function NoutatiPage() {

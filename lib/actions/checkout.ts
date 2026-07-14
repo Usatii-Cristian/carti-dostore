@@ -137,7 +137,7 @@ export async function createOrderAndPay(
       amount: total,
       currency: "MDL",
       clientIp,
-      description: `Comandă BookStore ${orderNumber}`,
+      description: `Comandă Dostore Carti ${orderNumber}`,
       orderId: orderNumber,
       clientName: customerName,
       email,

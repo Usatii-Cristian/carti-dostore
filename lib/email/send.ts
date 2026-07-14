@@ -11,7 +11,7 @@ import { Resend } from "resend";
 // să NU se blocheze când emailul nu e încă configurat (exact ca la maib/DB).
 
 const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.EMAIL_FROM ?? "BookStore <onboarding@resend.dev>";
+const from = process.env.EMAIL_FROM ?? "Dostore Carti <onboarding@resend.dev>";
 
 const isConfigured = typeof apiKey === "string" && apiKey.startsWith("re_");
 const resend = isConfigured ? new Resend(apiKey) : null;
