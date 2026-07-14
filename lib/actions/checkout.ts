@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { createDirectPayment } from "@/lib/payments/maib";
+import { sendNewOrderEmails } from "@/lib/email/notifications";
 import { cartItemPrice, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/store/cart";
 import type { CartItem } from "@/lib/store/cart";
 
@@ -105,6 +106,28 @@ export async function createOrderAndPay(
       },
     },
   });
+
+  // Confirmare către client + notificare către admin. Trimiterea nu blochează și
+  // nu poate strica fluxul de plată (sendEmail prinde erorile intern).
+  await sendNewOrderEmails(
+    {
+      orderNumber,
+      customerName,
+      customerEmail: email,
+      customerPhone: phone,
+      shippingAddress,
+      city,
+      items: items.map((item) => ({
+        title: item.title,
+        price: cartItemPrice(item),
+        quantity: item.quantity,
+      })),
+      subtotal,
+      shippingCost,
+      total,
+    },
+    order.id
+  );
 
   const [origin, clientIp] = await Promise.all([resolveOrigin(), resolveClientIp()]);
 

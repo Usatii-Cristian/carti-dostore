@@ -87,6 +87,38 @@ corespund cărților reale, sunt doar temporare. Cărțile adăugate/editate din
 `images.remotePatterns`) — vezi `app/api/admin/upload/route.ts` +
 `components/admin/ImageUploader.tsx`.
 
+**Optimizare la upload** (`app/api/admin/upload/route.ts`): imaginile NU se stochează brute.
+Ruta rulează pe runtime Node.js (`export const runtime = "nodejs"`, necesar pentru `sharp`) și
+trece fiecare fișier prin `sharp`: `.rotate()` (aplică EXIF + curăță metadatele) →
+`.resize(1200, 1600, { fit: "inside", withoutEnlargement: true })` → `.webp({ quality: 80 })`
+înainte de `put()` în Blob (cu extensie `.webp` și `contentType: "image/webp"`). Reduce tipic
+un JPEG de câteva sute de KB / câțiva MB cu ~90% (ex. 386KB → 38KB), ca sute de produse să
+ocupe spațiu minim. Limita de intrare e 10MB brut; dacă `sharp` crapă pe un fișier corupt,
+ruta răspunde 400, nu 500.
+
+### Email tranzacțional — Resend în spatele unei abstracții
+
+Emailurile automate trec toate prin `lib/email/send.ts` (`sendEmail(...)`) — un strat
+provider-agnostic. Concret folosește **Resend** (`resend` + `@react-email/components`), dar
+dacă vrei SMTP/nodemailer sau alt serviciu, schimbi DOAR acel fișier. Reguli importante:
+
+- **Nu aruncă niciodată**: un email eșuat nu trebuie să strice comanda/plata/abonarea.
+  `sendEmail` prinde erorile intern și returnează `{ ok:false }`; apelanții folosesc și
+  `Promise.allSettled`.
+- **Mod no-op fără key real**: dacă `RESEND_API_KEY` nu începe cu `re_` (placeholder), doar
+  loghează și returnează `{ skipped:true }` — exact ca la maib/DB, ca fluxurile să meargă
+  local fără credențiale.
+- **Template-uri** React Email în `lib/email/templates/` (culorile brandului în `theme.ts`,
+  layout comun în `EmailLayout.tsx`). Preview local: se randează cu `@react-email/render`.
+- **Puncte de trimitere**: `lib/actions/checkout.ts` (confirmare client + notificare admin,
+  imediat după `order.create`), `app/api/payments/maib/callback/route.ts` (confirmare plată,
+  o singură dată — gardat cu `wasAlreadyPaid` fiindcă maib poate re-trimite callback-ul),
+  `lib/actions/newsletter.ts` (bun-venit, doar la abonare nouă — de-asta `findUnique`+`create`
+  în loc de `upsert`, ca să știm dacă e abonat nou).
+- Env: `RESEND_API_KEY`, `EMAIL_FROM` (domeniul trebuie verificat în Resend; pentru test rapid
+  `onboarding@resend.dev` merge doar către adresa contului Resend), `EMAIL_ADMIN` (destinatar
+  notificări; fallback pe `ADMIN_EMAIL`).
+
 ### Autentificare admin — NextAuth v5 (beta) + două fișiere de config
 
 `next-auth@beta` (v5), nu v4 — v5 e gândit pentru App Router (`auth()` universal în Server

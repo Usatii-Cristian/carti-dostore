@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyMaibSignature } from "@/lib/payments/maib";
+import { sendPaymentConfirmedEmail } from "@/lib/email/notifications";
 
 // maib reîncearcă acest callback dacă nu răspundem cu 200, așa că orice
 // ramură din funcția asta trebuie să se termine cu un 200 — inclusiv erorile.
@@ -42,6 +43,8 @@ export async function POST(request: NextRequest) {
   const paid = result.status === "OK";
   const payId = typeof result.payId === "string" ? result.payId : order.paymentId;
 
+  const wasAlreadyPaid = order.paymentStatus === "PAID";
+
   await prisma.order.update({
     where: { id: order.id },
     data: {
@@ -50,6 +53,17 @@ export async function POST(request: NextRequest) {
       paymentId: payId,
     },
   });
+
+  // Email de confirmare a plății — o singură dată (maib poate re-trimite
+  // callback-ul; nu retrimitem dacă era deja marcată plătită).
+  if (paid && !wasAlreadyPaid) {
+    await sendPaymentConfirmedEmail({
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      orderNumber: order.orderNumber,
+      total: order.total,
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }

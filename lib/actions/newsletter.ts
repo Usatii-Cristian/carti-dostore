@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { sendNewsletterWelcomeEmail } from "@/lib/email/notifications";
 
 export type NewsletterState = {
   status: "idle" | "success" | "error";
@@ -20,11 +21,14 @@ export async function subscribeNewsletter(
   }
 
   try {
-    await prisma.newsletterSubscriber.upsert({
-      where: { email },
-      update: {},
-      create: { email },
-    });
+    const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
+
+    if (!existing) {
+      await prisma.newsletterSubscriber.create({ data: { email } });
+      // Emailul de bun-venit merge o singură dată, doar la abonarea nouă.
+      await sendNewsletterWelcomeEmail(email);
+    }
+
     return {
       status: "success",
       message: "Te-ai abonat cu succes! Verifică-ți emailul pentru confirmare.",
