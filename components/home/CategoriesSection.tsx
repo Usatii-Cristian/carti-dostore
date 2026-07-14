@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPopularCategories } from "@/lib/categories";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 export async function CategoriesSection() {
   const categories = await getPopularCategories(6);
@@ -23,8 +24,8 @@ export async function CategoriesSection() {
               href={`/carti/categorie/${category.slug}`}
               className="group flex flex-col items-center gap-3 rounded-xl bg-card p-5 text-center shadow-sm ring-1 ring-border/70 transition-shadow hover:shadow-md"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-cream-soft text-2xl transition-colors group-hover:bg-terracotta/10">
-                {category.icon}
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-cream-soft text-terracotta transition-colors group-hover:bg-terracotta/10">
+                <CategoryIcon slug={category.slug} name={category.name} className="h-6 w-6" />
               </span>
               <span className="text-sm font-semibold text-ink group-hover:text-terracotta">
                 {category.name}

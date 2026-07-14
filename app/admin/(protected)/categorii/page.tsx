@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { getAdminCategories } from "@/lib/admin/categories";
 import { deleteCategory } from "@/lib/actions/admin-categories";
 import { DeleteButton } from "@/components/admin/DeleteButton";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 export const metadata: Metadata = { title: "Categorii — Admin BookStore" };
 
@@ -48,8 +49,14 @@ export default async function AdminCategoriesPage({ searchParams }: PageProps) {
             {categories.map((category) => (
               <tr key={category.id} className="hover:bg-slate-50">
                 <td className="px-4 py-3">
-                  <span className="mr-2">{category.icon}</span>
-                  <span className="font-medium text-slate-900">{category.name}</span>
+                  <span className="flex items-center gap-2">
+                    <CategoryIcon
+                      slug={category.slug}
+                      name={category.name}
+                      className="h-4 w-4 shrink-0 text-slate-500"
+                    />
+                    <span className="font-medium text-slate-900">{category.name}</span>
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-slate-500">{category.slug}</td>
                 <td className="px-4 py-3 text-slate-600">{category.bookCount}</td>

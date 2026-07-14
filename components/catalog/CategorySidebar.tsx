@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Category } from "@prisma/client";
+import { CategoryIcon } from "@/components/CategoryIcon";
 
 export function CategorySidebar({
   categories,
@@ -25,7 +26,7 @@ export function CategorySidebar({
                     : "text-ink-soft hover:bg-cream-soft hover:text-ink"
                 }`}
               >
-                <span aria-hidden="true">{category.icon}</span>
+                <CategoryIcon slug={category.slug} name={category.name} className="h-4 w-4 shrink-0" />
                 {category.name}
               </Link>
             </li>
