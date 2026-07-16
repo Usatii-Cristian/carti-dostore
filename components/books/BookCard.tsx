@@ -48,7 +48,7 @@ export function BookCard({ book }: { book: BookCardData }) {
         >
           {book.title}
         </Link>
-        <p className="text-xs text-ink-soft">{book.author}</p>
+        {book.author && <p className="text-xs text-ink-soft">{book.author}</p>}
 
         <StarRating rating={book.rating} reviewCount={book.reviewCount} size={14} />
 

@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.public.blob.vercel-storage.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.jotform.com",
+      },
     ],
   },
   // Headere de securitate aplicate tuturor rutelor. maib nu iframe-uiește

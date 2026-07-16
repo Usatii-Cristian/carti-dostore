@@ -7,17 +7,26 @@ import {
   Feather,
   Globe,
   Landmark,
+  Leaf,
+  Megaphone,
   Microscope,
   Palette,
   Sprout,
+  TrendingUp,
   type LucideProps,
 } from "lucide-react";
 import { createElement, type ComponentType } from "react";
 
 type IconType = ComponentType<LucideProps>;
 
-// Mapare directă slug → iconiță lucide, pentru categoriile din seed.
+// Mapare directă slug → iconiță lucide.
 const BY_SLUG: Record<string, IconType> = {
+  // categorii curente (produse Dostore Carti)
+  carti: BookText,
+  "uleiuri-esentiale": Leaf,
+  "mlm-business": TrendingUp,
+  "materiale-promotionale": Megaphone,
+  // categorii literare (legacy)
   "literatura-romana": BookText,
   "literatura-universala": Globe,
   "dezvoltare-personala": Sprout,
