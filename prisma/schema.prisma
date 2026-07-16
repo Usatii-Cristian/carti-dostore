@@ -104,6 +104,12 @@ model OrderItem {
   @@index([bookId])
 }
 
+model Publisher {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique
+  slug String @unique
+}
+
 model Admin {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
   email    String @unique

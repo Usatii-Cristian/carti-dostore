@@ -6,10 +6,10 @@ import { StoreHydration } from "@/components/providers/StoreHydration";
 import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
-// Randăm paginile magazinului la cerere, nu prerandate la build. Astfel build-ul
-// (ex. pe Vercel) NU mai are nevoie de DATABASE_URL — baza de date e interogată
-// la runtime. Bonus: datele (stoc, prețuri) sunt mereu proaspete.
-export const dynamic = "force-dynamic";
+// ISR: paginile magazinului sunt prerandate (servite rapid din CDN) și
+// revalidate periodic + la cerere (revalidatePath din admin la orice modificare).
+// Mult mai rapid decât force-dynamic, care lovea baza de date la fiecare request.
+export const revalidate = 3600;
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",

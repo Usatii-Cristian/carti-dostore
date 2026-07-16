@@ -12,7 +12,7 @@ export function Logo({ variant = "dark" }: { variant?: "dark" | "light" }) {
       aria-label="Dostore Carti — pagina principală"
     >
       <Image
-        src="/logo-round-icon.png"
+        src="/logo-nou.png"
         alt=""
         width={44}
         height={44}

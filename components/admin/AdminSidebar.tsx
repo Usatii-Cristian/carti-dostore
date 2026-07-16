@@ -5,7 +5,7 @@ import { LogoutButton } from "./LogoutButton";
 
 export function AdminSidebar({ adminEmail }: { adminEmail?: string | null }) {
   return (
-    <aside className="hidden w-64 shrink-0 flex-col bg-navy-dark px-4 py-6 lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto bg-navy-dark px-4 py-6 lg:flex">
       <Link href="/admin" className="mb-8 flex items-center gap-2 px-2">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white">
           <BookOpen className="h-5 w-5" aria-hidden="true" />

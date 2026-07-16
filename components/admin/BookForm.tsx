@@ -37,10 +37,12 @@ const inputClass =
 export function BookForm({
   action,
   categories,
+  publishers,
   initialBook,
 }: {
   action: BookFormAction;
   categories: Category[];
+  publishers: { id: string; name: string }[];
   initialBook?: Book | null;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -196,7 +198,18 @@ export function BookForm({
 
       <section className="grid grid-cols-1 gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
         <Field label="Editură">
-          <input name="publisher" defaultValue={initialBook?.publisher ?? ""} className={inputClass} />
+          <select
+            name="publisher"
+            defaultValue={initialBook?.publisher ?? ""}
+            className={inputClass}
+          >
+            <option value="">Fără editură</option>
+            {publishers.map((publisher) => (
+              <option key={publisher.id} value={publisher.name}>
+                {publisher.name}
+              </option>
+            ))}
+          </select>
         </Field>
         <Field label="ISBN">
           <input name="isbn" defaultValue={initialBook?.isbn ?? ""} className={inputClass} />

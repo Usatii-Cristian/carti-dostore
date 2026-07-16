@@ -30,3 +30,14 @@ export async function getAdminBooks({ q, page = 1 }: { q?: string; page?: number
 export function getBookForEdit(id: string) {
   return prisma.book.findUnique({ where: { id } });
 }
+
+// Prag sub care o carte e „stoc redus" (avertizare în admin).
+export const LOW_STOCK_THRESHOLD = 5;
+
+export async function getStockAlerts() {
+  const [outOfStock, lowStock] = await Promise.all([
+    prisma.book.count({ where: { stock: { lte: 0 } } }),
+    prisma.book.count({ where: { stock: { gt: 0, lte: LOW_STOCK_THRESHOLD } } }),
+  ]);
+  return { outOfStock, lowStock };
+}

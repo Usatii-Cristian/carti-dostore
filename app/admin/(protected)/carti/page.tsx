@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
-import { getAdminBooks } from "@/lib/admin/books";
+import { Plus, Search, AlertTriangle, PackageX } from "lucide-react";
+import { getAdminBooks, getStockAlerts, LOW_STOCK_THRESHOLD } from "@/lib/admin/books";
 import { deleteBook } from "@/lib/actions/admin-books";
 import { formatPrice, formatBookCount } from "@/lib/format";
 import { DeleteButton } from "@/components/admin/DeleteButton";
@@ -17,7 +17,10 @@ type PageProps = {
 export default async function AdminBooksPage({ searchParams }: PageProps) {
   const { q, page: pageParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
-  const { books, total, totalPages } = await getAdminBooks({ q, page });
+  const [{ books, total, totalPages }, alerts] = await Promise.all([
+    getAdminBooks({ q, page }),
+    getStockAlerts(),
+  ]);
 
   return (
     <div>
@@ -34,6 +37,27 @@ export default async function AdminBooksPage({ searchParams }: PageProps) {
           Carte nouă
         </Link>
       </div>
+
+      {(alerts.outOfStock > 0 || alerts.lowStock > 0) && (
+        <div className="mb-5 flex flex-col gap-2 sm:flex-row">
+          {alerts.outOfStock > 0 && (
+            <div className="flex flex-1 items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              <PackageX className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              {alerts.outOfStock}{" "}
+              {alerts.outOfStock === 1 ? "carte fără stoc" : "cărți fără stoc"} (ascunse de pe
+              site)
+            </div>
+          )}
+          {alerts.lowStock > 0 && (
+            <div className="flex flex-1 items-center gap-2 rounded-lg bg-amber-50 px-4 py-3 text-sm font-medium text-amber-700">
+              <AlertTriangle className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+              {alerts.lowStock}{" "}
+              {alerts.lowStock === 1 ? "carte cu stoc redus" : "cărți cu stoc redus"} (≤{" "}
+              {LOW_STOCK_THRESHOLD})
+            </div>
+          )}
+        </div>
+      )}
 
       <form method="GET" className="mb-5">
         <div className="relative max-w-sm">
@@ -82,15 +106,17 @@ export default async function AdminBooksPage({ searchParams }: PageProps) {
                 <td className="px-4 py-3 text-slate-600">{book.category.name}</td>
                 <td className="px-4 py-3 text-slate-900">{formatPrice(book.price)}</td>
                 <td className="px-4 py-3">
-                  <span
-                    className={
-                      book.stock < 5
-                        ? "font-semibold text-red-600"
-                        : "text-slate-600"
-                    }
-                  >
-                    {book.stock}
-                  </span>
+                  {book.stock <= 0 ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                      <PackageX className="h-3 w-3" aria-hidden="true" /> Epuizat
+                    </span>
+                  ) : book.stock <= LOW_STOCK_THRESHOLD ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                      <AlertTriangle className="h-3 w-3" aria-hidden="true" /> Redus · {book.stock}
+                    </span>
+                  ) : (
+                    <span className="text-slate-600">{book.stock}</span>
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-1">
