@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createDirectPayment } from "@/lib/payments/maib";
 import { sendNewOrderEmails } from "@/lib/email/notifications";
+import { tgNewOrder } from "@/lib/telegram";
 import { cartItemPrice, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/store/cart";
 import type { CartItem } from "@/lib/store/cart";
 
@@ -127,27 +128,39 @@ export async function createOrderAndPay(
   );
   revalidatePath("/", "layout");
 
-  // Confirmare către client + notificare către admin. Trimiterea nu blochează și
-  // nu poate strica fluxul de plată (sendEmail prinde erorile intern).
-  await sendNewOrderEmails(
-    {
+  // Confirmare către client + notificare către admin (email + Telegram). Nimic
+  // din astea nu blochează și nu poate strica fluxul de plată.
+  await Promise.allSettled([
+    sendNewOrderEmails(
+      {
+        orderNumber,
+        customerName,
+        customerEmail: email,
+        customerPhone: phone,
+        shippingAddress,
+        city,
+        items: items.map((item) => ({
+          title: item.title,
+          price: cartItemPrice(item),
+          quantity: item.quantity,
+        })),
+        subtotal,
+        shippingCost,
+        total,
+      },
+      order.id
+    ),
+    tgNewOrder({
       orderNumber,
       customerName,
-      customerEmail: email,
       customerPhone: phone,
+      customerEmail: email,
       shippingAddress,
       city,
-      items: items.map((item) => ({
-        title: item.title,
-        price: cartItemPrice(item),
-        quantity: item.quantity,
-      })),
-      subtotal,
-      shippingCost,
       total,
-    },
-    order.id
-  );
+      items: items.map((item) => ({ title: item.title, quantity: item.quantity })),
+    }),
+  ]);
 
   const [origin, clientIp] = await Promise.all([resolveOrigin(), resolveClientIp()]);
 

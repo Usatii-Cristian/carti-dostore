@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyMaibSignature } from "@/lib/payments/maib";
 import { sendPaymentConfirmedEmail } from "@/lib/email/notifications";
+import { tgPaymentConfirmed } from "@/lib/telegram";
 
 // maib reîncearcă acest callback dacă nu răspundem cu 200, așa că orice
 // ramură din funcția asta trebuie să se termine cu un 200 — inclusiv erorile.
@@ -62,12 +63,15 @@ export async function POST(request: NextRequest) {
   // Email de confirmare a plății — o singură dată (maib poate re-trimite
   // callback-ul; nu retrimitem dacă era deja marcată plătită).
   if (paid && !wasAlreadyPaid) {
-    await sendPaymentConfirmedEmail({
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      orderNumber: order.orderNumber,
-      total: order.total,
-    });
+    await Promise.allSettled([
+      sendPaymentConfirmedEmail({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        total: order.total,
+      }),
+      tgPaymentConfirmed({ orderNumber: order.orderNumber, total: order.total }),
+    ]);
   }
 
   return NextResponse.json({ ok: true });

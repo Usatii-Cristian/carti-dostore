@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import type { OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendOrderStatusEmail } from "@/lib/email/notifications";
+import { tgStatusChange } from "@/lib/telegram";
+import { STATUS_META } from "@/lib/orders/status";
 
 const ORDER_STATUSES: OrderStatus[] = [
   "PENDING",
@@ -46,13 +48,19 @@ export async function updateOrderStatus(id: string, formData: FormData) {
   // Notificăm clientul prin email la schimbarea de status (doar stadiile
   // relevante — vezi STATUS_EMAIL; nu blochează dacă emailul eșuează).
   if (statusChanged) {
-    await sendOrderStatusEmail({
-      customerName: order.customerName,
-      customerEmail: order.customerEmail,
-      orderNumber: order.orderNumber,
-      status,
-      trackingNumber: trackingNumber || order.trackingNumber,
-    });
+    await Promise.allSettled([
+      sendOrderStatusEmail({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        status,
+        trackingNumber: trackingNumber || order.trackingNumber,
+      }),
+      tgStatusChange({
+        orderNumber: order.orderNumber,
+        statusLabel: STATUS_META[status].customerLabel,
+      }),
+    ]);
   }
 
   revalidatePath(`/admin/comenzi/${id}`);
