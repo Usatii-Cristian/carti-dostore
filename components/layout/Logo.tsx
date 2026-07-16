@@ -17,7 +17,7 @@ export function Logo({ variant = "dark" }: { variant?: "dark" | "light" }) {
         width={44}
         height={44}
         priority
-        className="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-border/60"
+        className="h-11 w-11 shrink-0 rounded-full object-cover"
       />
       <span
         className={`font-serif text-2xl font-semibold leading-none tracking-tight ${textColor}`}

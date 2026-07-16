@@ -18,7 +18,7 @@ export function BookCard({ book }: { book: BookCardData }) {
             alt={`Coperta cărții ${book.title}`}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
-            className="object-contain"
+            className="object-cover"
           />
         </Link>
 
