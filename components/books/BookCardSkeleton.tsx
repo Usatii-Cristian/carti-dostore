@@ -1,7 +1,7 @@
 export function BookCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border/70">
-      <div className="aspect-[2/3] w-full animate-pulse bg-cream-soft" />
+    <div className="flex flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-border/50">
+      <div className="aspect-square w-full animate-pulse bg-cream-soft" />
       <div className="flex flex-col gap-2 p-3.5">
         <div className="h-3.5 w-4/5 animate-pulse rounded bg-cream-soft" />
         <div className="h-3 w-2/5 animate-pulse rounded bg-cream-soft" />

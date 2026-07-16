@@ -10,15 +10,15 @@ export function BookCard({ book }: { book: BookCardData }) {
   const outOfStock = book.stock <= 0;
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border/70 transition-shadow hover:shadow-md">
-      <div className="relative aspect-[2/3] w-full overflow-hidden bg-cream-soft">
+    <div className="group relative flex flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-transparent transition-all duration-200 hover:shadow-lg hover:ring-border">
+      <div className="relative aspect-square w-full overflow-hidden bg-cream">
         <Link href={`/carti/${book.slug}`} className="relative block h-full w-full">
           <Image
             src={book.coverImage}
             alt={`Coperta cărții ${book.title}`}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-contain"
           />
         </Link>
 
@@ -52,7 +52,7 @@ export function BookCard({ book }: { book: BookCardData }) {
 
         <StarRating rating={book.rating} reviewCount={book.reviewCount} size={14} />
 
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+        <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <PriceTag price={book.price} discountPrice={book.discountPrice} />
           <AddToCartButton book={book} outOfStock={outOfStock} />
         </div>

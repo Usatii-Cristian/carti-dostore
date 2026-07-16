@@ -10,19 +10,48 @@ export function PriceTag({
   size?: "sm" | "md" | "lg";
 }) {
   const hasDiscount = discountPrice != null && discountPrice < price;
-  const textSize = size === "lg" ? "text-2xl" : size === "sm" ? "text-sm" : "text-base";
-  const oldTextSize = size === "lg" ? "text-base" : "text-xs";
+  const finalPrice = hasDiscount ? discountPrice : price;
 
-  if (!hasDiscount) {
-    return <span className={`font-semibold text-ink ${textSize}`}>{formatPrice(price)}</span>;
+  // Prețul final e cel mai mare element (mai mare decât titlul).
+  const finalSize = size === "lg" ? "text-3xl" : size === "sm" ? "text-base" : "text-2xl";
+  const oldSize = size === "sm" ? "text-[11px]" : "text-sm";
+  const badgeSize = size === "sm" ? "text-[10px]" : "text-xs";
+
+  // Varianta compactă (ex. sugestii de căutare): pe un singur rând, fără badge-uri.
+  if (size === "sm") {
+    return (
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-base font-bold text-ink">{formatPrice(finalPrice)}</span>
+        {hasDiscount && (
+          <span className={`text-ink-soft line-through ${oldSize}`}>{formatPrice(price)}</span>
+        )}
+      </div>
+    );
   }
 
+  const saved = hasDiscount ? price - discountPrice : 0;
+  const percent = hasDiscount ? Math.round((1 - discountPrice / price) * 100) : 0;
+
   return (
-    <div className="flex flex-wrap items-baseline gap-2">
-      <span className={`font-semibold text-terracotta ${textSize}`}>
-        {formatPrice(discountPrice)}
+    <div className="flex flex-col gap-1">
+      {hasDiscount && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className={`text-ink-soft line-through ${oldSize}`}>{formatPrice(price)}</span>
+          <span
+            className={`inline-flex items-center rounded-full bg-terracotta px-2 py-0.5 font-semibold text-cream ${badgeSize}`}
+          >
+            −{formatPrice(saved)}
+          </span>
+          <span
+            className={`inline-flex items-center rounded-full bg-terracotta/10 px-2 py-0.5 font-semibold text-terracotta ${badgeSize}`}
+          >
+            −{percent}%
+          </span>
+        </div>
+      )}
+      <span className={`font-bold leading-none text-ink ${finalSize}`}>
+        {formatPrice(finalPrice)}
       </span>
-      <span className={`text-ink-soft line-through ${oldTextSize}`}>{formatPrice(price)}</span>
     </div>
   );
 }
