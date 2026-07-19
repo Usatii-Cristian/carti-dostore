@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { slugify } from "@/lib/slugify";
+import { slugify, normalizeForSearch } from "@/lib/slugify";
 import { sendNewBookAnnouncement } from "@/lib/email/notifications";
 
 export type BookFormState = {
@@ -67,9 +67,11 @@ async function buildBookData(formData: FormData) {
     if (!category) errors.categoryId = "Categorie inexistentă.";
   }
 
-  const searchText = [title, author, category?.name ?? "", ...tags]
-    .join(" ")
-    .toLowerCase();
+  // Fără diacritice, la fel ca seed.ts și ca interogarea din lib/search.ts —
+  // altfel „carti" nu ar găsi „cărți" (bug real, reparat în auditul din iulie 2026).
+  const searchText = normalizeForSearch(
+    [title, author, category?.name ?? "", ...tags].join(" ")
+  );
 
   return {
     errors,

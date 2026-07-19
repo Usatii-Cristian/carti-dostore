@@ -47,8 +47,10 @@ export function Hero() {
             </Link>
           </div>
 
-          {/* Citat-semnătură: stă sub CTA ca să nu-i fure atenția */}
-          <blockquote className="mt-10 border-l-2 border-terracotta/60 pl-5">
+          {/* Citat-semnătură: stă sub CTA ca să nu-i fure atenția. Pe mobil cade
+              peste fotografie (voalul crem e transparent jos), deci primește un
+              panou translucid cu blur; pe desktop stă pe voal și rămâne curat. */}
+          <blockquote className="mt-10 rounded-r-xl border-l-2 border-terracotta/60 bg-cream/75 p-4 pl-5 backdrop-blur-sm md:bg-transparent md:p-0 md:pl-5 md:backdrop-blur-none">
             <p className="font-serif text-base italic leading-relaxed text-ink-soft sm:text-lg">
               „Singurul bine este <span className="font-semibold not-italic text-ink">CUNOAȘTEREA</span>.
               Singurul rău este <span className="font-semibold not-italic text-ink">ignoranța</span>!”

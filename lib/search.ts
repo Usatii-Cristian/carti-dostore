@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { normalizeForSearch } from "@/lib/slugify";
 import type { Book } from "@prisma/client";
 
 const SEARCH_INDEX_NAME = "default";
@@ -96,8 +97,9 @@ function maxEditDistance(word: string): number {
 const CANDIDATE_TAKE = 2000;
 
 async function fallbackSearch(query: string, limit: number): Promise<Book[]> {
-  const words = query
-    .toLowerCase()
+  // Normalizăm și query-ul, și (mai jos) textele cărții — utilizatorii scriu
+  // de obicei fără diacritice („carti"), iar titlurile le au („cărți").
+  const words = normalizeForSearch(query)
     .split(/\s+/)
     .filter(Boolean);
 
@@ -125,9 +127,9 @@ async function fallbackSearch(query: string, limit: number): Promise<Book[]> {
 
   const scored = pool
     .map((book) => {
-      const title = book.title.toLowerCase();
-      const author = book.author.toLowerCase();
-      const haystack = book.searchText.toLowerCase();
+      const title = normalizeForSearch(book.title);
+      const author = normalizeForSearch(book.author);
+      const haystack = normalizeForSearch(book.searchText);
       const tokens = haystack.split(/\s+/).filter(Boolean);
 
       let score = 0;

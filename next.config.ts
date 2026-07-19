@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // /carti nu are pagină index (catalogul e organizat pe bestsellers/noutăți/
+  // categorii), dar cineva care taie URL-ul manual nu merită un 404.
+  async redirects() {
+    return [{ source: "/carti", destination: "/carti/bestsellers", permanent: false }];
+  },
   // Headere de securitate aplicate tuturor rutelor. maib nu iframe-uiește
   // callback-ul, iar site-ul nu e menit să fie încapsulat, deci blocăm
   // clickjacking-ul cu frame-ancestors 'none' / X-Frame-Options DENY.
