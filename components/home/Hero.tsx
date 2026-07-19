@@ -46,6 +46,17 @@ export function Hero() {
               Descoperă acum
             </Link>
           </div>
+
+          {/* Citat-semnătură: stă sub CTA ca să nu-i fure atenția */}
+          <blockquote className="mt-10 border-l-2 border-terracotta/60 pl-5">
+            <p className="font-serif text-base italic leading-relaxed text-ink-soft sm:text-lg">
+              „Singurul bine este <span className="font-semibold not-italic text-ink">CUNOAȘTEREA</span>.
+              Singurul rău este <span className="font-semibold not-italic text-ink">ignoranța</span>!”
+            </p>
+            <cite className="mt-2 block text-sm not-italic uppercase tracking-widest text-terracotta">
+              Socrate
+            </cite>
+          </blockquote>
         </div>
       </div>
     </section>
