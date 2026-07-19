@@ -96,28 +96,37 @@ un JPEG de câteva sute de KB / câțiva MB cu ~90% (ex. 386KB → 38KB), ca sut
 ocupe spațiu minim. Limita de intrare e 10MB brut; dacă `sharp` crapă pe un fișier corupt,
 ruta răspunde 400, nu 500.
 
-### Email tranzacțional — Resend în spatele unei abstracții
+### Email tranzacțional — SMTP (nodemailer) în spatele unei abstracții
 
 Emailurile automate trec toate prin `lib/email/send.ts` (`sendEmail(...)`) — un strat
-provider-agnostic. Concret folosește **Resend** (`resend` + `@react-email/components`), dar
-dacă vrei SMTP/nodemailer sau alt serviciu, schimbi DOAR acel fișier. Reguli importante:
+provider-agnostic. Concret folosește **SMTP prin `nodemailer`** (am migrat de la Resend, care
+cerea domeniu verificat prin API; SMTP merge cu orice furnizor: Gmail, Zoho, Brevo, hosting-ul
+propriu). Dacă vrei alt serviciu, schimbi DOAR acel fișier. Reguli importante:
 
 - **Nu aruncă niciodată**: un email eșuat nu trebuie să strice comanda/plata/abonarea.
   `sendEmail` prinde erorile intern și returnează `{ ok:false }`; apelanții folosesc și
   `Promise.allSettled`.
-- **Mod no-op fără key real**: dacă `RESEND_API_KEY` nu începe cu `re_` (placeholder), doar
-  loghează și returnează `{ skipped:true }` — exact ca la maib/DB, ca fluxurile să meargă
+- **Mod no-op fără credențiale**: dacă lipsește `SMTP_HOST`/`SMTP_USER`/`SMTP_PASS`/`EMAIL_FROM`,
+  doar loghează și returnează `{ skipped:true }` — exact ca la maib/DB, ca fluxurile să meargă
   local fără credențiale.
 - **Template-uri** React Email în `lib/email/templates/` (culorile brandului în `theme.ts`,
-  layout comun în `EmailLayout.tsx`). Preview local: se randează cu `@react-email/render`.
+  layout comun în `EmailLayout.tsx`). Spre deosebire de Resend (care accepta `react:` direct),
+  nodemailer primește string-uri — de-asta `send.ts` randează el însuși cu `render()` din
+  `@react-email/render`, în `html` + variantă `plainText` (ajută livrabilitatea). API-ul public
+  `sendEmail({ to, subject, react })` a rămas identic, deci apelanții n-au fost atinși.
+- **Transporter cu pool**, creat leneș și cachat (`pool: true`, `rateLimit: 5/s`) — newsletter-ul
+  trimite individual către fiecare abonat, iar limitarea previne să fim tratați drept spam.
 - **Puncte de trimitere**: `lib/actions/checkout.ts` (confirmare client + notificare admin,
   imediat după `order.create`), `app/api/payments/maib/callback/route.ts` (confirmare plată,
   o singură dată — gardat cu `wasAlreadyPaid` fiindcă maib poate re-trimite callback-ul),
   `lib/actions/newsletter.ts` (bun-venit, doar la abonare nouă — de-asta `findUnique`+`create`
   în loc de `upsert`, ca să știm dacă e abonat nou).
-- Env: `RESEND_API_KEY`, `EMAIL_FROM` (domeniul trebuie verificat în Resend; pentru test rapid
-  `onboarding@resend.dev` merge doar către adresa contului Resend), `EMAIL_ADMIN` (destinatar
-  notificări; fallback pe `ADMIN_EMAIL`).
+- Env: `SMTP_HOST`, `SMTP_PORT` (587 STARTTLS implicit; 465 = TLS direct, detectat automat, sau
+  forțat cu `SMTP_SECURE`), `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` (la Gmail TREBUIE să fie
+  aceeași adresă cu `SMTP_USER` sau un alias verificat), `EMAIL_ADMIN` (destinatar notificări;
+  fallback pe `ADMIN_EMAIL`).
+- **Gmail**: `SMTP_PASS` NU e parola contului, ci o „parolă de aplicație" de 16 caractere de la
+  myaccount.google.com/apppasswords (necesită verificare în 2 pași activată).
 
 ### Autentificare admin — NextAuth v5 (beta) + două fișiere de config
 
