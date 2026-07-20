@@ -13,14 +13,22 @@ import "../globals.css";
 // Mult mai rapid decât force-dynamic, care lovea baza de date la fiecare request.
 export const revalidate = 3600;
 
+// `display: "swap"` — textul apare imediat cu fontul de sistem și se schimbă
+// când fontul real e gata, în loc să rămână invizibil. Fără el, titlul din hero
+// aștepta ~190KB de woff2 înainte să se vadă.
+// Playfair e doar pentru titluri: îi cerem strict greutățile folosite, ca să nu
+// descărcăm toată axa variabilă.
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin", "latin-ext"],
+  weight: ["600", "700"],
+  display: "swap",
 });
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

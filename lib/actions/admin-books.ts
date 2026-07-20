@@ -13,6 +13,34 @@ export type BookFormState = {
   fieldErrors?: Record<string, string>;
 };
 
+// FAQ-urile vin dintr-un singur câmp JSON (vezi components/admin/FaqEditor).
+// Ignorăm rândurile goale și acceptăm cel mult unul „deschis implicit".
+function parseFaqs(
+  value: FormDataEntryValue | null
+): { question: string; answer: string; defaultOpen: boolean }[] {
+  if (typeof value !== "string" || !value.trim()) return [];
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+
+    let defaultUsed = false;
+    return parsed.flatMap((entry) => {
+      if (typeof entry !== "object" || entry === null) return [];
+      const { question, answer, defaultOpen } = entry as Record<string, unknown>;
+      const q = typeof question === "string" ? question.trim() : "";
+      const a = typeof answer === "string" ? answer.trim() : "";
+      if (!q || !a) return [];
+
+      const open = defaultOpen === true && !defaultUsed;
+      if (open) defaultUsed = true;
+      return [{ question: q, answer: a, defaultOpen: open }];
+    });
+  } catch {
+    return [];
+  }
+}
+
 function parseNumber(value: FormDataEntryValue | null): number | undefined {
   if (value === null || value === "") return undefined;
   const parsed = Number(value);
@@ -35,6 +63,7 @@ async function buildBookData(formData: FormData) {
   const reviewCount = parseNumber(formData.get("reviewCount")) ?? 0;
   const pageCount = parseNumber(formData.get("pageCount"));
   const weightGrams = parseNumber(formData.get("weightGrams"));
+  const faqs = parseFaqs(formData.get("faqs"));
 
   const publisher = String(formData.get("publisher") ?? "").trim() || undefined;
   const isbn = String(formData.get("isbn") ?? "").trim() || undefined;
@@ -91,6 +120,7 @@ async function buildBookData(formData: FormData) {
       reviewCount,
       pageCount,
       weightGrams,
+      faqs,
       publisher,
       isbn,
       language,

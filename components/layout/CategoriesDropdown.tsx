@@ -84,7 +84,7 @@ export function CategoriesDropdown({ categories }: { categories: Cat[] }) {
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/carti/categorie/${cat.slug}`}
+                href={`/carti?categorii=${cat.slug}`}
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink transition-colors hover:bg-cream-soft hover:text-terracotta"
               >

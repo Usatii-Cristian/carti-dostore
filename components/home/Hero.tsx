@@ -1,27 +1,36 @@
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import Link from "next/link";
 
 export function Hero() {
+  // Hero-ul e elementul LCP al site-ului. Înainte randam DOUĂ <Image priority>
+  // (desktop + mobil), ascunse alternativ din CSS — dar `priority` pune preload
+  // pe amândouă, deci pe mobil se descărca degeaba și varianta de desktop, iar
+  // cele două își furau banda una alteia. Aici folosim un singur <picture> cu
+  // `media`: browserul alege și descarcă EXACT o imagine.
+  // `getImageProps` ne dă srcset-ul optimizat de Next pentru fiecare variantă.
+  const common = {
+    alt: "Cărți și flori uscate pe o masă de lemn",
+    fill: true,
+    priority: true,
+    sizes: "100vw",
+  } as const;
+
+  const desktop = getImageProps({ ...common, src: "/hero-desktop.webp" }).props;
+  const mobile = getImageProps({ ...common, src: "/hero-mobile.webp" }).props;
+
   return (
     <section className="relative isolate flex min-h-[32rem] items-start overflow-hidden sm:min-h-[34rem] md:items-center">
-      {/* Imagine desktop (spațiu liber în stânga) */}
-      <Image
-        src="/hero-desktop.webp"
-        alt="Cărți și flori uscate pe o masă de lemn"
-        fill
-        priority
-        sizes="100vw"
-        className="hidden object-cover md:block"
-      />
-      {/* Imagine mobil (spațiu liber sus) */}
-      <Image
-        src="/hero-mobile.webp"
-        alt="Cărți și flori uscate pe o masă de lemn"
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-bottom md:hidden"
-      />
+      <picture>
+        <source media="(min-width: 768px)" srcSet={desktop.srcSet} sizes={desktop.sizes} />
+        <source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={mobile.sizes} />
+        {/* eslint-disable-next-line @next/next/no-img-element -- art direction: vezi comentariul de mai sus */}
+        <img
+          {...mobile}
+          srcSet={undefined}
+          alt={common.alt}
+          className="absolute inset-0 h-full w-full object-cover object-bottom md:object-center"
+        />
+      </picture>
 
       {/* Voal crem pentru lizibilitatea textului (sus pe mobil, stânga pe desktop) */}
       <div className="absolute inset-0 bg-gradient-to-b from-cream/85 via-cream/30 to-transparent md:bg-gradient-to-r md:from-cream/90 md:via-cream/45 md:to-transparent" />

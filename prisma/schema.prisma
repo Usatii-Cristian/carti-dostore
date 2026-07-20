@@ -33,6 +33,10 @@ model Book {
   isBestseller   Boolean  @default(false)
   isNew          Boolean  @default(false)
   tags           String[]
+  // Întrebări frecvente specifice produsului, administrate din panoul de admin.
+  // Embedded (nu model separat): aparțin exclusiv produsului, se citesc mereu
+  // împreună cu el și se rescriu în bloc la salvare.
+  faqs           BookFaq[]
   searchText     String
   orderItems     OrderItem[]
   createdAt      DateTime @default(now())
@@ -95,6 +99,14 @@ model Order {
   updatedAt         DateTime           @updatedAt
 }
 
+// O întrebare frecventă atașată unui produs.
+type BookFaq {
+  question    String
+  answer      String
+  // Dacă e true, acordeonul apare deja deschis la încărcarea paginii.
+  defaultOpen Boolean @default(false)
+}
+
 // Un stadiu din istoricul comenzii (embedded), pentru timeline-ul de tracking.
 type OrderStatusEvent {
   status OrderStatus
@@ -131,4 +143,23 @@ model NewsletterSubscriber {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String   @unique
   createdAt DateTime @default(now())
+}
+
+// Articol de blog, administrat complet din panoul de admin.
+model BlogPost {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String    @unique
+  excerpt     String    // rezumatul din listă și din meta description
+  content     String    // corpul articolului, în Markdown simplu
+  coverImage  String
+  author      String    @default("Dostore Carti")
+  tags        String[]
+  // Articolele nepublicate se văd doar în admin (ciornă).
+  published   Boolean   @default(true)
+  publishedAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
 }

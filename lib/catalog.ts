@@ -2,7 +2,9 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma, Book } from "@prisma/client";
 import { sortToOrderBy, type CategorySort } from "@/lib/books";
 
-export const CATALOG_PAGE_SIZE = 24;
+// Câte produse se încarcă odată. Restul apar la apăsarea butonului „Afișează
+// mai multe" (care crește `page`), ca prima încărcare să fie ușoară.
+export const CATALOG_PAGE_SIZE = 12;
 
 export type CatalogQuery = {
   categorii: string[]; // slug-uri de categorii bifate
@@ -63,7 +65,9 @@ export async function getCatalog(query: CatalogQuery): Promise<{
     .map((category) => category.id);
 
   const where = buildWhere(query, selectedIds);
-  const skip = (query.page - 1) * CATALOG_PAGE_SIZE;
+  // `page` = câte pagini sunt afișate CUMULAT: butonul „Afișează mai multe" o
+  // incrementează și adăugăm produse la cele deja vizibile, în loc să paginăm.
+  const take = query.page * CATALOG_PAGE_SIZE;
 
   // Numărătorile pe categorii ignoră filtrul de categorie (altfel bifarea uneia
   // ar duce restul la 0 și n-ai mai putea adăuga a doua) — dar respectă
@@ -74,8 +78,7 @@ export async function getCatalog(query: CatalogQuery): Promise<{
     prisma.book.findMany({
       where,
       orderBy: sortToOrderBy(query.sort),
-      skip,
-      take: CATALOG_PAGE_SIZE,
+      take,
     }),
     prisma.book.count({ where }),
     prisma.book.groupBy({

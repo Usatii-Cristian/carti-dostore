@@ -18,7 +18,7 @@ export function CategorySidebar({
           return (
             <li key={category.id}>
               <Link
-                href={`/carti/categorie/${category.slug}`}
+                href={`/carti?categorii=${category.slug}`}
                 aria-current={isActive ? "page" : undefined}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                   isActive

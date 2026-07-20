@@ -5,6 +5,7 @@ import type { Book, Category } from "@prisma/client";
 import { slugify } from "@/lib/slugify";
 import type { BookFormState } from "@/lib/actions/admin-books";
 import { ImageUploader } from "./ImageUploader";
+import { FaqEditor } from "./FaqEditor";
 
 type BookFormAction = (
   prevState: BookFormState,
@@ -250,6 +251,12 @@ export function BookForm({
               placeholder="ex: obiceiuri, productivitate"
               className={inputClass}
             />
+          </Field>
+        </div>
+
+        <div className="sm:col-span-2">
+          <Field label="Întrebări frecvente">
+            <FaqEditor initialFaqs={initialBook?.faqs ?? []} />
           </Field>
         </div>
 

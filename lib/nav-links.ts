@@ -6,7 +6,9 @@ export type NavLink = {
 export const secondaryNavLinks: NavLink[] = [
   { label: "Categorii", href: "/categorii" },
   { label: "Toate produsele", href: "/carti" },
-  { label: "Noutăți", href: "/carti/noutati" },
+  // „Noutăți" arăta produse; utilizatorul a cerut ca locul din meniu să ducă la blog.
+  // Pagina /carti/noutati rămâne activă (link din catalog + filtrul „Noutăți").
+  { label: "Blog", href: "/blog" },
   { label: "Bestsellers", href: "/carti/bestsellers" },
   { label: "Reduceri", href: "/carti/reduceri" },
   { label: "Livrare și plată", href: "/livrare-si-plata" },

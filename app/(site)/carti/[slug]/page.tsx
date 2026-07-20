@@ -7,6 +7,7 @@ import { PriceTag } from "@/components/books/PriceTag";
 import { ImageGallery } from "@/components/books/ImageGallery";
 import { BookGrid } from "@/components/books/BookGrid";
 import { AddToCartButton } from "@/components/books/AddToCartButton";
+import { FaqAccordion } from "@/components/books/FaqAccordion";
 import { FavoriteButton } from "@/components/books/FavoriteButton";
 
 type PageProps = {
@@ -56,7 +57,7 @@ export default async function BookPage({ params }: PageProps) {
           Acasă
         </Link>
         <span className="mx-2">/</span>
-        <Link href={`/carti/categorie/${book.category.slug}`} className="hover:text-terracotta">
+        <Link href={`/carti?categorii=${book.category.slug}`} className="hover:text-terracotta">
           {book.category.name}
         </Link>
         <span className="mx-2">/</span>
@@ -68,7 +69,7 @@ export default async function BookPage({ params }: PageProps) {
 
         <div>
           <Link
-            href={`/carti/categorie/${book.category.slug}`}
+            href={`/carti?categorii=${book.category.slug}`}
             className="text-sm font-semibold text-terracotta hover:text-terracotta-dark"
           >
             {book.category.name}
@@ -120,6 +121,8 @@ export default async function BookPage({ params }: PageProps) {
           )}
         </div>
       </div>
+
+      <FaqAccordion faqs={book.faqs} />
 
       {similarBooks.length > 0 && (
         <section className="mt-16">

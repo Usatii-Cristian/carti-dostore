@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { getCatalog, parseCatalogQuery } from "@/lib/catalog";
 import { formatProductCount } from "@/lib/format";
 import { FacetSidebar } from "@/components/catalog/FacetSidebar";
-import { Pagination } from "@/components/catalog/Pagination";
 import { BookGrid } from "@/components/books/BookGrid";
+import { buildQueryString } from "@/lib/url";
 
 export const metadata: Metadata = {
   title: "Toate produsele",
@@ -35,20 +35,26 @@ async function CatalogContent({ searchParams }: PageProps) {
           emptyMessage="Niciun produs nu corespunde filtrelor alese. Încearcă să le relaxezi."
         />
 
-        <Pagination
-          basePath="/carti"
-          currentPage={query.page}
-          totalPages={totalPages}
-          query={{
-            sort: query.sort,
-            minPrice: query.minPrice,
-            maxPrice: query.maxPrice,
-            categorii: query.categorii.join(",") || undefined,
-            reduceri: query.reduceri ? "1" : undefined,
-            bestsellers: query.bestsellers ? "1" : undefined,
-            noutati: query.noutati ? "1" : undefined,
-          }}
-        />
+        {books.length < total && (
+          <div className="mt-10 text-center">
+            <Link
+              href={`/carti${buildQueryString({
+                sort: query.sort === "noi" ? undefined : query.sort,
+                minPrice: query.minPrice,
+                maxPrice: query.maxPrice,
+                categorii: query.categorii.join(",") || undefined,
+                reduceri: query.reduceri ? "1" : undefined,
+                bestsellers: query.bestsellers ? "1" : undefined,
+                noutati: query.noutati ? "1" : undefined,
+                page: query.page + 1,
+              })}`}
+              scroll={false}
+              className="inline-flex items-center gap-2 rounded-full border border-border px-7 py-3 font-semibold text-ink transition-colors hover:border-terracotta hover:text-terracotta"
+            >
+              Afișează mai multe ({total - books.length} rămase)
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

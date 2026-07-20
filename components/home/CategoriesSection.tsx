@@ -29,7 +29,7 @@ export async function CategoriesSection() {
             return (
               <Link
                 key={category.id}
-                href={`/carti/categorie/${category.slug}`}
+                href={`/carti?categorii=${category.slug}`}
                 className="group flex flex-col items-center gap-3 rounded-xl bg-card p-5 text-center shadow-sm ring-1 ring-border/70 transition-shadow hover:shadow-md"
               >
                 <span className="flex h-16 w-16 items-center justify-center rounded-full bg-cream-soft text-terracotta transition-colors group-hover:bg-terracotta/10">

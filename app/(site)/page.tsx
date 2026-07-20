@@ -2,7 +2,7 @@ import { Hero } from "@/components/home/Hero";
 import { Benefits } from "@/components/home/Benefits";
 import { BestsellersSection } from "@/components/home/BestsellersSection";
 import { CategoriesSection } from "@/components/home/CategoriesSection";
-import { PromoBanners } from "@/components/home/PromoBanners";
+import { BlogHighlights } from "@/components/home/BlogHighlights";
 import { NewsletterForm } from "@/components/home/NewsletterForm";
 
 export default function Home() {
@@ -12,7 +12,7 @@ export default function Home() {
       <Benefits />
       <BestsellersSection />
       <CategoriesSection />
-      <PromoBanners />
+      <BlogHighlights />
       <NewsletterForm />
     </>
   );
