@@ -1,5 +1,6 @@
 import { getImageProps } from "next/image";
 import Link from "next/link";
+import { HERO_BLUR } from "@/lib/hero-blur";
 
 export function Hero() {
   // Hero-ul e elementul LCP al site-ului. Înainte randam DOUĂ <Image priority>
@@ -20,6 +21,13 @@ export function Hero() {
 
   return (
     <section className="relative isolate flex min-h-[32rem] items-start overflow-hidden sm:min-h-[34rem] md:items-center">
+      {/* Placeholder blur: apare instant ca fundal cât timp se încarcă imaginea
+          reală. Elimină „gap-ul" gol dinaintea LCP-ului. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${HERO_BLUR.mobile})` }}
+      />
       <picture>
         <source media="(min-width: 768px)" srcSet={desktop.srcSet} sizes={desktop.sizes} />
         <source media="(max-width: 767px)" srcSet={mobile.srcSet} sizes={mobile.sizes} />
