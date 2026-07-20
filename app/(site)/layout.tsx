@@ -18,11 +18,16 @@ export const revalidate = 3600;
 // aștepta ~190KB de woff2 înainte să se vadă.
 // Playfair e doar pentru titluri: îi cerem strict greutățile folosite, ca să nu
 // descărcăm toată axa variabilă.
+// Playfair e folosit DOAR la titluri, care apar mai jos în pagină. `preload:false`
+// îl scoate din lanțul critic: browserul nu mai amână prima randare pentru el,
+// iar `swap` afișează titlul cu fontul de sistem până sosește. Inter (textul
+// curent, deci vizibil imediat) rămâne preîncărcat.
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin", "latin-ext"],
   weight: ["600", "700"],
   display: "swap",
+  preload: false,
 });
 
 const inter = Inter({

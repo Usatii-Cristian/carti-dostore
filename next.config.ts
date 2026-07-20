@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Nu expune „X-Powered-By: Next.js" — info leak inutil despre stack.
   poweredByHeader: false,
+  // lucide-react exportă mii de iconițe dintr-un singur barrel file. Fără asta,
+  // bundler-ul trage tot modulul ca să găsească cele ~20 pe care le folosim.
+  experimental: {
+    optimizePackageImports: ["lucide-react"],
+  },
   images: {
     remotePatterns: [
       {
