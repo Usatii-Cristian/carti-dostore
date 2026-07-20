@@ -17,13 +17,15 @@ function buildCategoryData(formData: FormData) {
   const slugInput = String(formData.get("slug") ?? "").trim();
   const icon = String(formData.get("icon") ?? "").trim() || undefined;
   const image = String(formData.get("image") ?? "").trim() || null;
+  const featured = formData.get("featured") === "on";
+  const featuredOrder = Number(formData.get("featuredOrder")) || 0;
   const slug = slugify(slugInput || name);
 
   const errors: Record<string, string> = {};
   if (name.length < 2) errors.name = "Introdu numele categoriei.";
   if (!slug) errors.slug = "Slug invalid.";
 
-  return { errors, data: { name, slug, icon, image } };
+  return { errors, data: { name, slug, icon, image, featured, featuredOrder } };
 }
 
 export async function createCategory(

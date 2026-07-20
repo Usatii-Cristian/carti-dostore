@@ -81,6 +81,29 @@ export function CategoryForm({
         </p>
       </div>
 
+      <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <input
+            type="checkbox"
+            name="featured"
+            defaultChecked={initialCategory?.featured ?? false}
+            className="h-4 w-4 rounded border-slate-300"
+          />
+          Afișează pe pagina principală
+        </label>
+        <div className="mt-3">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            Ordine (numărul mai mic apare primul)
+          </label>
+          <input
+            type="number"
+            name="featuredOrder"
+            defaultValue={initialCategory?.featuredOrder ?? 0}
+            className="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-navy focus:outline-none"
+          />
+        </div>
+      </div>
+
       <button
         type="submit"
         disabled={pending}

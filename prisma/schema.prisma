@@ -53,6 +53,10 @@ model Category {
   // Imagine proprie, încărcată din admin. Când există, înlocuiește iconița
   // în listele de categorii de pe site.
   image String?
+  // Ce apare în secțiunea „Categorii populare" de pe pagina principală și în
+  // ce ordine — controlat din admin, nu din cod.
+  featured      Boolean @default(false)
+  featuredOrder Int     @default(0)
   books Book[]
 }
 
