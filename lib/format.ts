@@ -8,3 +8,8 @@ export function formatPrice(amount: number): string {
 export function formatBookCount(count: number): string {
   return `${count} ${count === 1 ? "carte" : "cărți"}`;
 }
+
+// Catalogul general conține și uleiuri/materiale, nu doar cărți — deci „produse".
+export function formatProductCount(count: number): string {
+  return `${count} ${count === 1 ? "produs găsit" : "produse găsite"}`;
+}

@@ -6,11 +6,13 @@ export function SimpleBookListing({
   subtitle,
   books,
   emptyMessage,
+  variant = "wide",
 }: {
   title: string;
   subtitle?: string;
   books: Book[];
   emptyMessage?: string;
+  variant?: "wide" | "compact";
 }) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -19,7 +21,7 @@ export function SimpleBookListing({
         {subtitle && <p className="mt-2 text-ink-soft">{subtitle}</p>}
       </div>
 
-      <BookGrid books={books} variant="wide" emptyMessage={emptyMessage} />
+      <BookGrid books={books} variant={variant} emptyMessage={emptyMessage} />
     </div>
   );
 }

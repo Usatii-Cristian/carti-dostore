@@ -83,6 +83,16 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
             <p className="text-sm text-ink-soft">{formatBookCount(total)}</p>
           </div>
 
+          <p className="mb-4 text-sm text-ink-soft">
+            Vrei să combini mai multe categorii sau să filtrezi după preț și oferte?{" "}
+            <Link
+              href={`/carti?categorii=${slug}`}
+              className="font-semibold text-terracotta hover:text-terracotta-dark"
+            >
+              Vezi toate filtrele →
+            </Link>
+          </p>
+
           <CatalogFilters basePath={basePath} sort={sort} minPrice={minPrice} maxPrice={maxPrice} />
 
           <div className="mt-6">

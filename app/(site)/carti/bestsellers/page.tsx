@@ -16,6 +16,7 @@ export default async function BestsellersPage() {
       subtitle="Cărțile cele mai apreciate de cititorii noștri"
       books={books}
       emptyMessage="Nu avem bestsellers momentan — revino în curând."
+      variant="compact"
     />
   );
 }

@@ -24,7 +24,7 @@ export async function BestsellersSection() {
         </Link>
       </div>
 
-      <BookGrid books={books} variant="wide" />
+      <BookGrid books={books} variant="compact" />
     </section>
   );
 }

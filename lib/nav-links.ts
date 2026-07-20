@@ -5,6 +5,7 @@ export type NavLink = {
 
 export const secondaryNavLinks: NavLink[] = [
   { label: "Categorii", href: "/categorii" },
+  { label: "Toate produsele", href: "/carti" },
   { label: "Noutăți", href: "/carti/noutati" },
   { label: "Bestsellers", href: "/carti/bestsellers" },
   { label: "Reduceri", href: "/carti/reduceri" },

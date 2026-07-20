@@ -22,7 +22,7 @@ export const SORT_OPTIONS: { value: CategorySort; label: string }[] = (
   ["noi", "pret-asc", "pret-desc", "rating"] as CategorySort[]
 ).map((value) => ({ value, label: SORT_LABELS[value] }));
 
-function sortToOrderBy(sort: CategorySort): Prisma.BookOrderByWithRelationInput {
+export function sortToOrderBy(sort: CategorySort): Prisma.BookOrderByWithRelationInput {
   switch (sort) {
     case "pret-asc":
       return { price: "asc" };
