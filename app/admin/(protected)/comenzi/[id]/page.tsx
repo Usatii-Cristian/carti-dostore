@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getOrderById } from "@/lib/admin/orders";
 import { updateOrderStatus } from "@/lib/actions/admin-orders";
 import { formatPrice } from "@/lib/format";
+import { AwbPanel } from "@/components/admin/AwbPanel";
 import {
   OrderStatusBadge,
   PaymentStatusBadge,
@@ -116,6 +117,13 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               </div>
             </dl>
           </section>
+
+          <AwbPanel
+            orderId={order.id}
+            existingAwb={order.trackingNumber}
+            county={order.county}
+            fanCost={order.fanCost}
+          />
         </div>
 
         <section className="h-fit rounded-xl border border-slate-200 bg-white p-5">
