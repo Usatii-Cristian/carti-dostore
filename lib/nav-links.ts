@@ -6,13 +6,12 @@ export type NavLink = {
 export const secondaryNavLinks: NavLink[] = [
   { label: "Categorii", href: "/categorii" },
   { label: "Toate produsele", href: "/carti" },
-  // „Noutăți" arăta produse; utilizatorul a cerut ca locul din meniu să ducă la blog.
-  // Pagina /carti/noutati rămâne activă (link din catalog + filtrul „Noutăți").
-  { label: "Blog", href: "/blog" },
   { label: "Bestsellers", href: "/carti/bestsellers" },
-  { label: "Reduceri", href: "/carti/reduceri" },
   { label: "Livrare și plată", href: "/livrare-si-plata" },
 ];
+// Notă: „Blog" și „Reduceri" au fost scoase din meniu la cererea utilizatorului.
+// Paginile /blog și /carti/reduceri rămân accesibile prin URL direct, doar
+// butoanele din nav au dispărut.
 
 // Aliniate la dreapta în bara de navigație (restul stau la stânga).
 export const secondaryNavRightLinks: NavLink[] = [

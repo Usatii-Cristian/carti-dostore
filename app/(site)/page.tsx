@@ -9,8 +9,9 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <Benefits />
       <BestsellersSection />
+      {/* Beneficiile (Livrare rapidă, Plată sigură etc.) stau după bestsellers. */}
+      <Benefits />
       <CategoriesSection />
       <BlogHighlights />
       <NewsletterForm />

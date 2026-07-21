@@ -39,12 +39,13 @@ export function Hero() {
 
       <div className="relative mx-auto w-full max-w-7xl px-4 pt-12 sm:px-6 md:py-24 lg:px-8">
         <div className="max-w-md md:max-w-xl">
+          {/* Titlul vizibil a fost scos la cererea utilizatorului. Păstrăm un H1
+              invizibil (doar pentru Google + cititoare de ecran), altfel pagina
+              ar rămâne fără titlu principal — rău pentru SEO. */}
+          <h1 className="sr-only">Dostore Cărți — librărie și uleiuri esențiale în Moldova</h1>
           <p className="font-medium uppercase tracking-widest text-terracotta">
             Dostore Cărți — Moldova
           </p>
-          <h1 className="mt-3 font-serif text-4xl font-semibold leading-tight text-ink sm:text-5xl">
-            Cărți și uleiuri esențiale, alese cu grijă
-          </h1>
           <p className="mt-5 max-w-lg text-lg text-ink-soft">
             De la cărți pentru suflet și dezvoltare, până la ghiduri de uleiuri esențiale și
             materiale pentru afacerea ta — livrate rapid oriunde în Moldova.
