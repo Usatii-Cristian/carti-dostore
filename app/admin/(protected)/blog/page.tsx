@@ -32,7 +32,7 @@ export default async function AdminBlogPage() {
 
       {posts.length === 0 ? (
         <p className="rounded-lg border border-dashed border-slate-300 py-16 text-center text-sm text-slate-500">
-          Niciun articol încă. Apasă „Articol nou" ca să scrii primul.
+          Niciun articol încă. Apasă „Articol nou” ca să scrii primul.
         </p>
       ) : (
         <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">

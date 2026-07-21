@@ -6,8 +6,8 @@ import { getPostBySlug, getRelatedPosts, formatPostDate, readingTimeMinutes } fr
 import { prisma } from "@/lib/prisma";
 import { Markdown } from "@/components/blog/Markdown";
 
-// Prerandare statică + ISR (ca la paginile de produs): articolele se servesc
-// din CDN, nu din DB la fiecare request.
+// Prerandare statică + ISR 1h (ca la produse). 404-ul corect e asigurat după
+// eliminarea loading.tsx de la nivel de /blog.
 export const revalidate = 3600;
 
 export async function generateStaticParams() {

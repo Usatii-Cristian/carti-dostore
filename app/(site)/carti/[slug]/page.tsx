@@ -4,10 +4,11 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getBookBySlug, getSimilarBooks } from "@/lib/books";
 
-// Prerandare statică a paginilor de produs (servite din CDN, nu din DB la
-// fiecare request) + ISR: se reîmprospătează la o oră și la orice modificare
-// din admin (revalidatePath). `dynamicParams` rămâne true implicit, deci un
-// produs nou apărut între build-uri se randează on-demand și apoi se cachează.
+// Prerandare statică (servite din CDN) + ISR 1h. Produsele reale sunt
+// pre-generate; `dynamicParams` rămâne true, deci un produs nou din admin se
+// randează on-demand și apoi se cachează. 404-ul corect e asigurat: soft-404-ul
+// venea din `loading.tsx` pus la nivel de /carti (crea un Suspense boundary
+// peste [slug]) — a fost eliminat.
 export const revalidate = 3600;
 
 export async function generateStaticParams() {

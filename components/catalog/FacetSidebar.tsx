@@ -67,10 +67,13 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
   const [localMin, setLocalMin] = useState(minPrice ?? facets.priceMin);
   const [localMax, setLocalMax] = useState(maxPrice ?? facets.priceMax);
 
+  // Sincronizăm sliderul local cu URL-ul când filtrele se schimbă din altă parte.
+  /* eslint-disable react-hooks/set-state-in-effect -- sync intenționat prop→state */
   useEffect(() => {
     setLocalMin(minPrice ?? facets.priceMin);
     setLocalMax(maxPrice ?? facets.priceMax);
   }, [minPrice, maxPrice, facets.priceMin, facets.priceMax]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   function apply(mutate: (next: URLSearchParams) => void) {
     const next = new URLSearchParams(params.toString());
