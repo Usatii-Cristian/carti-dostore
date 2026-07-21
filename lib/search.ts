@@ -5,6 +5,35 @@ import type { Book } from "@prisma/client";
 const SEARCH_INDEX_NAME = "default";
 const SEARCH_PATHS = ["title", "author", "description", "tags"];
 
+// Sinonime: mapează termeni generici pe care-i tastează clienții pe cuvinte care
+// chiar apar în produse/categorii. Ex: cine caută „carti" vrea cărțile, dar
+// niciun produs nu conține literal „carti" — îl extindem la categoriile de carte.
+// Cheile și valorile sunt fără diacritice (comparate după normalizeForSearch).
+const SYNONYMS: Record<string, string[]> = {
+  carte: ["dezvoltare personala", "leadership", "psihologie", "suflet", "iubire"],
+  carti: ["dezvoltare personala", "leadership", "psihologie", "suflet", "iubire"],
+  ulei: ["aromoterapie", "uleiuri", "esentiale"],
+  uleiuri: ["aromoterapie", "esentiale"],
+  aromaterapie: ["aromoterapie", "uleiuri", "esentiale"],
+  mlm: ["leadership", "network", "marketing", "sponsorizare"],
+  networking: ["leadership", "network", "marketing"],
+  business: ["leadership", "network", "marketing", "afaceri"],
+  afaceri: ["leadership", "network", "marketing"],
+  eticheta: ["etichete", "cartonase", "pliante"],
+  etichete: ["cartonase", "pliante", "materiale"],
+};
+
+// Extinde lista de cuvinte căutate cu sinonimele lor (dacă există).
+function expandWithSynonyms(words: string[]): string[] {
+  const set = new Set(words);
+  for (const word of words) {
+    for (const syn of SYNONYMS[word] ?? []) {
+      for (const token of syn.split(/\s+/)) set.add(token);
+    }
+  }
+  return [...set];
+}
+
 type SearchResult = {
   books: Book[];
   usedFallback: boolean;
@@ -99,11 +128,15 @@ const CANDIDATE_TAKE = 2000;
 async function fallbackSearch(query: string, limit: number): Promise<Book[]> {
   // Normalizăm și query-ul, și (mai jos) textele cărții — utilizatorii scriu
   // de obicei fără diacritice („carti"), iar titlurile le au („cărți").
-  const words = normalizeForSearch(query)
+  const baseWords = normalizeForSearch(query)
     .split(/\s+/)
     .filter(Boolean);
 
-  if (words.length === 0) return [];
+  if (baseWords.length === 0) return [];
+
+  // Extindem cu sinonime, ca termeni generici („carti", „ulei", „mlm") să
+  // găsească produsele relevante chiar dacă nu conțin literal cuvântul căutat.
+  const words = expandWithSynonyms(baseWords);
 
   // 1) Potrivire directă (rapidă) — conține cuvântul în searchText.
   const contained = await prisma.book.findMany({
