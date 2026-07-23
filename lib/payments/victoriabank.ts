@@ -202,9 +202,14 @@ export async function refundPayment(
       };
     }
     if (res.status === 404) {
+      // Două cauze posibile, indistingibile din răspuns:
+      //  a) plata e prea recentă — banca are nevoie de ~15 secunde ca s-o
+      //     înregistreze înainte de a putea fi returnată (verificat pe test);
+      //  b) a fost deja returnată — se poate o singură dată.
       return {
         ok: false,
-        message: "Tranzacția nu a fost găsită sau a fost deja returnată (se poate o singură dată).",
+        message:
+          "Banca nu găsește tranzacția. Fie plata e prea recentă (așteaptă un minut și reîncearcă), fie a fost deja returnată — o plată se poate returna o singură dată.",
       };
     }
     return { ok: false, message: `Banca a respins returnarea (HTTP ${res.status}).` };

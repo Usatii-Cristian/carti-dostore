@@ -97,19 +97,21 @@ export function Footer() {
             {/* Siglele partenerilor de plată, în variantă albă ca să stea direct
                 pe navy, fără cutie de fundal. La MIA am păstrat bulinele colorate. */}
             <div className="mt-6 flex flex-col items-start gap-4">
+              {/* Aceeași înălțime pentru ambele sigle (lățimea diferă natural,
+                  fiindcă au proporții diferite). */}
               <Image
                 src="/plati/mia-alb.png"
                 alt="MIA — plăți instant"
-                width={193}
-                height={48}
-                className="h-11 w-auto object-contain"
+                width={161}
+                height={40}
+                className="h-10 w-auto object-contain"
               />
               <Image
                 src="/plati/victoriabank-alb.png"
                 alt="VictoriaBank"
-                width={233}
-                height={48}
-                className="h-8 w-auto object-contain"
+                width={194}
+                height={40}
+                className="h-10 w-auto object-contain"
               />
             </div>
           </div>
