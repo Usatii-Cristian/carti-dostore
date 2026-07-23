@@ -114,6 +114,9 @@ model Order {
   qrHeaderUUID      String?
   qrExtensionUUID   String?
   qrPayUrl          String?            // payload-ul QR (link), din care regenerăm imaginea
+  // Momentul în care clientul a bifat acordul cu termenii, politica de
+  // confidențialitate și cea de retur. Păstrat ca dovadă a consimțământului.
+  termsAcceptedAt   DateTime?
   // Tracking livrare
   trackingNumber    String?            // AWB de la curier (FANcourier)
   estimatedDelivery DateTime?          // termen estimat de livrare
