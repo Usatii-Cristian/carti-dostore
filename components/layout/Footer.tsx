@@ -107,7 +107,7 @@ export function Footer() {
                 className="h-10 w-auto object-contain"
               />
               <Image
-                src="/plati/victoriabank-alb.png"
+                src="/plati/victoriabank.png"
                 alt="VictoriaBank"
                 width={194}
                 height={40}

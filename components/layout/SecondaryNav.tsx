@@ -1,17 +1,19 @@
 import Link from "next/link";
 import { secondaryNavLinks, secondaryNavRightLinks } from "@/lib/nav-links";
 import { getAllCategories } from "@/lib/categories";
-import { CategoriesDropdown } from "./CategoriesDropdown";
+import { CategoriesTrigger, CategoriesPanel } from "./CategoriesDropdown";
 
 export async function SecondaryNav() {
   const categories = await getAllCategories();
 
   return (
-    <nav aria-label="Navigație principală" className="hidden bg-navy md:block">
+    // `group` + `relative` pe toată bara: meniul de categorii coboară sub ea, pe
+    // toată lățimea, când butonul e hover/focus (vezi CategoriesPanel).
+    <nav aria-label="Navigație principală" className="group relative hidden bg-navy md:block">
       {/* Trei zone: butonul de categorii (stânga), linkurile de catalog
           distribuite egal (centru), linkurile instituționale (dreapta). */}
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-2.5 text-sm font-medium text-cream/90 sm:px-6 lg:px-8">
-        <CategoriesDropdown categories={categories} />
+        <CategoriesTrigger />
 
         <div className="flex flex-1 items-center justify-center gap-7 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {secondaryNavLinks
@@ -39,6 +41,8 @@ export async function SecondaryNav() {
           ))}
         </div>
       </div>
+
+      <CategoriesPanel categories={categories} />
     </nav>
   );
 }

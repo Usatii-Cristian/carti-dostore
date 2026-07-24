@@ -187,10 +187,14 @@ export function CheckoutView() {
                 ,{" "}
                 <Link href="/confidentialitate" target="_blank" className="font-medium text-terracotta underline">
                   Politica de confidențialitate
+                </Link>
+                ,{" "}
+                <Link href="/retur-si-rambursare" target="_blank" className="font-medium text-terracotta underline">
+                  Politica de retur
                 </Link>{" "}
                 și{" "}
-                <Link href="/confidentialitate#cookies" target="_blank" className="font-medium text-terracotta underline">
-                  Politica de cookie-uri
+                <Link href="/livrare-si-plata" target="_blank" className="font-medium text-terracotta underline">
+                  condițiile de livrare
                 </Link>
                 .
               </span>
