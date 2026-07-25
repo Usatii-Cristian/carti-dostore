@@ -24,7 +24,7 @@ const sections = [
   },
   {
     title: "5. Plata",
-    body: "Acceptăm trei metode: (a) plata online pe site prin MIA — sistemul de plăți instant al Băncii Naționale a Moldovei, operat prin VictoriaBank, unde scanezi un cod QR și confirmi plata în aplicația băncii tale; (b) plata cu cardul la livrare, la curier; (c) plata în numerar la livrare. Pentru plata online, noi nu vedem și nu stocăm datele cardului sau ale contului tău — tranzacția se desfășoară integral în aplicația băncii tale. Plățile se efectuează în lei moldovenești (MDL).",
+    body: "Acceptăm trei metode: (a) plata online pe site prin MIA — sistemul de plăți instant al Băncii Naționale a Moldovei, disponibil din aplicația oricărei bănci participante, unde scanezi un cod QR și confirmi plata în aplicația băncii tale; (b) plata cu cardul la livrare, la curier; (c) plata în numerar la livrare. Pentru plata online, noi nu vedem și nu stocăm datele cardului sau ale contului tău — tranzacția se desfășoară integral în aplicația băncii tale. Plățile se efectuează în lei moldovenești (MDL).",
   },
   {
     title: "6. Dreptul de retur",

@@ -47,7 +47,7 @@ export function OrderStatusUpdateEmail({
       </Section>
 
       <Text style={{ ...styles.paragraph, margin: "24px 0 0" }}>
-        Ai întrebări? Sună-ne la +373 068 812 853 sau răspunde la acest email.
+        Ai întrebări? Sună-ne la +373 68 812 853 sau răspunde la acest email.
       </Text>
     </EmailLayout>
   );

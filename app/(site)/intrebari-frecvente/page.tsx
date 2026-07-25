@@ -22,9 +22,8 @@ const faqs = [
       "Da, ai la dispoziție 14 zile calendaristice de la primirea comenzii pentru a returna produsul, conform politicii de retur.",
   },
   {
-    question: "Livrarea este gratuită?",
-    answer:
-      "Livrarea este gratuită pentru comenzile de peste 199 lei. Sub această valoare, costul de transport este de 39 lei.",
+    question: "Cât costă livrarea?",
+    answer: "Transportul costă 39 lei, indiferent de valoarea comenzii.",
   },
   {
     question: "Cum verific statusul comenzii mele?",

@@ -16,7 +16,7 @@ const sections = [
   },
   {
     title: "3. Partajarea datelor",
-    body: "Transmitem datele strict cât e nevoie ca să primești comanda: (a) către FAN Courier — nume, telefon, adresă și localitate, pentru generarea AWB-ului și livrare; (b) către VictoriaBank / sistemul MIA — doar suma și un identificator al comenzii, atunci când plătești online. Datele contului sau ale cardului tău NU trec prin site-ul nostru. Nu vindem și nu închiriem datele tale personale către terți în scopuri de marketing.",
+    body: "Transmitem datele strict cât e nevoie ca să primești comanda: (a) către FAN Courier — nume, telefon, adresă și localitate, pentru generarea AWB-ului și livrare; (b) către sistemul MIA (plăți instant) — doar suma și un identificator al comenzii, atunci când plătești online. Datele contului sau ale cardului tău NU trec prin site-ul nostru. Nu vindem și nu închiriem datele tale personale către terți în scopuri de marketing.",
   },
   {
     title: "4. Securitatea datelor",

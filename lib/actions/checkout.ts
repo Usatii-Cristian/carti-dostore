@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendNewOrderEmails } from "@/lib/email/notifications";
 import { tgNewOrder } from "@/lib/telegram";
-import { cartItemPrice, FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/lib/store/cart";
+import { cartItemPrice, SHIPPING_COST } from "@/lib/store/cart";
 import { getShippingPrice } from "@/lib/shipping/fan";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
@@ -129,9 +129,9 @@ export async function createOrderAndPay(
     | "CASH_ON_DELIVERY";
 
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
-  // Ce plătește clientul: regula noastră (gratuit peste prag). Costul real către
-  // FAN se calculează separat mai jos și se salvează doar informativ.
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  // Ce plătește clientul: tarif fix, fără prag de livrare gratuită. Costul real
+  // către FAN se calculează separat mai jos și se salvează doar informativ.
+  const shippingCost = SHIPPING_COST;
   const total = subtotal + shippingCost;
   const orderNumber = generateOrderNumber();
 

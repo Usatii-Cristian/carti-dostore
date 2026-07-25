@@ -22,8 +22,7 @@ export default function LivrareSiPlataPage() {
             <h2 className="font-serif text-xl font-semibold text-ink">Livrare</h2>
           </div>
           <ul className="mt-4 space-y-2 text-sm text-ink-soft">
-            <li>• Livrare gratuită pentru comenzi peste 199 lei</li>
-            <li>• Transport 39 lei pentru comenzi sub 199 lei</li>
+            <li>• Transport 39 lei, indiferent de valoarea comenzii</li>
             <li>• Livrare în 1-3 zile lucrătoare, oriunde în Moldova</li>
           </ul>
         </section>

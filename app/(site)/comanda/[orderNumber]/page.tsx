@@ -170,7 +170,7 @@ export default async function OrderTrackingPage({ params }: PageProps) {
           className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-2.5 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
         >
           <Phone className="h-4 w-4" aria-hidden="true" />
-          +373 068 812 853
+          +373 68 812 853
         </a>
         <Link href="/" className="text-sm font-medium text-navy hover:text-terracotta">
           Înapoi la Dostore Carti

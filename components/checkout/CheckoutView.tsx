@@ -130,7 +130,7 @@ export function CheckoutView() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
-  const shipping = getShippingCost(subtotal);
+  const shipping = getShippingCost();
   const total = subtotal + shipping;
 
   return (

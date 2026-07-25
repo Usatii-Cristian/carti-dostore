@@ -51,9 +51,10 @@ export function cartItemPrice(item: CartItem): number {
   return item.discountPrice ?? item.price;
 }
 
-export const FREE_SHIPPING_THRESHOLD = 199;
+// Transport la tarif fix — NU există livrare gratuită, la nicio sumă a
+// comenzii (a fost o afirmație greșită eliminată din tot site-ul).
 export const SHIPPING_COST = 39;
 
-export function getShippingCost(subtotal: number): number {
-  return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+export function getShippingCost(): number {
+  return SHIPPING_COST;
 }

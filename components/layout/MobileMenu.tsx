@@ -106,7 +106,7 @@ export function MobileMenu({ categories }: { categories: Category[] }) {
             <div className="mt-auto space-y-2 border-t border-cream/10 px-4 py-4 text-sm text-cream/80">
               <a href="tel:+37368812853" className="flex items-center gap-2 hover:text-gold">
                 <Phone className="h-4 w-4" aria-hidden="true" />
-                +373 068 812 853
+                +373 68 812 853
               </a>
               <p className="flex items-center gap-2">
                 <Clock className="h-4 w-4" aria-hidden="true" />

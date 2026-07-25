@@ -9,7 +9,7 @@ const BENEFITS = [
   {
     icon: ShieldCheck,
     title: "Plată sigură",
-    description: "Online prin VictoriaBank MIA sau la livrare",
+    description: "Online prin MIA sau la livrare",
   },
   {
     icon: Undo2,

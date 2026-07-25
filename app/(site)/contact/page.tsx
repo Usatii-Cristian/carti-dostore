@@ -25,7 +25,7 @@ export default function ContactPage() {
           </span>
           <div>
             <p className="font-semibold text-ink">Telefon</p>
-            <p className="mt-1 text-sm text-ink-soft">+373 068 812 853</p>
+            <p className="mt-1 text-sm text-ink-soft">+373 68 812 853</p>
           </div>
         </a>
 

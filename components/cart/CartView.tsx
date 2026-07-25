@@ -3,12 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import {
-  useCartStore,
-  cartItemPrice,
-  getShippingCost,
-  FREE_SHIPPING_THRESHOLD,
-} from "@/lib/store/cart";
+import { useCartStore, cartItemPrice, getShippingCost } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/format";
 
 export function CartView() {
@@ -39,9 +34,8 @@ export function CartView() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
-  const shipping = getShippingCost(subtotal);
+  const shipping = getShippingCost();
   const total = subtotal + shipping;
-  const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -119,16 +113,6 @@ export function CartView() {
 
         <div className="h-fit rounded-xl bg-card p-6 shadow-sm ring-1 ring-border/70">
           <h2 className="font-serif text-lg font-semibold text-ink">Sumar comandă</h2>
-
-          {remainingForFreeShipping > 0 ? (
-            <p className="mt-3 rounded-lg bg-cream-soft px-3 py-2 text-xs text-ink-soft">
-              Mai adaugă {formatPrice(remainingForFreeShipping)} pentru livrare gratuită.
-            </p>
-          ) : (
-            <p className="mt-3 rounded-lg bg-cream-soft px-3 py-2 text-xs font-medium text-terracotta">
-              Ai livrare gratuită la această comandă!
-            </p>
-          )}
 
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between">
