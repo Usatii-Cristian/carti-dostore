@@ -1,8 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
-import { Truck, ExternalLink, AlertTriangle } from "lucide-react";
-import { generateAwb, type AwbState } from "@/lib/actions/admin-shipping";
+import { useActionState, useState } from "react";
+import { Truck, ExternalLink, AlertTriangle, Printer, XCircle } from "lucide-react";
+import {
+  generateAwb,
+  cancelAwb,
+  fetchLabelUrl,
+  type AwbState,
+} from "@/lib/actions/admin-shipping";
 
 export function AwbPanel({
   orderId,
@@ -18,8 +23,25 @@ export function AwbPanel({
   const [state, action, pending] = useActionState(generateAwb.bind(null, orderId), {
     status: "idle",
   } as AwbState);
+  const [cancelState, cancelAction, cancelPending] = useActionState(
+    cancelAwb.bind(null, orderId),
+    { status: "idle" } as AwbState
+  );
+  const [labelLoading, setLabelLoading] = useState(false);
 
-  const awb = state.awb ?? existingAwb;
+  // AWB-ul curent: cel proaspăt generat, sau cel salvat — dar dispare după anulare.
+  const awb = cancelState.status === "success" ? null : (state.awb ?? existingAwb);
+
+  async function openLabel() {
+    if (!awb) return;
+    setLabelLoading(true);
+    try {
+      const url = await fetchLabelUrl(awb);
+      window.open(url, "_blank", "noopener");
+    } finally {
+      setLabelLoading(false);
+    }
+  }
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-5">
@@ -47,28 +69,62 @@ export function AwbPanel({
         )}
       </dl>
 
-      {state.status === "error" && (
+      {(state.status === "error" || cancelState.status === "error") && (
         <p className="mb-3 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          {state.message}
+          {state.status === "error" ? state.message : cancelState.message}
         </p>
       )}
-      {state.status === "success" && (
+      {(state.status === "success" || cancelState.status === "success") && (
         <p className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
-          {state.message}
+          {cancelState.status === "success" ? cancelState.message : state.message}
         </p>
       )}
 
       {awb ? (
-        <a
-          href={`https://www.fancourier.md/awb-tracking/?awb=${awb}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900"
-        >
-          Urmărește coletul
-          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={openLabel}
+            disabled={labelLoading}
+            className="inline-flex items-center gap-2 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-dark disabled:opacity-60"
+          >
+            <Printer className="h-4 w-4" aria-hidden="true" />
+            {labelLoading ? "Se deschide…" : "Printează eticheta"}
+          </button>
+
+          <a
+            href={`https://www.fancourier.md/awb-tracking/?awb=${awb}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900"
+          >
+            Urmărește coletul
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
+
+          <form
+            action={cancelAction}
+            onSubmit={(event) => {
+              if (!confirm("Anulezi AWB-ul la FAN? Poți genera altul după.")) {
+                event.preventDefault();
+              }
+            }}
+          >
+            <button
+              type="submit"
+              disabled={cancelPending}
+              className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:border-red-400 hover:bg-red-50 disabled:opacity-60"
+            >
+              <XCircle className="h-4 w-4" aria-hidden="true" />
+              {cancelPending ? "Se anulează…" : "Anulează AWB"}
+            </button>
+          </form>
+
+          <p className="w-full text-xs text-slate-500">
+            Anularea merge doar cât timp coletul n-a fost ridicat de curier.
+          </p>
+        </div>
       ) : (
         <form action={action}>
           <button

@@ -19,6 +19,28 @@ const FAN_BASE_URL = "https://app.fancourier.md/fan/API";
 const apiKey = process.env.FAN_API_KEY;
 export const isFanConfigured = typeof apiKey === "string" && apiKey.length > 10;
 
+/**
+ * Adresa expeditorului, exact cum e salvată în contul FAN (`list_addresses`).
+ * Trimisă explicit la fiecare expediție — vezi comentariul din createShipment
+ * despre `use_default_from_address`. Se poate suprascrie din variabile de mediu
+ * dacă se schimbă sediul, fără modificare de cod.
+ */
+const SENDER = {
+  name: process.env.FAN_SENDER_NAME ?? "Free Life SRL",
+  contact: process.env.FAN_SENDER_CONTACT ?? "Free Life SRL",
+  street: process.env.FAN_SENDER_STREET ?? "Petru Zadnipru",
+  nr: process.env.FAN_SENDER_NR ?? "19",
+  bl: process.env.FAN_SENDER_BL ?? "2",
+  sc: process.env.FAN_SENDER_SC ?? "1",
+  et: process.env.FAN_SENDER_ET ?? "8",
+  ap: process.env.FAN_SENDER_AP ?? "30",
+  sector: process.env.FAN_SENDER_SECTOR ?? "Ciocana",
+  city: process.env.FAN_SENDER_CITY ?? "Chisinau",
+  county: process.env.FAN_SENDER_COUNTY ?? "Chisinau",
+  zipcode: process.env.FAN_SENDER_ZIPCODE ?? "MD 2044",
+  phone: process.env.FAN_SENDER_PHONE ?? "068812853",
+} as const;
+
 type FanEnvelope<T> = {
   status?: "done" | "failed";
   data?: T;
@@ -176,8 +198,29 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
   }
 
   const res = await fanRequest<{ no?: string } | { no?: string }[]>("create_shipment", {
-    use_default_from_address: true,
+    // ⚠️ NU folosi `use_default_from_address` — creează AWB-uri „nefinalizate":
+    // eticheta întoarce „Shipment is not finalized yet", iar anularea „forbidden".
+    // Verificat direct pe API-ul FAN: cu adresa expeditorului trimisă explicit,
+    // ambele funcționează. Datele sunt cele din contul FAN (list_addresses).
+    from_name: SENDER.name,
+    from_contact: SENDER.contact,
+    from_str: SENDER.street,
+    from_nr: SENDER.nr,
+    from_bl: SENDER.bl,
+    from_sc: SENDER.sc,
+    from_et: SENDER.et,
+    from_ap: SENDER.ap,
+    from_sector: SENDER.sector,
+    from_city: SENDER.city,
+    from_county: SENDER.county,
+    from_country: "MD",
+    from_zipcode: SENDER.zipcode,
+    from_phone: SENDER.phone,
     type: "package",
+    // ⚠️ OBLIGATORIU. Fără `service_type`, FAN creează AWB-ul dar îl lasă
+    // NEFINALIZAT: eticheta răspunde „Shipment is not finalized yet" și
+    // anularea „forbidden". Verificat A/B direct pe API — cu el, ambele merg.
+    service_type: "Standard",
     to_name: input.toName,
     to_contact: input.toName,
     to_phone: input.toPhone,
@@ -264,13 +307,19 @@ export async function getTracking(awb: string): Promise<FanTracking | null> {
   }
 }
 
-/** Eticheta de lipit pe colet, ca PDF (base64 sau URL, în funcție de răspuns). */
+/**
+ * Eticheta de lipit pe colet, ca PDF.
+ *
+ * ⚠️ Parametrul corect e `pdf=true` — NU `type=pdf` (cum aveam înainte, ceea ce
+ * întorcea o eroare JSON în loc de PDF). Verificat direct pe API-ul FAN:
+ * `pdf=true` → PDF de ~18KB; fără parametru → tot PDF; `type=pdf` → eroare.
+ * Documentat în formularul lor: <input type="checkbox" name="pdf" value="true">
+ */
 export async function getLabelUrl(awb: string): Promise<string> {
   const params = new URLSearchParams({
     api_key: apiKey ?? "",
     awbno: awb,
-    type: "pdf",
-    format: "a6",
+    pdf: "true",
   });
   return `${FAN_BASE_URL}/print?${params.toString()}`;
 }
