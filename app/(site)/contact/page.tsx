@@ -17,7 +17,7 @@ export default function ContactPage() {
 
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
         <a
-          href="tel:+37322000000"
+          href="tel:+37368812853"
           className="flex items-start gap-3 rounded-xl bg-card p-6 shadow-sm ring-1 ring-border/70 transition-colors hover:ring-terracotta/50"
         >
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cream-soft text-terracotta">
