@@ -67,10 +67,13 @@ const sections = [
 const companyDetails = [
   { label: "Denumire", value: "Free Life SRL" },
   { label: "Cod fiscal", value: "1025600059594" },
+  { label: "Bancă", value: "VictoriaBank, SWIFT — VICBMD2X" },
+  { label: "IBAN", value: "MD46VI022511400000572MDL" },
   { label: "Adresă", value: "Str. Ismail 47, Chișinău, Republica Moldova" },
   { label: "Email", value: "dostore.moldova@gmail.com" },
   { label: "Telefon", value: "+373 68 812 853" },
   { label: "Site", value: "dostore-carti.vercel.app" },
+  { label: "Administrator", value: "Nadejda Marandici" },
 ];
 
 export default function TermeniSiConditiiPage() {

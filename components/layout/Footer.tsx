@@ -121,6 +121,9 @@ export function Footer() {
           <p>© {new Date().getFullYear()} Dostore Carti. Toate drepturile rezervate.</p>
           <p>Făcut cu drag pentru cititorii din Moldova.</p>
         </div>
+        <p className="mt-2 text-center text-[11px] text-cream/40 sm:text-left">
+          Free Life SRL, cod fiscal 1025600059594 · IBAN MD46VI022511400000572MDL, VictoriaBank
+        </p>
       </div>
     </footer>
   );
