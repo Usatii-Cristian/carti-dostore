@@ -16,7 +16,7 @@ const sections = [
   },
   {
     title: "3. Produsele și prețurile",
-    body: "Vindem cărți și produse conexe (accesorii, uleiuri esențiale). Prețurile afișate sunt exprimate în lei moldovenești (MDL) și includ TVA. Ne rezervăm dreptul de a modifica prețurile și stocul disponibil fără notificare prealabilă, comenzile deja confirmate nefiind afectate.",
+    body: "Vindem cărți și produse conexe (accesorii, uleiuri esențiale). Prețurile afișate sunt exprimate în lei moldovenești (MDL). Ne rezervăm dreptul de a modifica prețurile și stocul disponibil fără notificare prealabilă, comenzile deja confirmate nefiind afectate.",
   },
   {
     title: "4. Comenzile",
@@ -72,8 +72,8 @@ const companyDetails = [
   { label: "Adresă", value: "Str. Ismail 47, Chișinău, Republica Moldova" },
   { label: "Email", value: "dostore.moldova@gmail.com" },
   { label: "Telefon", value: "+373 68 812 853" },
-  { label: "Site", value: "dostore-carti.vercel.app" },
-  { label: "Administrator", value: "Nadejda Marandici" },
+  { label: "Site", value: "dostore.md" },
+  { label: "Director", value: "Nadejda Marandici" },
 ];
 
 export default function TermeniSiConditiiPage() {
