@@ -234,8 +234,13 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
     content: input.content,
     customer_reference: input.reference,
     comments: input.comments,
+    // ⚠️ ramburs_type=cash e RESPINS pe contul nostru FAN ("Tip de transfer
+    // COD incorect pentru acest client") — verificat direct pe API. Contul e
+    // configurat pentru decontare prin virament bancar, nu cash fizic la
+    // predare. "cont" e valoarea corectă: clientul plătește curierului la
+    // livrare, iar noi primim suma prin transfer în contul înregistrat la FAN.
     ...(input.codAmount && input.codAmount > 0
-      ? { ramburs: input.codAmount, ramburs_type: "cash" }
+      ? { ramburs: input.codAmount, ramburs_type: "cont" }
       : {}),
   });
 
