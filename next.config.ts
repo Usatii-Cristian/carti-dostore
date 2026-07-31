@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Headere de securitate aplicate tuturor rutelor. maib nu iframe-uiește
+  // Headere de securitate aplicate tuturor rutelor. MIA nu iframe-uiește
   // callback-ul, iar site-ul nu e menit să fie încapsulat, deci blocăm
   // clickjacking-ul cu frame-ancestors 'none' / X-Frame-Options DENY.
   async headers() {

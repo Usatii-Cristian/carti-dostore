@@ -12,7 +12,7 @@ import nodemailer, { type Transporter } from "nodemailer";
 //
 // Fără credențiale SMTP complete, intrăm în mod no-op: logăm și returnăm
 // `skipped`, ca fluxul de checkout / callback / newsletter să NU se blocheze
-// când emailul nu e încă configurat (exact ca la maib/DB).
+// când emailul nu e încă configurat (exact ca la MIA/DB).
 
 const host = process.env.SMTP_HOST;
 const user = process.env.SMTP_USER;

@@ -12,7 +12,7 @@ const sections = [
   },
   {
     title: "2. Operatorul de date",
-    body: "Operatorul datelor cu caracter personal colectate prin acest site este Free Life SRL, cod fiscal 1025600059594, care operează magazinul online Dostore Cărți, cu adresa de corespondență Str. Ismail 47, Chișinău, Republica Moldova. Pentru orice întrebare legată de datele tale personale, ne poți contacta la dostore.moldova@gmail.com sau +373 68 812 853.",
+    body: "Operatorul datelor cu caracter personal colectate prin acest site este Free Life SRL, cod fiscal 1025600059594, care operează magazinul online Dostore Cărți, cu sediul în Str. Petru Zadnipru 19/2, Chișinău, Republica Moldova. Pentru orice întrebare legată de datele tale personale, ne poți contacta la dostore.moldova@gmail.com sau +373 68 812 853.",
   },
   {
     title: "3. Ce date colectăm",

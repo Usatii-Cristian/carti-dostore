@@ -4,7 +4,14 @@ import { useActionState, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import { useCartStore, cartItemPrice, getShippingCost } from "@/lib/store/cart";
+import {
+  useCartStore,
+  cartItemPrice,
+  getShippingCost,
+  getCodFee,
+  isLocalDelivery,
+  COD_FEE,
+} from "@/lib/store/cart";
 import { createOrderAndPay, type CheckoutState } from "@/lib/actions/checkout";
 import { formatPrice } from "@/lib/format";
 import { CityAutocomplete } from "./CityAutocomplete";
@@ -94,6 +101,11 @@ export function CheckoutView() {
     city: state.values?.city ?? "",
   });
   const [termsChecked, setTermsChecked] = useState(state.values?.terms === "on");
+  // Metoda de plată e urmărită ca să putem afișa taxa de ramburs (15 lei) doar
+  // după ce clientul alege efectiv plata la livrare.
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    state.values?.paymentMethod ?? "ONLINE"
+  );
 
   function updateField(name: keyof typeof values, value: string) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -130,8 +142,13 @@ export function CheckoutView() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
-  const shipping = getShippingCost();
-  const total = subtotal + shipping;
+  // Transportul depinde de localitate (Chișinău vs. restul țării), iar taxa de
+  // ramburs apare doar dacă s-a ales plata la livrare. Aceleași reguli sunt
+  // recalculate pe server (lib/actions/checkout.ts) — aici e doar afișarea.
+  const cityChosen = values.city.trim().length >= 2;
+  const shipping = getShippingCost(cityChosen ? values.city : undefined);
+  const codFee = getCodFee(paymentMethod);
+  const total = subtotal + shipping + codFee;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -210,7 +227,7 @@ export function CheckoutView() {
               Metoda de plată
             </legend>
             <div className="space-y-2.5">
-              {PAYMENT_METHODS.map((method, index) => (
+              {PAYMENT_METHODS.map((method) => (
                 <label
                   key={method.value}
                   className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3.5 transition-colors has-[:checked]:border-terracotta has-[:checked]:bg-terracotta/5"
@@ -219,12 +236,18 @@ export function CheckoutView() {
                     type="radio"
                     name="paymentMethod"
                     value={method.value}
-                    defaultChecked={index === 0}
+                    checked={paymentMethod === method.value}
+                    onChange={() => setPaymentMethod(method.value)}
                     className="mt-0.5 h-4 w-4 accent-terracotta"
                   />
                   <span>
                     <span className="block text-sm font-semibold text-ink">{method.label}</span>
                     <span className="block text-xs text-ink-soft">{method.hint}</span>
+                    {method.value !== "ONLINE" && (
+                      <span className="mt-1 block text-xs font-medium text-terracotta">
+                        + {COD_FEE} lei taxă de ramburs
+                      </span>
+                    )}
                   </span>
                 </label>
               ))}
@@ -314,11 +337,27 @@ export function CheckoutView() {
               <dd className="font-medium text-ink">{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-soft">Transport</dt>
-              <dd className="font-medium text-ink">
-                {shipping === 0 ? "Gratuit" : formatPrice(shipping)}
-              </dd>
+              <dt className="text-ink-soft">
+                Transport
+                <span className="block text-xs text-ink-soft/70">
+                  {cityChosen
+                    ? isLocalDelivery(values.city)
+                      ? "Chișinău"
+                      : "În toată țara"
+                    : "Alege localitatea"}
+                </span>
+              </dt>
+              <dd className="font-medium text-ink">{formatPrice(shipping)}</dd>
             </div>
+            {codFee > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-ink-soft">
+                  Taxă de ramburs
+                  <span className="block text-xs text-ink-soft/70">Plată la livrare</span>
+                </dt>
+                <dd className="font-medium text-ink">{formatPrice(codFee)}</dd>
+              </div>
+            )}
             <div className="flex justify-between border-t border-border pt-2 text-base">
               <dt className="font-semibold text-ink">Total</dt>
               <dd className="font-semibold text-ink">{formatPrice(total)}</dd>

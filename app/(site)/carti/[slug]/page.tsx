@@ -55,7 +55,6 @@ export default async function BookPage({ params }: PageProps) {
 
   const galleryImages = [book.coverImage, ...book.images.filter((img) => img !== book.coverImage)];
   const similarBooks = await getSimilarBooks(book.categoryId, book.id, 4);
-  const outOfStock = book.stock <= 0;
 
   const details = [
     { label: "Editură", value: book.publisher },
@@ -102,16 +101,8 @@ export default async function BookPage({ params }: PageProps) {
             <PriceTag price={book.price} discountPrice={book.discountPrice} size="lg" />
           </div>
 
-          <p className={`mt-2 text-sm font-medium ${outOfStock ? "text-terracotta" : "text-ink-soft"}`}>
-            {outOfStock
-              ? "Stoc epuizat"
-              : book.stock === 1
-                ? "Ultimul exemplar în stoc"
-                : `În stoc — ${book.stock} exemplare disponibile`}
-          </p>
-
           <div className="mt-6 flex flex-wrap gap-3">
-            <AddToCartButton book={book} outOfStock={outOfStock} variant="full" />
+            <AddToCartButton book={book} variant="full" />
             <FavoriteButton book={book} variant="full" />
           </div>
 

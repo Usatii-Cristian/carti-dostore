@@ -32,14 +32,10 @@ export type CatalogFacets = {
   priceMax: number;
 };
 
-// Doar produsele pe stoc apar în catalog — la fel ca în restul site-ului.
-const IN_STOCK: Prisma.BookWhereInput = { stock: { gt: 0 } };
-
 const DISCOUNTED: Prisma.BookWhereInput = { discountPrice: { not: null } };
 
 function buildWhere(query: CatalogQuery, categoryIds: string[]): Prisma.BookWhereInput {
   return {
-    ...IN_STOCK,
     ...(categoryIds.length > 0 && { categoryId: { in: categoryIds } }),
     ...((query.minPrice !== undefined || query.maxPrice !== undefined) && {
       price: {
@@ -89,7 +85,7 @@ export async function getCatalog(query: CatalogQuery): Promise<{
     prisma.book.count({ where: { ...whereWithoutCategory, ...DISCOUNTED } }),
     prisma.book.count({ where: { ...whereWithoutCategory, isBestseller: true } }),
     prisma.book.count({ where: { ...whereWithoutCategory, isNew: true } }),
-    prisma.book.aggregate({ where: IN_STOCK, _min: { price: true }, _max: { price: true } }),
+    prisma.book.aggregate({ _min: { price: true }, _max: { price: true } }),
   ]);
 
   const countByCategory = new Map(grouped.map((row) => [row.categoryId, row._count._all]));

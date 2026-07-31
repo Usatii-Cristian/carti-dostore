@@ -27,10 +27,12 @@ model Book {
   // nu putem calcula corect costul livrării. Opțional: produsele fără greutate
   // intră în calcul cu estimarea implicită din lib/shipping/weight.ts.
   weightGrams    Int?
-  stock          Int      @default(0)
   rating         Float    @default(0)
   reviewCount    Int      @default(0)
   isBestseller   Boolean  @default(false)
+  // Poziția în secțiunea Bestsellers (0 = prima). Ordonarea după `rating` nu
+  // era suficientă: produsele cu rating egal ieșeau în ordine arbitrară.
+  bestsellerOrder Int     @default(0)
   isNew          Boolean  @default(false)
   tags           String[]
   // Întrebări frecvente specifice produsului, administrate din panoul de admin.

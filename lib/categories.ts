@@ -1,7 +1,14 @@
 import { prisma } from "@/lib/prisma";
 
+/**
+ * Toate categoriile, în ordinea stabilită din admin (`featuredOrder`), ca
+ * meniul, footerul și pagina de categorii să arate aceeași ordine ca secțiunea
+ * de pe homepage. Numele rămâne doar ca departajare la ordine egală.
+ */
 export function getAllCategories() {
-  return prisma.category.findMany({ orderBy: { name: "asc" } });
+  return prisma.category.findMany({
+    orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
+  });
 }
 
 /**

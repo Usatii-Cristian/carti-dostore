@@ -8,5 +8,4 @@ export type BookCardData = {
   discountPrice: number | null;
   rating: number;
   reviewCount: number;
-  stock: number;
 };

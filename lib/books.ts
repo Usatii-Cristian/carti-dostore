@@ -1,9 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
-// Cărțile cu stoc 0 dispar complet de pe site (nu mai apar în liste/căutare).
-export const IN_STOCK: Prisma.BookWhereInput = { stock: { gt: 0 } };
-
 export const CATEGORY_PAGE_SIZE = 12;
 
 // Fereastra în care o carte e considerată „nouă" (apare la Noutăți).
@@ -38,8 +35,10 @@ export function sortToOrderBy(sort: CategorySort): Prisma.BookOrderByWithRelatio
 
 export function getBestsellers(limit = 6) {
   return prisma.book.findMany({
-    where: { isBestseller: true, ...IN_STOCK },
-    orderBy: { rating: "desc" },
+    where: { isBestseller: true },
+    // Ordine explicită, controlabilă din admin; rating-ul rămâne doar ca
+    // departajare pentru produsele lăsate pe aceeași poziție.
+    orderBy: [{ bestsellerOrder: "asc" }, { rating: "desc" }],
     take: limit,
   });
 }
@@ -51,7 +50,7 @@ export async function getNewBooks(limit = 24) {
   const since = new Date(Date.now() - NEW_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
   const recent = await prisma.book.findMany({
-    where: { ...IN_STOCK, createdAt: { gte: since } },
+    where: { createdAt: { gte: since } },
     orderBy: { createdAt: "desc" },
     take: limit,
   });
@@ -59,7 +58,6 @@ export async function getNewBooks(limit = 24) {
   if (recent.length > 0) return recent;
 
   return prisma.book.findMany({
-    where: IN_STOCK,
     orderBy: { createdAt: "desc" },
     take: 3,
   });
@@ -67,7 +65,6 @@ export async function getNewBooks(limit = 24) {
 
 export function getTopRatedBooks(limit = 24) {
   return prisma.book.findMany({
-    where: IN_STOCK,
     orderBy: [{ rating: "desc" }, { reviewCount: "desc" }],
     take: limit,
   });
@@ -75,7 +72,7 @@ export function getTopRatedBooks(limit = 24) {
 
 export function getDiscountedBooks(limit = 24) {
   return prisma.book.findMany({
-    where: { discountPrice: { not: null }, ...IN_STOCK },
+    where: { discountPrice: { not: null } },
     orderBy: { createdAt: "desc" },
     take: limit,
   });
@@ -90,7 +87,7 @@ export function getBookBySlug(slug: string) {
 
 export function getSimilarBooks(categoryId: string, excludeBookId: string, limit = 4) {
   return prisma.book.findMany({
-    where: { categoryId, id: { not: excludeBookId }, ...IN_STOCK },
+    where: { categoryId, id: { not: excludeBookId } },
     orderBy: { rating: "desc" },
     take: limit,
   });
@@ -113,7 +110,6 @@ export async function getBooksByCategory({
 }: BooksByCategoryParams) {
   const where: Prisma.BookWhereInput = {
     categoryId,
-    ...IN_STOCK,
     ...((minPrice !== undefined || maxPrice !== undefined) && {
       price: {
         ...(minPrice !== undefined && { gte: minPrice }),

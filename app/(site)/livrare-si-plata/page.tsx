@@ -22,8 +22,10 @@ export default function LivrareSiPlataPage() {
             <h2 className="font-serif text-xl font-semibold text-ink">Livrare</h2>
           </div>
           <ul className="mt-4 space-y-2 text-sm text-ink-soft">
-            <li>• Transport 39 lei, indiferent de valoarea comenzii</li>
-            <li>• Livrare în 1-3 zile lucrătoare, oriunde în Moldova</li>
+            <li>• Chișinău — 60 lei</li>
+            <li>• Restul Republicii Moldova — 85 lei</li>
+            <li>• Livrare în 1-3 zile lucrătoare, prin FAN Courier</li>
+            <li>• Costul nu depinde de valoarea comenzii</li>
           </ul>
         </section>
 
@@ -32,11 +34,14 @@ export default function LivrareSiPlataPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-cream-soft text-terracotta">
               <CreditCard className="h-5 w-5" aria-hidden="true" />
             </span>
-            <h2 className="font-serif text-xl font-semibold text-ink">Plată online</h2>
+            <h2 className="font-serif text-xl font-semibold text-ink">Plată online prin MIA</h2>
           </div>
           <p className="mt-4 text-sm text-ink-soft">
-            Plătești în siguranță cu cardul bancar, printr-o conexiune criptată, prin maib
-            (Moldova Agroindbank).
+            Plătești instant, direct din aplicația băncii tale: la finalizarea comenzii îți
+            generăm un cod QR pe care îl scanezi și confirmi plata. Funcționează din aplicația
+            oricărei bănci participante la MIA, sistemul național de plăți instant al Băncii
+            Naționale a Moldovei. Datele cardului sau ale contului tău nu trec prin site-ul
+            nostru.
           </p>
         </section>
 
@@ -45,10 +50,11 @@ export default function LivrareSiPlataPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-cream-soft text-terracotta">
               <Banknote className="h-5 w-5" aria-hidden="true" />
             </span>
-            <h2 className="font-serif text-xl font-semibold text-ink">Ramburs la livrare</h2>
+            <h2 className="font-serif text-xl font-semibold text-ink">Plata la livrare</h2>
           </div>
           <p className="mt-4 text-sm text-ink-soft">
-            Poți alege și plata numerar, direct la curier, în momentul livrării comenzii.
+            Poți plăti și la primirea coletului, cu cardul sau în numerar, direct curierului.
+            Pentru această opțiune se adaugă o taxă de ramburs de 15 lei la costul comenzii.
           </p>
         </section>
       </div>

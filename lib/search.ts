@@ -81,7 +81,7 @@ async function atlasSearch(query: string, limit: number): Promise<Book[]> {
   if (orderedIds.length === 0) return [];
 
   const books = await prisma.book.findMany({
-    where: { id: { in: orderedIds }, stock: { gt: 0 } },
+    where: { id: { in: orderedIds } },
   });
   const byId = new Map(books.map((book) => [book.id, book]));
 
@@ -144,7 +144,6 @@ async function fallbackSearch(query: string, limit: number): Promise<Book[]> {
   // 1) Potrivire directă (rapidă) — conține cuvântul în searchText.
   const contained = await prisma.book.findMany({
     where: {
-      stock: { gt: 0 },
       OR: words.map((word) => ({
         searchText: { contains: word, mode: "insensitive" },
       })),
@@ -156,7 +155,7 @@ async function fallbackSearch(query: string, limit: number): Promise<Book[]> {
   //    și potrivim fuzzy pe tokenii lor (titlu, autor, tag-uri etc.).
   let pool = contained;
   if (contained.length < limit) {
-    const extra = await prisma.book.findMany({ where: { stock: { gt: 0 } }, take: CANDIDATE_TAKE });
+    const extra = await prisma.book.findMany({ take: CANDIDATE_TAKE });
     const seen = new Set(contained.map((b) => b.id));
     pool = [...contained, ...extra.filter((b) => !seen.has(b.id))];
   }

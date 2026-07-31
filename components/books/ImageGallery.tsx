@@ -9,8 +9,9 @@ export function ImageGallery({ images, title }: { images: string[]; title: strin
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Pătrat: imaginile de produs sunt normalizate 1:1 (vezi
-          scripts/squarify-product-images.mts), deci `cover` nu taie nimic. */}
+      {/* Imaginile din catalog sunt normalizate 1:1 (vezi
+          scripts/squarify-product-images.mts), dar cele încărcate din admin
+          păstrează proporția sursei — de-asta `contain`, ca să nu se taie. */}
       <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-cream-soft">
         <Image
           src={activeImage}
@@ -18,7 +19,7 @@ export function ImageGallery({ images, title }: { images: string[]; title: strin
           fill
           priority
           sizes="(max-width: 1024px) 100vw, 40vw"
-          className="object-cover"
+          className="object-contain"
         />
       </div>
 

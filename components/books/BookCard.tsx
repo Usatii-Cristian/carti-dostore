@@ -7,10 +7,11 @@ import { FavoriteButton } from "./FavoriteButton";
 import { AddToCartButton } from "./AddToCartButton";
 
 export function BookCard({ book }: { book: BookCardData }) {
-  const outOfStock = book.stock <= 0;
-
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-transparent transition-all duration-200 hover:shadow-lg hover:ring-border">
+      {/* `object-contain`, nu `cover`: imaginile din catalog sunt pătrate, deci
+          arată identic, dar cele încărcate din admin păstrează proporția sursei
+          (upload-ul folosește `fit: inside`) — cu `cover` li se tăiau marginile. */}
       <div className="relative aspect-square w-full overflow-hidden bg-cream">
         <Link href={`/carti/${book.slug}`} className="relative block h-full w-full">
           <Image
@@ -18,7 +19,7 @@ export function BookCard({ book }: { book: BookCardData }) {
             alt={`Coperta cărții ${book.title}`}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
-            className="object-cover"
+            className="object-contain"
           />
         </Link>
 
@@ -32,13 +33,6 @@ export function BookCard({ book }: { book: BookCardData }) {
           </span>
         )}
 
-        {outOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-ink/50">
-            <span className="rounded-full bg-card px-3 py-1 text-xs font-semibold text-ink">
-              Stoc epuizat
-            </span>
-          </div>
-        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-1.5 p-3.5">
@@ -54,7 +48,7 @@ export function BookCard({ book }: { book: BookCardData }) {
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-2">
           <PriceTag price={book.price} discountPrice={book.discountPrice} />
-          <AddToCartButton book={book} outOfStock={outOfStock} />
+          <AddToCartButton book={book} />
         </div>
       </div>
     </div>

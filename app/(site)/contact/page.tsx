@@ -48,7 +48,7 @@ export default function ContactPage() {
           </span>
           <div>
             <p className="font-semibold text-ink">Adresă</p>
-            <p className="mt-1 text-sm text-ink-soft">Str. Ismail 47, Chișinău, Moldova</p>
+            <p className="mt-1 text-sm text-ink-soft">Str. Petru Zadnipru 19/2, Chișinău, Moldova</p>
           </div>
         </div>
 

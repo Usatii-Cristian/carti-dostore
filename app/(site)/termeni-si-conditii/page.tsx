@@ -12,11 +12,11 @@ const sections = [
   },
   {
     title: "2. Vânzătorul",
-    body: "Magazinul online Dostore Cărți este operat de Free Life SRL, cod fiscal 1025600059594, cu adresa de corespondență Str. Ismail 47, Chișinău, Republica Moldova. Ne poți contacta la dostore.moldova@gmail.com sau +373 68 812 853.",
+    body: "Magazinul online Dostore Cărți este operat de Free Life SRL, cod fiscal 1025600059594, cu sediul în Str. Petru Zadnipru 19/2, Chișinău, Republica Moldova. Ne poți contacta la dostore.moldova@gmail.com sau +373 68 812 853.",
   },
   {
     title: "3. Produsele și prețurile",
-    body: "Vindem cărți și produse conexe (accesorii, uleiuri esențiale). Prețurile afișate sunt exprimate în lei moldovenești (MDL). Ne rezervăm dreptul de a modifica prețurile și stocul disponibil fără notificare prealabilă, comenzile deja confirmate nefiind afectate.",
+    body: "Vindem cărți și produse conexe (accesorii, uleiuri esențiale). Prețurile afișate sunt exprimate în lei moldovenești (MDL). Ne rezervăm dreptul de a modifica prețurile și disponibilitatea produselor fără notificare prealabilă, comenzile deja confirmate nefiind afectate.",
   },
   {
     title: "4. Comenzile",
@@ -67,9 +67,10 @@ const sections = [
 const companyDetails = [
   { label: "Denumire", value: "Free Life SRL" },
   { label: "Cod fiscal", value: "1025600059594" },
+  { label: "Nr. înregistrare", value: "189842 din 17.10.2025" },
   { label: "Bancă", value: "VictoriaBank, SWIFT — VICBMD2X" },
   { label: "IBAN", value: "MD46VI022511400000572MDL" },
-  { label: "Adresă", value: "Str. Ismail 47, Chișinău, Republica Moldova" },
+  { label: "Adresă juridică", value: "Str. Petru Zadnipru 19/2, Chișinău, Republica Moldova" },
   { label: "Email", value: "dostore.moldova@gmail.com" },
   { label: "Telefon", value: "+373 68 812 853" },
   { label: "Site", value: "dostore.md" },

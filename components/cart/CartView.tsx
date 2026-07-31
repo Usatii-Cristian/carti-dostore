@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { useCartStore, cartItemPrice, getShippingCost } from "@/lib/store/cart";
+import { useCartStore, cartItemPrice, SHIPPING_LOCAL, SHIPPING_NATIONAL } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/format";
 
 export function CartView() {
@@ -34,8 +34,9 @@ export function CartView() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
-  const shipping = getShippingCost();
-  const total = subtotal + shipping;
+  // În coș nu știm încă localitatea, deci nu putem afișa un cost exact — arătăm
+  // intervalul și lăsăm calculul final pe checkout, unde se alege orașul.
+  const total = subtotal;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -120,13 +121,18 @@ export function CartView() {
               <dd className="font-medium text-ink">{formatPrice(subtotal)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-ink-soft">Transport</dt>
-              <dd className="font-medium text-ink">
-                {shipping === 0 ? "Gratuit" : formatPrice(shipping)}
+              <dt className="text-ink-soft">
+                Transport
+                <span className="block text-xs text-ink-soft/70">
+                  Se calculează la checkout
+                </span>
+              </dt>
+              <dd className="text-right font-medium text-ink">
+                {SHIPPING_LOCAL}–{SHIPPING_NATIONAL} lei
               </dd>
             </div>
             <div className="flex justify-between border-t border-border pt-2 text-base">
-              <dt className="font-semibold text-ink">Total</dt>
+              <dt className="font-semibold text-ink">Subtotal</dt>
               <dd className="font-semibold text-ink">{formatPrice(total)}</dd>
             </div>
           </dl>

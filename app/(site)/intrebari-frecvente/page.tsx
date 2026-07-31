@@ -14,7 +14,7 @@ const faqs = [
   {
     question: "Ce metode de plată acceptați?",
     answer:
-      "Momentan plata se face ramburs la livrare, direct la curier. Plata online cu cardul va fi disponibilă în curând.",
+      "Poți plăti online prin MIA — scanezi un cod QR și confirmi plata în aplicația băncii tale — sau la livrare, cu cardul ori în numerar, direct curierului. Pentru plata la livrare se adaugă o taxă de ramburs de 15 lei.",
   },
   {
     question: "Pot returna o carte dacă nu îmi place?",
@@ -23,7 +23,8 @@ const faqs = [
   },
   {
     question: "Cât costă livrarea?",
-    answer: "Transportul costă 39 lei, indiferent de valoarea comenzii.",
+    answer:
+      "60 lei în Chișinău și 85 lei în restul Republicii Moldova, indiferent de valoarea comenzii. Dacă alegi plata la livrare, se adaugă și taxa de ramburs de 15 lei.",
   },
   {
     question: "Cum verific statusul comenzii mele?",
@@ -31,9 +32,9 @@ const faqs = [
       "Vei primi un email de confirmare imediat după plasarea comenzii. Pentru orice detaliu suplimentar, ne poți contacta oricând la dostore.moldova@gmail.com.",
   },
   {
-    question: "Aveți cărți în stoc pe care nu le văd pe site?",
+    question: "Aveți cărți pe care nu le văd pe site?",
     answer:
-      "Catalogul afișat este actualizat constant. Dacă o carte nu apare, cel mai probabil nu este momentan disponibilă — ne poți scrie și verificăm posibilitatea de reaprovizionare.",
+      "Catalogul afișat este actualizat constant. Dacă o carte nu apare, ne poți scrie și verificăm dacă o putem aduce.",
   },
 ];
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ShoppingCart, Wallet, PackageX } from "lucide-react";
+import { ShoppingCart, Wallet, BookOpen } from "lucide-react";
 import { getDashboardStats } from "@/lib/admin/dashboard";
 import { formatPrice } from "@/lib/format";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusBadge";
@@ -8,7 +8,7 @@ import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusB
 export const metadata: Metadata = { title: "Dashboard — Admin Dostore Carti" };
 
 export default async function AdminDashboardPage() {
-  const { totalOrders, totalRevenue, lowStockBooks, recentOrders } = await getDashboardStats();
+  const { totalOrders, totalRevenue, totalBooks, recentOrders } = await getDashboardStats();
 
   const cards = [
     {
@@ -22,9 +22,9 @@ export default async function AdminDashboardPage() {
       icon: Wallet,
     },
     {
-      label: "Cărți cu stoc sub 5",
-      value: lowStockBooks.length.toString(),
-      icon: PackageX,
+      label: "Produse în catalog",
+      value: totalBooks.toString(),
+      icon: BookOpen,
     },
   ];
 
@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="grid grid-cols-1 gap-6">
         <section className="rounded-xl border border-slate-200 bg-white p-5">
           <h2 className="mb-3 font-semibold text-slate-900">Ultimele comenzi</h2>
           <div className="overflow-x-auto">
@@ -94,27 +94,6 @@ export default async function AdminDashboardPage() {
               </tbody>
             </table>
           </div>
-        </section>
-
-        <section className="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 className="mb-3 font-semibold text-slate-900">Stoc redus</h2>
-          <ul className="space-y-2.5">
-            {lowStockBooks.map((book) => (
-              <li key={book.id} className="flex items-center justify-between gap-3 text-sm">
-                <Link
-                  href={`/admin/carti/${book.id}/editare`}
-                  className="truncate text-navy hover:underline"
-                >
-                  {book.title}
-                </Link>
-                <span className="shrink-0 font-semibold text-red-600">{book.stock} buc.</span>
-              </li>
-            ))}
-
-            {lowStockBooks.length === 0 && (
-              <li className="text-sm text-slate-500">Toate cărțile au stoc suficient.</li>
-            )}
-          </ul>
         </section>
       </div>
     </div>

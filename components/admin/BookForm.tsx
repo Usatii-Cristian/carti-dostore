@@ -147,14 +147,6 @@ export function BookForm({
             className={inputClass}
           />
         </Field>
-        <Field label="Stoc">
-          <input
-            type="number"
-            name="stock"
-            defaultValue={initialBook?.stock ?? 0}
-            className={inputClass}
-          />
-        </Field>
         <Field label="Rating (0-5)">
           <input
             type="number"
@@ -283,6 +275,14 @@ export function BookForm({
           />
           Bestseller
         </label>
+        <Field label="Ordine în bestsellers (0 = prima)">
+          <input
+            type="number"
+            name="bestsellerOrder"
+            defaultValue={initialBook?.bestsellerOrder ?? 0}
+            className={inputClass}
+          />
+        </Field>
         <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
           <input
             type="checkbox"

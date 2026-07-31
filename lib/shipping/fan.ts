@@ -8,7 +8,7 @@ import "server-only";
 // - autentificare prin parametrul `api_key`
 // - răspuns: { status: "done"|"failed", data, error, message }
 //
-// Ca la maib / email / Telegram: fără `FAN_API_KEY` intrăm în mod no-op —
+// Ca la MIA / email / Telegram: fără `FAN_API_KEY` intrăm în mod no-op —
 // logăm și returnăm un rezultat neutru, ca fluxul de comandă să meargă local
 // fără credențiale. Nimic din acest fișier nu aruncă în sus pe căile
 // necritice (preț, tracking); doar crearea AWB semnalează eroarea, fiindcă

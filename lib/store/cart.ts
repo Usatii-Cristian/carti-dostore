@@ -51,10 +51,47 @@ export function cartItemPrice(item: CartItem): number {
   return item.discountPrice ?? item.price;
 }
 
-// Transport la tarif fix — NU există livrare gratuită, la nicio sumă a
-// comenzii (a fost o afirmație greșită eliminată din tot site-ul).
-export const SHIPPING_COST = 39;
+// Transport — NU există livrare gratuită, la nicio sumă a comenzii (a fost o
+// afirmație greșită eliminată din tot site-ul). Tariful depinde doar de
+// destinație, nu de valoarea comenzii.
+export const SHIPPING_LOCAL = 60; // Chișinău (toate sectoarele)
+export const SHIPPING_NATIONAL = 85; // restul Republicii Moldova
 
-export function getShippingCost(): number {
-  return SHIPPING_COST;
+/**
+ * Taxă suplimentară pentru încasarea banilor la livrare (ramburs), indiferent
+ * dacă clientul plătește cash sau cu cardul la curier. Nu se aplică la plata
+ * online prin MIA, unde banii sunt deja încasați înainte de expediere.
+ */
+export const COD_FEE = 15;
+
+/** Normalizează pentru comparație: fără diacritice, litere mici, fără spații extra. */
+function normalizeCity(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
+/**
+ * Livrare locală = municipiul Chișinău propriu-zis (toate sectoarele lui apar
+ * la FAN sub aceeași localitate, „Chisinau"). Suburbiile cu nume propriu
+ * (Durlești, Cricova, Stăuceni…) sunt localități separate în lista FAN, deci
+ * intră la tarif național.
+ */
+export function isLocalDelivery(city: string): boolean {
+  return normalizeCity(city) === "chisinau";
+}
+
+/** Costul transportului pentru destinația aleasă. Fără oraș încă ales, presupunem tariful național (cel mai mare), ca să nu afișăm un preț mai mic decât cel real. */
+export function getShippingCost(city?: string): number {
+  if (!city) return SHIPPING_NATIONAL;
+  return isLocalDelivery(city) ? SHIPPING_LOCAL : SHIPPING_NATIONAL;
+}
+
+/** Taxa de ramburs, aplicată doar la plata la livrare (card sau numerar). */
+export function getCodFee(paymentMethod: string): number {
+  return paymentMethod === "CARD_ON_DELIVERY" || paymentMethod === "CASH_ON_DELIVERY"
+    ? COD_FEE
+    : 0;
 }

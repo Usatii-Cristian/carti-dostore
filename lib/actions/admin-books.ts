@@ -100,7 +100,6 @@ async function buildBookData(formData: FormData) {
 
   const price = parseNumber(formData.get("price"));
   const discountPrice = parseNumber(formData.get("discountPrice"));
-  const stock = parseNumber(formData.get("stock")) ?? 0;
   const rating = parseNumber(formData.get("rating")) ?? 0;
   const reviewCount = parseNumber(formData.get("reviewCount")) ?? 0;
   const pageCount = parseNumber(formData.get("pageCount"));
@@ -119,6 +118,7 @@ async function buildBookData(formData: FormData) {
     .filter(Boolean);
 
   const isBestseller = formData.get("isBestseller") === "on";
+  const bestsellerOrder = parseNumber(formData.get("bestsellerOrder")) ?? 0;
   const isNew = formData.get("isNew") === "on";
 
   const errors: Record<string, string> = {};
@@ -167,7 +167,6 @@ async function buildBookData(formData: FormData) {
       categoryId,
       price: price ?? 0,
       discountPrice,
-      stock,
       rating: computedRating,
       reviewCount: computedReviewCount,
       pageCount,
@@ -180,6 +179,7 @@ async function buildBookData(formData: FormData) {
       language,
       tags,
       isBestseller,
+      bestsellerOrder,
       isNew,
       searchText,
     },

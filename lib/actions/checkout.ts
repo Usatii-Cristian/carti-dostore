@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendNewOrderEmails } from "@/lib/email/notifications";
 import { tgNewOrder } from "@/lib/telegram";
-import { cartItemPrice, SHIPPING_COST } from "@/lib/store/cart";
+import { cartItemPrice, getShippingCost, getCodFee } from "@/lib/store/cart";
 import { getShippingPrice } from "@/lib/shipping/fan";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
@@ -129,9 +129,11 @@ export async function createOrderAndPay(
     | "CASH_ON_DELIVERY";
 
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
-  // Ce plătește clientul: tarif fix, fără prag de livrare gratuită. Costul real
-  // către FAN se calculează separat mai jos și se salvează doar informativ.
-  const shippingCost = SHIPPING_COST;
+  // Ce plătește clientul, recalculat pe SERVER (nu ne bazăm pe ce a afișat
+  // browserul): transport după localitate + taxă de ramburs dacă plătește la
+  // livrare. Fără prag de livrare gratuită. Costul real către FAN se
+  // calculează separat mai jos și se salvează doar informativ.
+  const shippingCost = getShippingCost(city) + getCodFee(paymentMethod);
   const total = subtotal + shippingCost;
   const orderNumber = generateOrderNumber();
 
@@ -171,20 +173,6 @@ export async function createOrderAndPay(
     },
   });
 
-  // Scădem stocul cărților cumpărate (logica de inventar). Clamp la 0 ca să nu
-  // ajungă negativ, apoi revalidăm arborele public ca numărul afișat pe homepage,
-  // catalog și pagina cărții să reflecte imediat noul stoc.
-  await Promise.all(
-    items.map(async (item) => {
-      const book = await prisma.book.findUnique({
-        where: { id: item.id },
-        select: { stock: true },
-      });
-      if (!book) return;
-      const newStock = Math.max(0, book.stock - item.quantity);
-      await prisma.book.update({ where: { id: item.id }, data: { stock: newStock } });
-    })
-  );
   revalidatePath("/", "layout");
 
   // Confirmare către client + notificare către admin (email + Telegram). Nimic
