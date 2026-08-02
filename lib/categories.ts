@@ -1,15 +1,24 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 /**
  * Toate categoriile, în ordinea stabilită din admin (`featuredOrder`), ca
  * meniul, footerul și pagina de categorii să arate aceeași ordine ca secțiunea
  * de pe homepage. Numele rămâne doar ca departajare la ordine egală.
+ *
+ * Cachat: header-ul îl cheamă la FIECARE pagină din site, iar categoriile se
+ * schimbă foarte rar. Fără cache era o interogare Atlas pe fiecare navigare.
+ * Se invalidează din admin la orice modificare de categorie (revalidateTag).
  */
-export function getAllCategories() {
-  return prisma.category.findMany({
-    orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
-  });
-}
+export const getAllCategories = unstable_cache(
+  () =>
+    prisma.category.findMany({
+      orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
+    }),
+  ["all-categories"],
+  { tags: [CACHE_TAGS.categories] }
+);
 
 /**
  * Categoriile din secțiunea „Categorii populare" de pe pagina principală.

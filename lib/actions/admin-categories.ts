@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slugify";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type CategoryFormState = {
   status: "idle" | "error";
@@ -50,6 +51,7 @@ export async function createCategory(
     throw error;
   }
 
+  updateTag(CACHE_TAGS.categories);
   revalidatePath("/admin/categorii");
   revalidatePath("/", "layout");
   redirect("/admin/categorii");
@@ -78,6 +80,7 @@ export async function updateCategory(
     throw error;
   }
 
+  updateTag(CACHE_TAGS.categories);
   revalidatePath("/admin/categorii");
   revalidatePath("/", "layout");
   redirect("/admin/categorii");
@@ -95,6 +98,7 @@ export async function deleteCategory(id: string) {
   }
 
   await prisma.category.delete({ where: { id } });
+  updateTag(CACHE_TAGS.categories);
   revalidatePath("/admin/categorii");
   revalidatePath("/", "layout");
   redirect("/admin/categorii");

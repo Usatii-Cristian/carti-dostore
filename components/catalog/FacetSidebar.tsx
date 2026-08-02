@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useOptimistic } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { SORT_OPTIONS } from "@/lib/books";
 import type { CatalogFacets } from "@/lib/catalog";
@@ -56,9 +56,18 @@ function CheckboxRow({
 export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const params = useSearchParams();
-  const [, startTransition] = useTransition();
+  const realParams = useSearchParams();
+  // `isPending` NU era folosit: la un click pe filtru nu se schimba nimic
+  // vizual până venea răspunsul de la server, deci părea că site-ul s-a blocat.
+  // Acum bifa se aplică instant, iar panoul semnalează discret că se lucrează.
+  const [isPending, startTransition] = useTransition();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Starea optimistă a filtrelor: bifa se vede pe loc, înainte ca serverul să
+  // răspundă. Când navigarea se termină, React revine la valorile reale din URL
+  // (care între timp le conțin pe cele noi) — deci nu poate rămâne desincronizat.
+  const [optimisticQuery, setOptimisticQuery] = useOptimistic(realParams.toString());
+  const params = new URLSearchParams(optimisticQuery);
 
   const selectedCategories = (params.get("categorii") ?? "").split(",").filter(Boolean);
 
@@ -80,6 +89,7 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
     mutate(next);
     next.delete("page"); // orice schimbare de filtru te duce înapoi la pagina 1
     startTransition(() => {
+      setOptimisticQuery(next.toString());
       router.push(`${pathname}?${next.toString()}`, { scroll: false });
     });
   }
@@ -122,7 +132,10 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
   const rightPct = ((localMax - facets.priceMin) / span) * 100;
 
   const content = (
-    <div className="space-y-5">
+    <div
+      className={`space-y-5 transition-opacity duration-150 ${isPending ? "opacity-60" : ""}`}
+      aria-busy={isPending}
+    >
       <div>
         <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-navy">Sortează după</h3>
         <select
@@ -249,7 +262,12 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
       {activeCount > 0 && (
         <button
           type="button"
-          onClick={() => startTransition(() => router.push(pathname, { scroll: false }))}
+          onClick={() =>
+            startTransition(() => {
+              setOptimisticQuery("");
+              router.push(pathname, { scroll: false });
+            })
+          }
           className="flex w-full items-center justify-center gap-2 rounded-full border border-border py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-terracotta hover:text-terracotta"
         >
           <X className="h-4 w-4" aria-hidden="true" />

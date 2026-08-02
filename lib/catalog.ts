@@ -1,6 +1,8 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import type { Prisma, Book } from "@prisma/client";
 import { sortToOrderBy, type CategorySort } from "@/lib/books";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 // Câte produse se încarcă odată. Restul apar la apăsarea butonului „Afișează
 // mai multe" (care crește `page`), ca prima încărcare să fie ușoară.
@@ -49,13 +51,44 @@ function buildWhere(query: CatalogQuery, categoryIds: string[]): Prisma.BookWher
   };
 }
 
-export async function getCatalog(query: CatalogQuery): Promise<{
+type CatalogResult = {
   books: Book[];
   total: number;
   totalPages: number;
   facets: CatalogFacets;
-}> {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+};
+
+/**
+ * Fiecare click pe un filtru re-randează pagina pe server, iar asta însemna 8
+ * interogări MongoDB Atlas (produse + total + numărători pe fațete + interval de
+ * preț). De-aici senzația de „se încarcă greu".
+ *
+ * Rezultatul e cachat pe combinația de filtre: a doua oară când cineva bifează
+ * aceeași combinație (foarte des — sunt puține combinații reale), răspunsul vine
+ * din memorie, fără drum până la Atlas. Se invalidează la orice modificare de
+ * produs/categorie din admin (revalidateTag), deci nu servim date vechi.
+ */
+export function getCatalog(query: CatalogQuery): Promise<CatalogResult> {
+  const key = JSON.stringify([
+    [...query.categorii].sort(),
+    query.minPrice ?? "",
+    query.maxPrice ?? "",
+    query.reduceri,
+    query.bestsellers,
+    query.noutati,
+    query.sort,
+    query.page,
+  ]);
+
+  return unstable_cache(() => queryCatalog(query), ["catalog", key], {
+    tags: [CACHE_TAGS.books, CACHE_TAGS.categories],
+  })();
+}
+
+async function queryCatalog(query: CatalogQuery): Promise<CatalogResult> {
+  const categories = await prisma.category.findMany({
+    orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
+  });
   const selectedIds = categories
     .filter((category) => query.categorii.includes(category.slug))
     .map((category) => category.id);

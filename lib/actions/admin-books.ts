@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { slugify, normalizeForSearch } from "@/lib/slugify";
 import { sendNewBookAnnouncement } from "@/lib/email/notifications";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type BookFormState = {
   status: "idle" | "error";
@@ -222,6 +223,7 @@ export async function createBook(
     });
   }
 
+  updateTag(CACHE_TAGS.books);
   revalidatePath("/admin/carti");
   revalidatePath("/", "layout");
   redirect("/admin/carti");
@@ -251,6 +253,7 @@ export async function updateBook(
     throw error;
   }
 
+  updateTag(CACHE_TAGS.books);
   revalidatePath("/admin/carti");
   revalidatePath("/", "layout");
   redirect("/admin/carti");
@@ -258,6 +261,7 @@ export async function updateBook(
 
 export async function deleteBook(id: string) {
   await prisma.book.delete({ where: { id } });
+  updateTag(CACHE_TAGS.books);
   revalidatePath("/admin/carti");
   revalidatePath("/", "layout");
 }

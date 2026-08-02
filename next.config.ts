@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   // bundler-ul trage tot modulul ca să găsească cele ~20 pe care le folosim.
   experimental: {
     optimizePackageImports: ["lucide-react"],
+    // 404 propriu pentru rutele care nu se potrivesc cu nimic. Necesar fiindcă
+    // avem DOUĂ root layout-uri (app/(site) și app/admin), deci Next n-are din
+    // ce compune un 404 global — fără asta, o adresă inexistentă primea pagina
+    // implicită „This page could not be found". Vezi app/global-not-found.tsx.
+    globalNotFound: true,
     // Cache-ul client pentru navigarea înapoi. Fără el, o pagină dinamică
     // (ex. /carti) se re-randează la „back", iar browserul restaurează scroll-ul
     // înainte să existe conținutul — utilizatorul ajunge mult mai sus decât era
