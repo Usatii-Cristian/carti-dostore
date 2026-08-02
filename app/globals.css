@@ -80,6 +80,20 @@ html {
   background: var(--color-navy);
 }
 
+/* Pe telefon, câmpurile de formular au minimum 16px.
+   Sub 16px, Safari pe iPhone mărește automat toată pagina când intri în câmp și
+   NU revine după — o săritură urâtă în mijlocul căutării sau al comenzii.
+   Peste 16px nu se mai întâmplă, iar textul e oricum mai lizibil când scrii pe
+   telefon (înainte era 14px peste tot). Pe desktop rămân dimensiunile din
+   Tailwind, deci nu se schimbă nimic acolo. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Mega-meniul de categorii din bara de navigare: se deschide DOAR la hover pe
    butonul „Categorii" sau pe panoul însuși (ca să poți muta mausul din buton
    spre listă fără să se închidă) — NU la hover oriunde altundeva în bară.

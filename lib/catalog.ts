@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma, Book } from "@prisma/client";
 import { sortToOrderBy, type CategorySort } from "@/lib/books";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { reviveDates } from "@/lib/revive-dates";
 
 // Câte produse se încarcă odată. Restul apar la apăsarea butonului „Afișează
 // mai multe" (care crește `page`), ca prima încărcare să fie ușoară.
@@ -80,9 +81,11 @@ export function getCatalog(query: CatalogQuery): Promise<CatalogResult> {
     query.page,
   ]);
 
+  // `reviveDates`: cache-ul întoarce `createdAt`/`updatedAt` ca string-uri, iar
+  // ele ajung în componente care le tratează ca `Date`.
   return unstable_cache(() => queryCatalog(query), ["catalog", key], {
     tags: [CACHE_TAGS.books, CACHE_TAGS.categories],
-  })();
+  })().then(reviveDates);
 }
 
 async function queryCatalog(query: CatalogQuery): Promise<CatalogResult> {

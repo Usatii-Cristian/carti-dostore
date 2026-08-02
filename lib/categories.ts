@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { reviveDates } from "@/lib/revive-dates";
 
 /**
  * Toate categoriile, în ordinea stabilită din admin (`featuredOrder`), ca
@@ -11,7 +12,7 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
  * schimbă foarte rar. Fără cache era o interogare Atlas pe fiecare navigare.
  * Se invalidează din admin la orice modificare de categorie (revalidateTag).
  */
-export const getAllCategories = unstable_cache(
+const cachedCategories = unstable_cache(
   () =>
     prisma.category.findMany({
       orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
@@ -19,6 +20,10 @@ export const getAllCategories = unstable_cache(
   ["all-categories"],
   { tags: [CACHE_TAGS.categories] }
 );
+
+export async function getAllCategories() {
+  return reviveDates(await cachedCategories());
+}
 
 /**
  * Categoriile din secțiunea „Categorii populare" de pe pagina principală.

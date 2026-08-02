@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/slugify";
+import { CACHE_TAGS } from "@/lib/cache-tags";
 
 export type BlogFormState = {
   status: "idle" | "error";
@@ -49,6 +50,7 @@ function parseForm(formData: FormData) {
 // Blogul apare în meniu, pe homepage (bannerul „De pe blog") și în sitemap —
 // deci orice mutație trebuie să invalideze tot subarborele public, nu doar /blog.
 function revalidateBlog() {
+  updateTag(CACHE_TAGS.blog);
   revalidatePath("/", "layout");
   revalidatePath("/admin/blog");
 }

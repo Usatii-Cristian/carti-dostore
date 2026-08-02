@@ -8,4 +8,5 @@
 export const CACHE_TAGS = {
   books: "books",
   categories: "categories",
+  blog: "blog",
 } as const;
