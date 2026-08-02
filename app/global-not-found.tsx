@@ -13,7 +13,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Playfair_Display, Inter } from "next/font/google";
-import { BookX, Home, Search } from "lucide-react";
+import { Home, Search } from "lucide-react";
 import { NotFoundRedirect } from "@/components/layout/NotFoundRedirect";
 import "./globals.css";
 
@@ -44,11 +44,7 @@ export default function GlobalNotFound() {
             404
           </p>
 
-          <span className="-mt-6 flex h-16 w-16 items-center justify-center rounded-full bg-card text-terracotta shadow-sm ring-1 ring-border/70 sm:-mt-8">
-            <BookX className="h-8 w-8" aria-hidden="true" />
-          </span>
-
-          <h1 className="mt-6 max-w-xl font-serif text-3xl font-semibold text-ink sm:text-4xl">
+          <h1 className="mt-4 max-w-xl font-serif text-3xl font-semibold text-ink sm:text-4xl">
             Pagina nu a fost găsită
           </h1>
           <p className="mt-3 max-w-md text-ink-soft">
