@@ -1,25 +1,26 @@
-// Curăță și normalizează imaginile de produs.
+// Optimizează imaginile de produs, PĂSTRÂND coperta întreagă.
 //
-// Problemă găsită: sursele (706x1000) au spațiu alb „copt" în fișier — de-asta
-// pe pagina produsului apărea un bloc alb mare sub imagine, indiferent de
-// containerul CSS. Aici tăiem marginile uniforme (trim), apoi reîncadrăm.
+// Istoric (nu repeta greșeala): o versiune veche a acestui script făcea `trim`
+// pe marginile uniforme și apoi încadra totul într-o pânză pătrată. Coperțile
+// sunt portret (706x1000), iar pătratul le tăia lateral — toate cele 18 produse
+// au apărut luni de zile cu imaginea „prea apropiată", tăiată. Reparat prin
+// restaurarea originalelor din git și afișarea la proporția reală (5/7 în
+// BookCard / ImageGallery).
+//
+// De-asta scriptul NU mai face nici `trim`, nici încadrare pătrată: doar
+// redimensionează păstrând proporția. Dacă vreodată ai nevoie de pătrat, scalează
+// imaginea ÎNTREAGĂ înăuntru (fit: "inside") peste un fundal — niciodată `cover`.
 //
 // Rulare:
-//   npx tsx scripts/squarify-product-images.mts          → doar trim (raport natural)
-//   npx tsx scripts/squarify-product-images.mts --square → trim + pânză pătrată 1:1
-//
-// La --square fundalul pătratului e chiar imaginea, scalată să acopere și
-// blurată: coperta se vede întreagă, fără benzi albe și fără deformare.
-// Idempotent: rulările repetate nu strică nimic.
+//   npx tsx scripts/squarify-product-images.mts
 
 import sharp from "sharp";
 import { readdirSync, statSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const DIR = "public/products";
-const SQUARE = process.argv.includes("--square");
-const SIZE = 1100;
-const INNER = 0.94;
+const MAX_WIDTH = 800;
+const MAX_HEIGHT = 1133;
 
 let processed = 0;
 let beforeTotal = 0;
@@ -35,54 +36,26 @@ for (const file of readdirSync(DIR)) {
   const input = readFileSync(path);
   const metaBefore = await sharp(input).metadata();
 
-  // `trim` taie marginile de culoare uniformă (albul din jurul produsului).
-  // Pragul mic evită să mănânce din desen dacă coperta e deschisă la culoare.
-  const trimmed = await sharp(input).trim({ threshold: 12 }).toBuffer();
-  const metaTrimmed = await sharp(trimmed).metadata();
+  const output = await sharp(input)
+    .resize(MAX_WIDTH, MAX_HEIGHT, { fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toBuffer();
 
-  let output: Buffer;
-
-  if (SQUARE) {
-    const background = await sharp(trimmed)
-      .resize(SIZE, SIZE, { fit: "cover" })
-      .blur(45)
-      .modulate({ brightness: 1.05, saturation: 0.8 })
-      .toBuffer();
-
-    const inner = Math.round(SIZE * INNER);
-    const foreground = await sharp(trimmed)
-      .resize(inner, inner, { fit: "inside" })
-      .toBuffer();
-
-    output = await sharp(background)
-      .composite([{ input: foreground, gravity: "center" }])
-      .webp({ quality: 82 })
-      .toBuffer();
-  } else {
-    output = await sharp(trimmed)
-      .resize(900, 1400, { fit: "inside", withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer();
-  }
-
-  // Scriem bufferul direct: sharp nu poate scrie peste fișierul pe care-l ține deschis.
   writeFileSync(path, output);
 
-  const sizeAfter = statSync(path).size;
   const metaAfter = await sharp(output).metadata();
   beforeTotal += sizeBefore;
-  afterTotal += sizeAfter;
+  afterTotal += output.length;
   processed++;
 
   console.log(
     `  ✓ ${file.padEnd(44)} ${metaBefore.width}x${metaBefore.height}` +
-      ` → trim ${metaTrimmed.width}x${metaTrimmed.height}` +
       ` → ${metaAfter.width}x${metaAfter.height}  ` +
-      `${(sizeBefore / 1024).toFixed(0)}KB → ${(sizeAfter / 1024).toFixed(0)}KB`
+      `${(sizeBefore / 1024).toFixed(0)}KB → ${(output.length / 1024).toFixed(0)}KB`
   );
 }
 
 console.log(
-  `\n${processed} imagini procesate (${SQUARE ? "pătrat 1:1" : "raport natural"}). ` +
+  `\n${processed} imagini procesate (proporție păstrată). ` +
     `Total ${(beforeTotal / 1024).toFixed(0)}KB → ${(afterTotal / 1024).toFixed(0)}KB.`
 );

@@ -9,10 +9,11 @@ import { AddToCartButton } from "./AddToCartButton";
 export function BookCard({ book }: { book: BookCardData }) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-transparent transition-all duration-200 hover:shadow-lg hover:ring-border">
-      {/* `object-contain`, nu `cover`: imaginile din catalog sunt pătrate, deci
-          arată identic, dar cele încărcate din admin păstrează proporția sursei
-          (upload-ul folosește `fit: inside`) — cu `cover` li se tăiau marginile. */}
-      <div className="relative aspect-square w-full overflow-hidden bg-cream">
+      {/* Proporția reală a coperților (706x1000 ≈ 5/7), nu pătrat: încadrarea în
+          pătrat le tăia lateral, de unde senzația de imagine „prea apropiată".
+          `object-contain` păstrează întreg și ce se încarcă din admin, unde
+          proporția sursei poate fi oricare (upload-ul folosește `fit: inside`). */}
+      <div className="relative aspect-[5/7] w-full overflow-hidden bg-cream">
         <Link href={`/carti/${book.slug}`} className="relative block h-full w-full">
           <Image
             src={book.coverImage}

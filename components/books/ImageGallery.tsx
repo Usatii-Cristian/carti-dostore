@@ -9,10 +9,9 @@ export function ImageGallery({ images, title }: { images: string[]; title: strin
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Imaginile din catalog sunt normalizate 1:1 (vezi
-          scripts/squarify-product-images.mts), dar cele încărcate din admin
-          păstrează proporția sursei — de-asta `contain`, ca să nu se taie. */}
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-cream-soft">
+      {/* Proporția coperților (5/7), nu pătrat — vezi comentariul din BookCard.
+          `contain` ca să rămână întregi și imaginile încărcate din admin. */}
+      <div className="relative aspect-[5/7] w-full overflow-hidden rounded-xl bg-cream-soft">
         <Image
           src={activeImage}
           alt={`Coperta cărții ${title}`}
