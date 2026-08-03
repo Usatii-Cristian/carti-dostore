@@ -40,6 +40,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // Site-ul e accesibil și pe adresa *.vercel.app, iar fără canonical Google
+  // le-ar putea trata ca două site-uri identice (conținut duplicat) și ar
+  // indexa-o pe cea greșită. `"./"` se rezolvă relativ la `metadataBase`, deci
+  // fiecare pagină își declară singură adresa canonică pe dostore.md.
+  alternates: { canonical: "./" },
   title: {
     default: "Dostore Carti — Librăria ta online din Moldova",
     template: "%s — Dostore Carti",
