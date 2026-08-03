@@ -80,6 +80,35 @@ html {
   background: var(--color-navy);
 }
 
+/* Mânuța pe tot ce se poate apăsa.
+   Tailwind v4 a scos din preflight `cursor: pointer` de pe butoane (în v3
+   exista), deci butoanele, select-urile și bifele arătau cu săgeata obișnuită
+   și nu păreau apăsabile. Îl punem la loc, o singură dată, în loc să adăugăm
+   `cursor-pointer` pe fiecare component. */
+button,
+summary,
+select,
+label:has(input[type="checkbox"]),
+label:has(input[type="radio"]),
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="submit"],
+input[type="file"],
+[role="button"],
+[role="tab"] {
+  cursor: pointer;
+}
+
+/* Ce e dezactivat nu se poate apăsa — nu promitem altceva prin cursor. */
+button:disabled,
+select:disabled,
+input:disabled,
+label:has(input:disabled),
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 /* Pe telefon, câmpurile de formular au minimum 16px.
    Sub 16px, Safari pe iPhone mărește automat toată pagina când intri în câmp și
    NU revine după — o săritură urâtă în mijlocul căutării sau al comenzii.
