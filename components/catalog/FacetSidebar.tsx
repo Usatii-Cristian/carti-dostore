@@ -139,10 +139,10 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
       <div>
         <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-navy">Sortează după</h3>
         <select
-          value={params.get("sort") ?? "noi"}
+          value={params.get("sort") ?? "recomandat"}
           onChange={(event) =>
             apply((params) => {
-              if (event.target.value === "noi") params.delete("sort");
+              if (event.target.value === "recomandat") params.delete("sort");
               else params.set("sort", event.target.value);
             })
           }

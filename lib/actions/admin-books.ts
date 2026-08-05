@@ -120,6 +120,7 @@ async function buildBookData(formData: FormData) {
 
   const isBestseller = formData.get("isBestseller") === "on";
   const bestsellerOrder = parseNumber(formData.get("bestsellerOrder")) ?? 0;
+  const displayOrder = parseNumber(formData.get("displayOrder")) ?? 0;
   const isNew = formData.get("isNew") === "on";
 
   const errors: Record<string, string> = {};
@@ -181,6 +182,7 @@ async function buildBookData(formData: FormData) {
       tags,
       isBestseller,
       bestsellerOrder,
+      displayOrder,
       isNew,
       searchText,
     },

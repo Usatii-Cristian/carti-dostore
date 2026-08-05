@@ -6,9 +6,13 @@ export const CATEGORY_PAGE_SIZE = 12;
 // Fereastra în care o carte e considerată „nouă" (apare la Noutăți).
 const NEW_WINDOW_DAYS = 14;
 
-export type CategorySort = "noi" | "pret-asc" | "pret-desc" | "rating";
+// „recomandat" e sortarea implicită: ordinea aleasă manual din admin
+// (`displayOrder`), ca produsele dintr-o categorie să poată fi aranjate cum
+// vrem, nu doar după data adăugării. „noi" a rămas ca opțiune separată.
+export type CategorySort = "recomandat" | "noi" | "pret-asc" | "pret-desc" | "rating";
 
 const SORT_LABELS: Record<CategorySort, string> = {
+  recomandat: "Recomandate",
   noi: "Cele mai noi",
   "pret-asc": "Preț crescător",
   "pret-desc": "Preț descrescător",
@@ -16,10 +20,12 @@ const SORT_LABELS: Record<CategorySort, string> = {
 };
 
 export const SORT_OPTIONS: { value: CategorySort; label: string }[] = (
-  ["noi", "pret-asc", "pret-desc", "rating"] as CategorySort[]
+  ["recomandat", "noi", "pret-asc", "pret-desc", "rating"] as CategorySort[]
 ).map((value) => ({ value, label: SORT_LABELS[value] }));
 
-export function sortToOrderBy(sort: CategorySort): Prisma.BookOrderByWithRelationInput {
+export function sortToOrderBy(
+  sort: CategorySort
+): Prisma.BookOrderByWithRelationInput | Prisma.BookOrderByWithRelationInput[] {
   switch (sort) {
     case "pret-asc":
       return { price: "asc" };
@@ -28,8 +34,11 @@ export function sortToOrderBy(sort: CategorySort): Prisma.BookOrderByWithRelatio
     case "rating":
       return { rating: "desc" };
     case "noi":
-    default:
       return { createdAt: "desc" };
+    case "recomandat":
+    default:
+      // `createdAt` rămâne ca departajare pentru produsele lăsate pe 0.
+      return [{ displayOrder: "asc" }, { createdAt: "desc" }];
   }
 }
 

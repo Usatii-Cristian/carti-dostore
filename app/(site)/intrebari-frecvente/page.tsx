@@ -31,11 +31,6 @@ const faqs = [
     answer:
       "Vei primi un email de confirmare imediat după plasarea comenzii. Pentru orice detaliu suplimentar, ne poți contacta oricând la dostore.moldova@gmail.com.",
   },
-  {
-    question: "Aveți cărți pe care nu le văd pe site?",
-    answer:
-      "Catalogul afișat este actualizat constant. Dacă o carte nu apare, ne poți scrie și verificăm dacă o putem aduce.",
-  },
 ];
 
 export default function IntrebariFrecventePage() {

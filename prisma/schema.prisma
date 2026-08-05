@@ -33,6 +33,9 @@ model Book {
   // Poziția în secțiunea Bestsellers (0 = prima). Ordonarea după `rating` nu
   // era suficientă: produsele cu rating egal ieșeau în ordine arbitrară.
   bestsellerOrder Int     @default(0)
+  // Poziția în catalog, la sortarea implicită (0 = prima). Permite aranjarea
+  // manuală a produselor dintr-o categorie, independent de data adăugării.
+  displayOrder    Int     @default(0)
   isNew          Boolean  @default(false)
   tags           String[]
   // Întrebări frecvente specifice produsului, administrate din panoul de admin.

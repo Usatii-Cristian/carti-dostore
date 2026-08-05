@@ -283,6 +283,14 @@ export function BookForm({
             className={inputClass}
           />
         </Field>
+        <Field label="Ordine în catalog (0 = prima)">
+          <input
+            type="number"
+            name="displayOrder"
+            defaultValue={initialBook?.displayOrder ?? 0}
+            className={inputClass}
+          />
+        </Field>
         <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
           <input
             type="checkbox"

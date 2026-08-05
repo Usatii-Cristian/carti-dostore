@@ -158,7 +158,7 @@ export function parseCatalogQuery(search: Record<string, string | string[] | und
     return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
   };
 
-  const validSorts: CategorySort[] = ["noi", "pret-asc", "pret-desc", "rating"];
+  const validSorts: CategorySort[] = ["recomandat", "noi", "pret-asc", "pret-desc", "rating"];
   const rawSort = one("sort") as CategorySort | undefined;
 
   return {
@@ -168,7 +168,7 @@ export function parseCatalogQuery(search: Record<string, string | string[] | und
     reduceri: one("reduceri") === "1",
     bestsellers: one("bestsellers") === "1",
     noutati: one("noutati") === "1",
-    sort: rawSort && validSorts.includes(rawSort) ? rawSort : "noi",
+    sort: rawSort && validSorts.includes(rawSort) ? rawSort : "recomandat",
     page: Math.max(1, Number(one("page")) || 1),
   };
 }

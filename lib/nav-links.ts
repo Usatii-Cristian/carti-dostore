@@ -19,10 +19,10 @@ export const secondaryNavRightLinks: NavLink[] = [
   { label: "Despre noi", href: "/despre-noi" },
 ];
 
+// „Cariere" și „Blog" scoase din footer la cererea utilizatorului. Paginile
+// rămân accesibile prin URL direct (și în sitemap), doar linkurile au dispărut.
 export const footerInfoLinks: NavLink[] = [
   { label: "Despre noi", href: "/despre-noi" },
-  { label: "Cariere", href: "/cariere" },
-  { label: "Blog", href: "/blog" },
   { label: "Termeni și condiții", href: "/termeni-si-conditii" },
   { label: "Politica de confidențialitate", href: "/confidentialitate" },
 ];
