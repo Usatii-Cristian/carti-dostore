@@ -127,10 +127,26 @@ export function AwbPanel({
         </div>
       ) : (
         <form action={action}>
+          {/* Fără raion butonul NU mai e blocat: acțiunea încearcă întâi să-l
+              deducă din lista FAN după numele localității. Câmpul de mai jos e
+              plasa de siguranță, pentru localități scrise greșit de client. */}
+          {!county && (
+            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-xs text-amber-800">
+                Comanda n-are raionul salvat. Îl căutăm automat după localitate; dacă nu iese,
+                scrie-l aici (ex: <span className="font-medium">Orhei</span>).
+              </p>
+              <input
+                name="county"
+                placeholder="Raion (opțional)"
+                className="mt-2 w-full rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-sm focus:border-slate-900 focus:outline-none"
+              />
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={pending || !county}
-            title={!county ? "Comanda n-are raionul completat" : undefined}
+            disabled={pending}
             className="rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-navy-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending ? "Se generează…" : "Generează AWB"}

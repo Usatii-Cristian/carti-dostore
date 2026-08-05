@@ -12,7 +12,9 @@ export async function SecondaryNav() {
     // bară) e controlată din globals.css, prin selectorul :has() — vezi acolo.
     <nav
       aria-label="Navigație principală"
-      className="categories-menu relative hidden bg-navy md:block"
+      // `sticky top-0`: singura parte a antetului care rămâne pe ecran la
+      // scroll (vezi comentariul din Header.tsx).
+      className="categories-menu sticky top-0 z-40 hidden bg-navy md:block"
     >
       {/* Trei zone: butonul de categorii (stânga), linkurile de catalog
           distribuite egal (centru), linkurile instituționale (dreapta). */}

@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { createShipment, getTracking, cancelShipment, getLabelUrl } from "@/lib/shipping/fan";
+import {
+  createShipment,
+  getTracking,
+  cancelShipment,
+  getLabelUrl,
+  resolveCityAndCounty,
+} from "@/lib/shipping/fan";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 
 export type AwbState = {
@@ -17,7 +23,11 @@ export type AwbState = {
  * „uncollected" (nu ciornă), deci e o cerere reală de ridicare — n-o vrem
  * pentru comenzi abandonate sau de test.
  */
-export async function generateAwb(orderId: string, _prev: AwbState): Promise<AwbState> {
+export async function generateAwb(
+  orderId: string,
+  _prev: AwbState,
+  formData?: FormData
+): Promise<AwbState> {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { items: true },
@@ -27,12 +37,32 @@ export async function generateAwb(orderId: string, _prev: AwbState): Promise<Awb
   if (order.trackingNumber) {
     return { status: "error", message: `Comanda are deja AWB-ul ${order.trackingNumber}.` };
   }
-  if (!order.county) {
+
+  // Comenzile vechi (sau cele în care clientul a scris orașul de mână) pot veni
+  // fără raion, iar FAN îl cere obligatoriu. Îl căutăm întâi în lista FAN după
+  // numele localității; dacă nici așa nu iese, adminul îl poate scrie manual în
+  // panou. Ce reușim să deducem se și salvează pe comandă.
+  let city = order.city;
+  let county = order.county ?? "";
+
+  if (!county) {
+    const resolved = await resolveCityAndCounty(order.city);
+    if (resolved) {
+      city = resolved.city;
+      county = resolved.county;
+    }
+  }
+  if (!county) county = String(formData?.get("county") ?? "").trim();
+
+  if (!county) {
     return {
       status: "error",
-      message:
-        "Comanda n-are raionul completat (a fost plasată înainte de integrarea FAN sau orașul a fost scris manual). Completează-l în baza de date înainte de a genera AWB.",
+      message: `Localitatea „${order.city}" nu se regăsește în lista FAN, deci raionul nu poate fi dedus. Scrie-l manual în câmpul de mai jos și încearcă din nou.`,
     };
+  }
+
+  if (city !== order.city || county !== order.county) {
+    await prisma.order.update({ where: { id: orderId }, data: { city, county } });
   }
 
   // Greutățile vin din produse; cele fără greutate setată intră cu estimarea implicită.
@@ -54,8 +84,8 @@ export async function generateAwb(orderId: string, _prev: AwbState): Promise<Awb
       toName: order.customerName,
       toPhone: order.customerPhone,
       toEmail: order.customerEmail,
-      toCity: order.city,
-      toCounty: order.county,
+      toCity: city,
+      toCounty: county,
       toStreet: order.shippingAddress,
       weightKg,
       content: order.items.map((item) => item.title).join(", ").slice(0, 200),

@@ -41,6 +41,9 @@ const SENDER = {
   phone: process.env.FAN_SENDER_PHONE ?? "068812853",
 } as const;
 
+/** Cât așteptăm după FAN până renunțăm (checkout-ul nu trebuie să atârne). */
+const FAN_TIMEOUT_MS = 8000;
+
 type FanEnvelope<T> = {
   status?: "done" | "failed";
   data?: T;
@@ -58,11 +61,14 @@ async function fanRequest<T>(
     if (value !== undefined && value !== "") body.set(key, String(value));
   }
 
+  // Timeout explicit: fără el, o cerere care atârnă la FAN ar ține blocat
+  // checkout-ul clientului (estimarea costului rulează înainte de redirect).
   const res = await fetch(`${FAN_BASE_URL}/${operation}`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
     cache: "no-store",
+    signal: AbortSignal.timeout(FAN_TIMEOUT_MS),
   });
 
   const text = await res.text();
@@ -104,6 +110,56 @@ export async function listCities(): Promise<FanCity[]> {
     console.error("[fan] list_cities a eșuat:", error);
     return citiesCache?.cities ?? [];
   }
+}
+
+/** Fără diacritice, litere mici, spații normalizate — pentru potrivirea localităților. */
+function normalizeCityName(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+/**
+ * Găsește raionul (province) unei localități în lista FAN.
+ *
+ * De ce există: în checkout raionul vine din autocomplete, dar clientul poate
+ * scrie orașul de mână (sau alege din sugestiile browserului) și atunci câmpul
+ * rămâne gol — iar fără raion NU se poate genera AWB-ul, deci comanda rămâne
+ * blocată la livrare. Aici îl deducem pe server, din același nume de localitate.
+ * Întoarce și forma canonică a localității, cum o știe FAN („Chisinau", nu
+ * „Chișinău"), fiindcă AWB-ul o cere exact așa.
+ */
+export async function resolveCityAndCounty(
+  city: string
+): Promise<{ city: string; county: string } | null> {
+  const target = normalizeCityName(city);
+  if (!target) return null;
+
+  const cities = await listCities();
+  // „mun. Chisinau", „or. Ungheni", „s. Cojusna" — prefixe scrise de client.
+  const stripped = target.replace(/^(mun\.?|or\.?|s\.?|sat|com\.?)\s+/, "");
+
+  const matches = cities.filter((entry) => {
+    const name = normalizeCityName(entry.name);
+    return name === target || name === stripped;
+  });
+
+  if (matches.length === 1) {
+    return { city: matches[0].name, county: matches[0].province };
+  }
+
+  // ⚠️ 123 de nume se repetă în lista FAN (există și satul Soroca din raionul
+  // Glodeni, nu doar orașul Soroca). Când numele e ambiguu, singura alegere
+  // sigură e reședința de raion — acolo numele localității coincide cu raionul.
+  // Dacă nici asta nu departajează, NU ghicim: raionul rămâne gol și îl
+  // completează adminul, în loc să trimitem coletul în alt colț de țară.
+  const seat = matches.find(
+    (entry) => normalizeCityName(entry.province) === normalizeCityName(entry.name)
+  );
+  return seat ? { city: seat.name, county: seat.province } : null;
 }
 
 // ------------------------------------------------------------------ tarifare

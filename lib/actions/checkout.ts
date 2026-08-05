@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendNewOrderEmails } from "@/lib/email/notifications";
 import { tgNewOrder } from "@/lib/telegram";
 import { cartItemPrice, getShippingCost, getCodFee } from "@/lib/store/cart";
-import { getShippingPrice } from "@/lib/shipping/fan";
+import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
 import type { CartItem } from "@/lib/store/cart";
@@ -122,7 +122,21 @@ export async function createOrderAndPay(
     return { status: "error", message: "Verifică datele introduse.", fieldErrors: errors, values };
   }
 
-  const { customerName, email, phone, shippingAddress, city, county } = values;
+  const { customerName, email, phone, shippingAddress } = values;
+  let { city, county } = values;
+
+  // Raionul e OBLIGATORIU la generarea AWB-ului. Vine din autocomplete-ul de
+  // localități, dar clientul poate scrie orașul de mână (sau completa cu
+  // autofill-ul browserului) și atunci rămâne gol — iar comanda ajunge în admin
+  // imposibil de expediat. Îl deducem aici, pe server, din lista FAN; tot atunci
+  // normalizăm și numele localității la forma pe care o știe FAN („Chisinau").
+  if (!county) {
+    const resolved = await resolveCityAndCounty(city);
+    if (resolved) {
+      city = resolved.city;
+      county = resolved.county;
+    }
+  }
   const paymentMethod = values.paymentMethod as
     | "ONLINE"
     | "CARD_ON_DELIVERY"

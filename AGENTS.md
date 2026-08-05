@@ -108,6 +108,37 @@ admin (`lib/actions/admin-books.ts`), și la trimiterea din formularul public
   oricâte ori fără duplicate; recenziile trimise de vizitatori se păstrează. `--fresh`
   șterge tot înainte de generare.
 
+### Antetul: ce rămâne lipit la scroll
+
+La scroll 0 se vede tot antetul; cum cobori, bara de contact (`TopBar`) și cea cu
+logo/căutare/coș (`MainHeader`) pleacă odată cu pagina și rămâne doar bara navy de
+navigație (`SecondaryNav`, `sticky top-0`). E CSS pur — niciun ascultător de scroll. De
+aceea cele trei bare NU sunt învelite într-un `<header>` comun: un părinte comun ar limita
+elementul `sticky` la înălțimea lui, iar bara de navigație s-ar desprinde din vârf imediat
+ce antetul iese din ecran. Pe telefon `SecondaryNav` e ascuns (`hidden md:block`), deci
+acolo rămâne lipită bara cu logo/coș — iar căutarea stă pe un rând propriu, în afara părții
+lipite (`sm:hidden` în `Header.tsx`), ca bara rămasă pe ecran să aibă ~70px, nu ~200px.
+
+### Raionul (county) — obligatoriu pentru AWB, dedus automat
+
+FAN cere raionul la generarea AWB-ului, iar clientul nu-l completează: vine din
+autocomplete-ul de localități din checkout. Dacă orașul e scris de mână (sau completat de
+browser), câmpul rămâne gol și comanda ajunge în admin **imposibil de expediat** — bug real,
+o comandă cu plata la livrare a rămas așa. De aceea:
+
+- `resolveCityAndCounty()` (`lib/shipping/fan.ts`) caută localitatea în lista FAN (fără
+  diacritice, cu prefixe „mun./or./s." curățate) și întoarce și forma canonică a numelui
+  („Chisinau", nu „Chișinău"), cum o cere AWB-ul.
+- **123 de nume se repetă în lista FAN** (există și satul Soroca din raionul Glodeni, nu
+  doar orașul Soroca). La nume ambiguu alegem reședința de raion (localitate = raion); dacă
+  nici asta nu departajează, NU ghicim — raionul rămâne gol, altfel coletul pleacă în alt
+  colț de țară.
+- Se apelează în două locuri: la crearea comenzii (`lib/actions/checkout.ts`) și, ca plasă
+  de siguranță, la generarea AWB-ului (`lib/actions/admin-shipping.ts`), care are și un câmp
+  manual în panou pentru localitățile negăsite.
+- Cererile către FAN au timeout (`AbortSignal.timeout`, 8s): estimarea costului rulează
+  înainte de redirect, deci o cerere blocată ar ține clientul în checkout.
+
 ### Imagini
 
 Seed-ul (Faza 1) folosește fotografii reale de pe Unsplash (`images.unsplash.com`, alocat în
