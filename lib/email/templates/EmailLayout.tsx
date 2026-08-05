@@ -50,10 +50,12 @@ export function EmailLayout({
           <Section style={styles.content}>{children}</Section>
 
           <Section style={styles.footer}>
+            {/* Fără adresa sediului: emailurile ajung la clienți, iar adresa
+                juridică nu are ce căuta în ele. Rămân doar canalele de contact. */}
             <Text style={styles.footerText}>
               Dostore Carti — librăria ta online din Moldova.
               <br />
-              Str. Petru Zadnipru 19/2, Chișinău · +373 68 812 853 · dostore.moldova@gmail.com
+              +373 68 812 853 · dostore.moldova@gmail.com
             </Text>
           </Section>
         </Container>
