@@ -78,6 +78,36 @@ Fără conturi de clienți. Coșul și favoritele trăiesc exclusiv client-side,
 în `components/providers/StoreHydration.tsx` ca să evităm hydration mismatch) — nu există
 modele în baza de date pentru ele.
 
+### Recenzii — afișare, formular public și limitare de rată
+
+Recenziile sunt embedded în `Book` (`BookReview`), nu model separat. `rating` și
+`reviewCount` de pe produs se recalculează MEREU din recenziile reale — și la salvarea din
+admin (`lib/actions/admin-books.ts`), și la trimiterea din formularul public
+(`lib/actions/reviews.ts`) — ca stelele de sub titlu să corespundă cu ce scrie dedesubt.
+
+- **Afișare progresivă** (`components/books/Reviews.tsx`): 3 recenzii la încărcare, +6 la
+  fiecare apăsare pe „Afișează mai multe"; ultimul pas arată exact cât a mai rămas (dacă
+  mai sunt 4, apar 4). Ordinea e cronologică inversă, calculată în componentă — nu depinde
+  de ordinea din DB.
+- **Formular public** (`components/books/ReviewForm.tsx`), pe fiecare pagină de produs.
+  Recenzia se publică imediat (fără moderare); ștergerea se face din admin. Câmpurile stau
+  într-un subcomponent montat cu `key={state.submissionId}` — după o trimitere reușită
+  Server Action-ul întoarce un `submissionId` nou, subarborele se re-montează și formularul
+  se golește singur. Nu folosi `useEffect` + `setState` pentru reset: regula de lint
+  `react-hooks/set-state-in-effect` e eroare, nu warning.
+- **Limitare de rată** (`lib/rate-limit.ts`, modelul `RateLimit`): 1 recenzie / produs /
+  IP la 24h și maxim 3 recenzii / IP pe oră, plus un câmp-capcană (honeypot) pentru boți.
+  Contorul stă în MongoDB, nu într-un `Map` în memorie — pe serverless fiecare instanță are
+  propria memorie, deci un contor local n-ar limita nimic. IP-ul se hash-uiește (SHA-256 +
+  `NEXTAUTH_SECRET`), nu se stochează brut.
+- Pagina produsului e prerandată static cu ISR 1h, deci Server Action-ul cheamă
+  `revalidatePath("/carti/<slug>")` — fără el recenzia nouă n-ar apărea până la expirare.
+- **Popularea recenziilor** (`scripts/seed-reviews.mts`): 20–50 recenzii de 5 stele per
+  produs, eșalonate din octombrie 2025 până în prezent, cu nume reale de persoane și texte
+  pe categorie. Generatorul e determinist (PRNG cu sămânță din slug), deci se poate rula de
+  oricâte ori fără duplicate; recenziile trimise de vizitatori se păstrează. `--fresh`
+  șterge tot înainte de generare.
+
 ### Imagini
 
 Seed-ul (Faza 1) folosește fotografii reale de pe Unsplash (`images.unsplash.com`, alocat în

@@ -141,7 +141,7 @@ export default async function BookPage({ params }: PageProps) {
         </div>
       </div>
 
-      <Reviews reviews={book.reviews} />
+      <Reviews reviews={book.reviews} bookSlug={book.slug} />
 
       <FaqAccordion faqs={book.faqs} />
 

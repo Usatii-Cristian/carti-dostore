@@ -134,6 +134,19 @@ model Order {
   updatedAt         DateTime           @updatedAt
 }
 
+// Contor pentru limitarea trimiterilor din formularele publice (deocamdată
+// recenziile). Stă în baza de date, nu într-un Map în memorie: pe Vercel fiecare
+// instanță de funcție are propria memorie și se reciclează, deci un contor local
+// nu ar limita nimic real. Cheia e hash-uită (IP + scop), nu ținem IP-uri brute.
+model RateLimit {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
 // O specificație a produsului (etichetă + valoare), embedded.
 type BookSpec {
   label String // ex: „Vârstă", „Pagini", „Categorie"
