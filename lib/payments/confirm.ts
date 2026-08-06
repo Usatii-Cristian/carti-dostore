@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getQrStatus } from "@/lib/payments/victoriabank";
 import { sendPaymentConfirmedEmail } from "@/lib/email/notifications";
 import { tgPaymentConfirmed } from "@/lib/telegram";
+import { createAwbForOrder } from "@/lib/shipping/create-awb";
 
 /**
  * Confirmă plata unei comenzi întrebând BANCA (status autentificat), nu
@@ -41,6 +42,10 @@ export async function confirmOrderPayment(
         total: order.total,
       }),
       tgPaymentConfirmed({ orderNumber: order.orderNumber, total: order.total }),
+      // Comanda e plătită, deci e sigură — creăm expediția FAN acum, ca să apară
+      // în contul de curierat fără intervenție manuală. Rambursul iese automat 0
+      // (comanda e deja PAID). Idempotent: dacă are deja AWB, nu face nimic.
+      createAwbForOrder(order.id),
     ]);
 
     return "paid";

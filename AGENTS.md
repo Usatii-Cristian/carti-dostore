@@ -134,8 +134,28 @@ o comandă cu plata la livrare a rămas așa. De aceea:
   nici asta nu departajează, NU ghicim — raionul rămâne gol, altfel coletul pleacă în alt
   colț de țară.
 - Se apelează în două locuri: la crearea comenzii (`lib/actions/checkout.ts`) și, ca plasă
-  de siguranță, la generarea AWB-ului (`lib/actions/admin-shipping.ts`), care are și un câmp
-  manual în panou pentru localitățile negăsite.
+  de siguranță, la generarea AWB-ului (`lib/shipping/create-awb.ts`), care are și un câmp
+  manual în panoul de admin pentru localitățile negăsite.
+- În checkout, localitatea trebuie **aleasă din listă**: butonul de trimitere stă inactiv
+  până când `county` e completat (vine doar la click pe o sugestie), iar serverul respinge
+  comanda dacă nici nu poate deduce raionul. Fără asta, comanda intra „nelivrabilă".
+
+### AWB-ul se creează AUTOMAT (nu doar din admin)
+
+`createAwbForOrder()` (`lib/shipping/create-awb.ts`) e singurul loc care creează expediția
+FAN, apelat din trei părți:
+
+- **plata la livrare** (card/numerar) — imediat la plasarea comenzii (`lib/actions/checkout.ts`),
+  fiindcă acele comenzi sunt finale în acel moment;
+- **plata online** — abia după ce banca confirmă plata (`lib/payments/confirm.ts`); până
+  atunci comanda poate fi abandonată și n-are rost o cerere de ridicare;
+- **butonul din admin** — pentru reîncercări sau localități pe care nu le-am putut potrivi.
+
+Garanții: nu aruncă niciodată (rulează în `Promise.allSettled`, un FAN picat nu strică
+comanda), e idempotent (dacă există deja `trackingNumber`, nu face nimic) și pune ramburs
+doar dacă nu s-a încasat deja online. ⚠️ Consecință de business: **fiecare comandă cu plata
+la livrare devine imediat o cerere reală de ridicare la FAN** — comenzile false se anulează
+din admin („Anulează AWB", merge cât timp coletul n-a fost preluat).
 - Cererile către FAN au timeout (`AbortSignal.timeout`, 8s): estimarea costului rulează
   înainte de redirect, deci o cerere blocată ar ține clientul în checkout.
 

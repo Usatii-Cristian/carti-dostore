@@ -7,6 +7,7 @@ import { sendNewOrderEmails } from "@/lib/email/notifications";
 import { tgNewOrder } from "@/lib/telegram";
 import { cartItemPrice, getShippingCost, getCodFee } from "@/lib/store/cart";
 import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
+import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
 import type { CartItem } from "@/lib/store/cart";
@@ -135,6 +136,17 @@ export async function createOrderAndPay(
     if (resolved) {
       city = resolved.city;
       county = resolved.county;
+    } else {
+      // Nici măcar nu putem deduce raionul: comanda ar rămâne nelivrabilă, deci
+      // o oprim aici și cerem clientului să aleagă localitatea din listă.
+      return {
+        status: "error",
+        message: "Alege localitatea din lista de sugestii.",
+        fieldErrors: {
+          city: "Apasă pe localitatea ta în lista care apare sub câmp — de acolo luăm raionul, obligatoriu pentru curier.",
+        },
+        values,
+      };
     }
   }
   const paymentMethod = values.paymentMethod as
@@ -208,6 +220,7 @@ export async function createOrderAndPay(
         subtotal,
         shippingCost,
         total,
+        paymentMethod,
       },
       order.id
     ),
@@ -221,6 +234,15 @@ export async function createOrderAndPay(
       total,
       items: items.map((item) => ({ title: item.title, quantity: item.quantity })),
     }),
+    // Expediția FAN, pentru comenzile cu plata la livrare: sunt finale în
+    // momentul plasării, deci AWB-ul se creează acum și comanda apare imediat
+    // în contul FAN. Comenzile online își primesc AWB-ul abia după ce banca
+    // confirmă plata (lib/payments/confirm.ts) — până atunci pot fi abandonate.
+    // Nu blochează și nu strică nimic: `createAwbForOrder` nu aruncă, iar dacă
+    // eșuează, AWB-ul se poate genera oricând din admin.
+    paymentMethod !== "ONLINE"
+      ? createAwbForOrder(order.id)
+      : Promise.resolve(null),
   ]);
 
   // Plata la livrare (card sau numerar): comanda e gata, mergem direct la succes.

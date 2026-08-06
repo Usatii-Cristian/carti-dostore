@@ -20,8 +20,12 @@ export function CityAutocomplete({
   defaultCity?: string;
   defaultCounty?: string;
   inputClassName?: string;
-  /** Anunță părintele la fiecare schimbare — folosit pentru validarea "formular complet". */
-  onValueChange?: (city: string) => void;
+  /**
+   * Anunță părintele la fiecare schimbare. `county` e gol până când clientul
+   * alege efectiv o localitate din listă — pe asta se sprijină validarea din
+   * checkout, fiindcă fără raion coletul nu poate fi expediat.
+   */
+  onValueChange?: (city: string, county: string) => void;
 }) {
   const [value, setValue] = useState(defaultCity);
   const [county, setCounty] = useState(defaultCounty);
@@ -74,7 +78,7 @@ export function CityAutocomplete({
     setCounty(suggestion.county);
     setOpen(false);
     setSuggestions([]);
-    onValueChange?.(suggestion.city);
+    onValueChange?.(suggestion.city, suggestion.county);
   }
 
   return (
@@ -87,7 +91,7 @@ export function CityAutocomplete({
           setValue(event.target.value);
           setCounty(""); // orice editare manuală invalidează raionul dedus
           setOpen(true);
-          onValueChange?.(event.target.value);
+          onValueChange?.(event.target.value, "");
         }}
         onFocus={() => setOpen(true)}
         autoComplete="address-level2"
@@ -122,10 +126,16 @@ export function CityAutocomplete({
         </ul>
       )}
 
-      {county && (
+      {county ? (
         <p className="mt-1 text-xs text-ink-soft">
           Raion: <span className="font-medium text-ink">{county}</span>
         </p>
+      ) : (
+        value.trim().length > 0 && (
+          <p className="mt-1 text-xs font-medium text-terracotta">
+            Apasă pe localitate în lista de mai sus — fără ea comanda nu poate fi expediată.
+          </p>
+        )
       )}
     </div>
   );

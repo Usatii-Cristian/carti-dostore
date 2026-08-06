@@ -2,14 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import {
-  createShipment,
-  getTracking,
-  cancelShipment,
-  getLabelUrl,
-  resolveCityAndCounty,
-} from "@/lib/shipping/fan";
-import { calculateParcelWeightKg } from "@/lib/shipping/weight";
+import { getTracking, cancelShipment, getLabelUrl } from "@/lib/shipping/fan";
+import { createAwbForOrder } from "@/lib/shipping/create-awb";
 
 export type AwbState = {
   status: "idle" | "error" | "success";
@@ -28,87 +22,13 @@ export async function generateAwb(
   _prev: AwbState,
   formData?: FormData
 ): Promise<AwbState> {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { items: true },
+  const result = await createAwbForOrder(orderId, {
+    manualCounty: String(formData?.get("county") ?? ""),
   });
 
-  if (!order) return { status: "error", message: "Comanda nu există." };
-  if (order.trackingNumber) {
-    return { status: "error", message: `Comanda are deja AWB-ul ${order.trackingNumber}.` };
-  }
+  if (!result.ok) return { status: "error", message: result.message };
 
-  // Comenzile vechi (sau cele în care clientul a scris orașul de mână) pot veni
-  // fără raion, iar FAN îl cere obligatoriu. Îl căutăm întâi în lista FAN după
-  // numele localității; dacă nici așa nu iese, adminul îl poate scrie manual în
-  // panou. Ce reușim să deducem se și salvează pe comandă.
-  let city = order.city;
-  let county = order.county ?? "";
-
-  if (!county) {
-    const resolved = await resolveCityAndCounty(order.city);
-    if (resolved) {
-      city = resolved.city;
-      county = resolved.county;
-    }
-  }
-  if (!county) county = String(formData?.get("county") ?? "").trim();
-
-  if (!county) {
-    return {
-      status: "error",
-      message: `Localitatea „${order.city}" nu se regăsește în lista FAN, deci raionul nu poate fi dedus. Scrie-l manual în câmpul de mai jos și încearcă din nou.`,
-    };
-  }
-
-  if (city !== order.city || county !== order.county) {
-    await prisma.order.update({ where: { id: orderId }, data: { city, county } });
-  }
-
-  // Greutățile vin din produse; cele fără greutate setată intră cu estimarea implicită.
-  const books = await prisma.book.findMany({
-    where: { id: { in: order.items.map((item) => item.bookId) } },
-    select: { id: true, weightGrams: true },
-  });
-  const weightById = new Map(books.map((book) => [book.id, book.weightGrams]));
-
-  const weightKg = calculateParcelWeightKg(
-    order.items.map((item) => ({
-      quantity: item.quantity,
-      weightGrams: weightById.get(item.bookId) ?? null,
-    }))
-  );
-
-  try {
-    const { awb } = await createShipment({
-      toName: order.customerName,
-      toPhone: order.customerPhone,
-      toEmail: order.customerEmail,
-      toCity: city,
-      toCounty: county,
-      toStreet: order.shippingAddress,
-      weightKg,
-      content: order.items.map((item) => item.title).join(", ").slice(0, 200),
-      // Ramburs doar dacă nu s-a încasat deja online.
-      codAmount: order.paymentStatus === "PAID" ? 0 : order.total,
-      reference: order.orderNumber,
-    });
-
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { trackingNumber: awb },
-    });
-
-    revalidatePath(`/admin/comenzi/${orderId}`);
-    revalidatePath(`/comanda/${order.orderNumber}`);
-
-    return { status: "success", message: `AWB generat: ${awb}`, awb };
-  } catch (error) {
-    return {
-      status: "error",
-      message: error instanceof Error ? error.message : "Generarea AWB a eșuat.",
-    };
-  }
+  return { status: "success", message: `AWB generat: ${result.awb}`, awb: result.awb };
 }
 
 /** Istoricul coletului, pentru afișare în admin și pe pagina publică a comenzii. */

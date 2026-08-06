@@ -13,14 +13,36 @@ export function OrderConfirmationEmail({
 }) {
   const firstName = order.customerName.split(" ")[0] || order.customerName;
 
+  // La plata la livrare nu există nicio plată online de confirmat — promisiunea
+  // „te anunțăm când plata e confirmată" era derutantă exact pentru clienții
+  // care aleseseră plata la curier.
+  const payOnDelivery =
+    order.paymentMethod === "CASH_ON_DELIVERY" || order.paymentMethod === "CARD_ON_DELIVERY";
+  const payLabel =
+    order.paymentMethod === "CASH_ON_DELIVERY"
+      ? "numerar la livrare"
+      : order.paymentMethod === "CARD_ON_DELIVERY"
+        ? "card la livrare"
+        : "online, pe site";
+
   return (
     <EmailLayout preview={`Am primit comanda ta ${order.orderNumber}`}>
       <Text style={styles.heading}>Îți mulțumim, {firstName}!</Text>
       <Text style={styles.paragraph}>
         Am primit comanda ta cu numărul{" "}
-        <span style={styles.strong}>{order.orderNumber}</span>. Îți pregătim cărțile cu
-        grijă — vei primi un mesaj de îndată ce plata e confirmată și comanda pleacă spre
-        tine.
+        <span style={styles.strong}>{order.orderNumber}</span>.{" "}
+        {payOnDelivery ? (
+          <>
+            Îți pregătim comanda și o predăm curierului — te anunțăm de îndată ce pleacă spre
+            tine. Plătești <span style={styles.strong}>{payLabel}</span>, direct curierului,
+            când primești coletul.
+          </>
+        ) : (
+          <>
+            Îți pregătim comanda cu grijă — vei primi un mesaj de îndată ce plata e confirmată
+            și comanda pleacă spre tine.
+          </>
+        )}
       </Text>
 
       <Section style={styles.infoBox}>

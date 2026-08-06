@@ -28,6 +28,18 @@ export function AdminOrderNotificationEmail({
         <Text style={{ ...styles.value, fontWeight: 400 }}>
           {order.shippingAddress}, {order.city}
         </Text>
+        {order.paymentMethod && (
+          <>
+            <Text style={{ ...styles.label, margin: "10px 0 4px" }}>Plată</Text>
+            <Text style={{ ...styles.value, fontWeight: 400 }}>
+              {order.paymentMethod === "CASH_ON_DELIVERY"
+                ? "Numerar la livrare"
+                : order.paymentMethod === "CARD_ON_DELIVERY"
+                  ? "Card la livrare"
+                  : "Online, pe site"}
+            </Text>
+          </>
+        )}
       </Section>
 
       <Text style={{ ...styles.strong, fontSize: "15px", margin: "0 0 8px" }}>Produse</Text>

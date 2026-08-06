@@ -99,6 +99,8 @@ export function CheckoutView() {
     phone: state.values?.phone ?? "",
     shippingAddress: state.values?.shippingAddress ?? "",
     city: state.values?.city ?? "",
+    // Se completează DOAR când clientul apasă pe o localitate din listă.
+    county: state.values?.county ?? "",
   });
   const [termsChecked, setTermsChecked] = useState(state.values?.terms === "on");
   // Metoda de plată e urmărită ca să putem afișa taxa de ramburs (15 lei) doar
@@ -117,6 +119,10 @@ export function CheckoutView() {
     PHONE_REGEX.test(values.phone.trim()) &&
     values.shippingAddress.trim().length >= 5 &&
     values.city.trim().length >= 2 &&
+    // Localitatea trebuie ALEASĂ din listă, nu doar scrisă: raionul vine odată
+    // cu ea, iar fără raion FAN nu acceptă expediția, deci comanda ar rămâne
+    // nelivrabilă. Aceeași regulă e verificată și pe server.
+    values.county.trim().length > 0 &&
     termsChecked;
 
   if (items.length === 0) {
@@ -207,7 +213,9 @@ export function CheckoutView() {
               <CityAutocomplete
                 defaultCity={state.values?.city ?? ""}
                 defaultCounty={state.values?.county ?? ""}
-                onValueChange={(city) => updateField("city", city)}
+                onValueChange={(city, county) =>
+                  setValues((current) => ({ ...current, city, county }))
+                }
                 inputClassName={`w-full rounded-lg border bg-card px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-soft/50 focus:outline-none focus:ring-2 focus:ring-terracotta/30 ${
                   state.fieldErrors?.city
                     ? "border-terracotta"

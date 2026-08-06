@@ -18,4 +18,10 @@ export type OrderEmailData = {
   subtotal: number;
   shippingCost: number;
   total: number;
+  /**
+   * Cum plătește clientul. Schimbă textul confirmării: la plata la livrare nu
+   * are rost să-i promitem „un mesaj când plata e confirmată" — nu există nicio
+   * plată de confirmat online.
+   */
+  paymentMethod?: "ONLINE" | "CARD_ON_DELIVERY" | "CASH_ON_DELIVERY";
 };
