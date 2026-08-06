@@ -32,6 +32,15 @@ const DATE_TIME: Intl.DateTimeFormatOptions = {
   timeZone: MD_TIMEZONE,
 };
 
+const DATE_TIME_SHORT: Intl.DateTimeFormatOptions = {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: MD_TIMEZONE,
+};
+
 /** Ex: „21 iulie 2026" */
 export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat("ro-RO", DATE).format(new Date(date));
@@ -45,4 +54,9 @@ export function formatDateShort(date: Date | string): string {
 /** Ex: „21 iulie 2026, 14:30" */
 export function formatDateTime(date: Date | string): string {
   return new Intl.DateTimeFormat("ro-RO", DATE_TIME).format(new Date(date));
+}
+
+/** Ex: „21.07.2026, 14:30" — pentru tabele și liste din admin. */
+export function formatDateTimeShort(date: Date | string): string {
+  return new Intl.DateTimeFormat("ro-RO", DATE_TIME_SHORT).format(new Date(date));
 }
