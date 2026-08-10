@@ -3,6 +3,7 @@ import { EmailLayout } from "./EmailLayout";
 import { styles } from "./theme";
 import { formatPrice } from "@/lib/format";
 import type { OrderEmailData } from "@/lib/email/types";
+import { formatShippingAddress } from "@/lib/orders/address";
 
 export function OrderConfirmationEmail({
   order,
@@ -49,9 +50,14 @@ export function OrderConfirmationEmail({
         <Text style={styles.label}>Livrare la</Text>
         <Text style={styles.value}>{order.customerName}</Text>
         <Text style={{ ...styles.value, fontWeight: 400 }}>
-          {order.shippingAddress}, {order.city}
+          {formatShippingAddress(order)}, {order.city}
         </Text>
         <Text style={{ ...styles.value, fontWeight: 400 }}>{order.customerPhone}</Text>
+        {order.customerNote && (
+          <Text style={{ ...styles.value, fontWeight: 400, fontStyle: "italic" }}>
+            Mesaj pentru curier: {order.customerNote}
+          </Text>
+        )}
       </Section>
 
       <Text style={{ ...styles.strong, fontSize: "15px", margin: "0 0 8px" }}>

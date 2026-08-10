@@ -4,6 +4,8 @@ import "server-only";
 // dacă nu e configurat, și nu aruncă niciodată (o notificare eșuată nu strică
 // comanda/plata) — exact ca la email.
 
+import { formatShippingAddress } from "@/lib/orders/address";
+
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -42,6 +44,9 @@ export async function tgNewOrder(order: {
   customerPhone: string;
   customerEmail: string;
   shippingAddress: string;
+  building?: string | null;
+  apartment?: string | null;
+  customerNote?: string | null;
   city: string;
   total: number;
   items: { title: string; quantity: number }[];
@@ -52,7 +57,8 @@ export async function tgNewOrder(order: {
       `👤 ${esc(order.customerName)}\n` +
       `📞 ${esc(order.customerPhone)}\n` +
       `📧 ${esc(order.customerEmail)}\n` +
-      `📍 ${esc(order.shippingAddress)}, ${esc(order.city)}\n` +
+      `📍 ${esc(formatShippingAddress(order))}, ${esc(order.city)}\n` +
+      (order.customerNote ? `📝 ${esc(order.customerNote)}\n` : "") +
       `💰 <b>${order.total} lei</b>\n\n${lines}`
   );
 }

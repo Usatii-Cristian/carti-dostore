@@ -13,7 +13,17 @@ import { createQrPayment } from "@/lib/payments/victoriabank";
 import type { CartItem } from "@/lib/store/cart";
 
 export type CheckoutFieldErrors = Partial<
-  Record<"customerName" | "email" | "phone" | "shippingAddress" | "city" | "terms", string>
+  Record<
+    | "customerName"
+    | "email"
+    | "phone"
+    | "shippingAddress"
+    | "building"
+    | "apartment"
+    | "city"
+    | "terms",
+    string
+  >
 >;
 
 export type CheckoutState = {
@@ -40,6 +50,11 @@ function validate(formData: FormData): { values: Record<string, string>; errors:
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const phone = String(formData.get("phone") ?? "").trim();
   const shippingAddress = String(formData.get("shippingAddress") ?? "").trim();
+  // Detalii de acces + mesajul pentru curier. Opționale, dar tăiate la o lungime
+  // rezonabilă: ajung pe AWB, unde câmpurile nu sunt nelimitate.
+  const building = String(formData.get("building") ?? "").trim().slice(0, 60);
+  const apartment = String(formData.get("apartment") ?? "").trim().slice(0, 30);
+  const customerNote = String(formData.get("customerNote") ?? "").trim().slice(0, 300);
   const city = String(formData.get("city") ?? "").trim();
   // Raionul vine din autocomplete-ul de localități (lista FAN), nu de la client.
   // Poate lipsi dacă a scris orașul de mână — nu blocăm comanda pentru asta,
@@ -70,7 +85,19 @@ function validate(formData: FormData): { values: Record<string, string>; errors:
   if (city.length < 2) errors.city = "Alege localitatea din listă.";
 
   return {
-    values: { customerName, email, phone, shippingAddress, city, county, paymentMethod, terms: termsAccepted ? "on" : "" },
+    values: {
+      customerName,
+      email,
+      phone,
+      shippingAddress,
+      building,
+      apartment,
+      customerNote,
+      city,
+      county,
+      paymentMethod,
+      terms: termsAccepted ? "on" : "",
+    },
     errors,
   };
 }
@@ -123,7 +150,8 @@ export async function createOrderAndPay(
     return { status: "error", message: "Verifică datele introduse.", fieldErrors: errors, values };
   }
 
-  const { customerName, email, phone, shippingAddress } = values;
+  const { customerName, email, phone, shippingAddress, building, apartment, customerNote } =
+    values;
   let { city, county } = values;
 
   // Raionul e OBLIGATORIU la generarea AWB-ului. Vine din autocomplete-ul de
@@ -176,6 +204,9 @@ export async function createOrderAndPay(
       customerEmail: email,
       customerPhone: phone,
       shippingAddress,
+      building: building || null,
+      apartment: apartment || null,
+      customerNote: customerNote || null,
       city,
       county: county || null,
       paymentMethod,
@@ -211,6 +242,9 @@ export async function createOrderAndPay(
         customerEmail: email,
         customerPhone: phone,
         shippingAddress,
+        building,
+        apartment,
+        customerNote,
         city,
         items: items.map((item) => ({
           title: item.title,
@@ -230,6 +264,9 @@ export async function createOrderAndPay(
       customerPhone: phone,
       customerEmail: email,
       shippingAddress,
+      building,
+      apartment,
+      customerNote,
       city,
       total,
       items: items.map((item) => ({ title: item.title, quantity: item.quantity })),

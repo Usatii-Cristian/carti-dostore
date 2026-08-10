@@ -5,6 +5,7 @@ import { Phone, Package, MapPin, CalendarClock, Truck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { STATUS_META } from "@/lib/orders/status";
+import { formatShippingAddress } from "@/lib/orders/address";
 import { OrderTimeline } from "@/components/orders/OrderTimeline";
 
 export const metadata: Metadata = {
@@ -124,7 +125,7 @@ export default async function OrderTrackingPage({ params }: PageProps) {
               <MapPin className="h-4 w-4" aria-hidden="true" /> Adresă
             </dt>
             <dd className="text-right font-semibold text-ink">
-              {order.shippingAddress}, {order.city}
+              {formatShippingAddress(order)}, {order.city}
             </dd>
           </div>
           {order.trackingNumber && (

@@ -140,6 +140,17 @@ o comandă cu plata la livrare a rămas așa. De aceea:
   până când `county` e completat (vine doar la click pe o sugestie), iar serverul respinge
   comanda dacă nici nu poate deduce raionul. Fără asta, comanda intra „nelivrabilă".
 
+### Adresa de livrare: stradă + bloc + apartament + mesaj
+
+Checkout-ul cere separat strada, blocul/casa și apartamentul (ultimele două opționale), plus
+un mesaj opțional pentru curier (`customerNote`, max 300 caractere). Motivul: scrise
+într-un singur rând, detaliile de acces se pierd pe AWB și curierul sună clientul ca să afle
+la ce scară vine. Peste tot unde adresa se afișează sau pleacă mai departe — emailuri,
+Telegram, admin, pagina publică a comenzii, AWB-ul FAN — se folosește
+`formatShippingAddress()` (`lib/orders/address.ts`), care le lipește într-un singur rând și
+adaugă prefixele „bl."/„ap." doar la valorile pur numerice. Mesajul clientului pleacă la FAN
+ca `comments` pe expediție.
+
 ### AWB-ul se creează AUTOMAT (nu doar din admin)
 
 `createAwbForOrder()` (`lib/shipping/create-awb.ts`) e singurul loc care creează expediția

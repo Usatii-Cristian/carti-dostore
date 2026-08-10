@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { createShipment, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
+import { formatShippingAddress } from "@/lib/orders/address";
 
 /**
  * Creează expediția FAN pentru o comandă și salvează AWB-ul pe ea.
@@ -87,9 +88,13 @@ export async function createAwbForOrder(
       toEmail: order.customerEmail,
       toCity: city,
       toCounty: county,
-      toStreet: order.shippingAddress,
+      // Bloc/apartament intră în adresa de pe AWB, nu doar în baza noastră —
+      // altfel curierul ajunge la scară și sună clientul ca să afle unde vine.
+      toStreet: formatShippingAddress(order),
       weightKg,
       content: order.items.map((item) => item.title).join(", ").slice(0, 200),
+      // Mesajul clientului („sunați înainte", cod interfon) ajunge la curier.
+      comments: order.customerNote ?? undefined,
       // Ramburs doar dacă nu s-a încasat deja online.
       codAmount: order.paymentStatus === "PAID" ? 0 : order.total,
       reference: order.orderNumber,

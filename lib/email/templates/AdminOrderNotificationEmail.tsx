@@ -3,6 +3,7 @@ import { EmailLayout } from "./EmailLayout";
 import { styles } from "./theme";
 import { formatPrice } from "@/lib/format";
 import type { OrderEmailData } from "@/lib/email/types";
+import { formatShippingAddress } from "@/lib/orders/address";
 
 export function AdminOrderNotificationEmail({
   order,
@@ -26,8 +27,14 @@ export function AdminOrderNotificationEmail({
         <Text style={{ ...styles.value, fontWeight: 400 }}>{order.customerPhone}</Text>
         <Text style={{ ...styles.label, margin: "10px 0 4px" }}>Adresă</Text>
         <Text style={{ ...styles.value, fontWeight: 400 }}>
-          {order.shippingAddress}, {order.city}
+          {formatShippingAddress(order)}, {order.city}
         </Text>
+        {order.customerNote && (
+          <>
+            <Text style={{ ...styles.label, margin: "10px 0 4px" }}>Mesaj de la client</Text>
+            <Text style={{ ...styles.value, fontWeight: 400 }}>{order.customerNote}</Text>
+          </>
+        )}
         {order.paymentMethod && (
           <>
             <Text style={{ ...styles.label, margin: "10px 0 4px" }}>Plată</Text>

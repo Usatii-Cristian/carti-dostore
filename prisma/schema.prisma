@@ -100,6 +100,13 @@ model Order {
   customerEmail     String
   customerPhone     String
   shippingAddress   String
+  // Detaliile de acces, cerute separat în checkout: fără ele curierul sună
+  // clientul ca să afle la ce bloc/apartament vine. Se lipesc și în adresa
+  // trimisă la FAN, ca să apară pe AWB.
+  building          String?            // bloc / casă (ex. „bl. 3" sau „casă")
+  apartment         String?            // apartament / oficiu
+  // Mesaj opțional de la client pentru curier („sunați înainte", cod interfon).
+  customerNote      String?
   city              String
   // Raionul (province la FAN). Obligatoriu pentru AWB — se completează automat
   // din localitatea aleasă în checkout, fiindcă lista FAN dă perechea oraș+raion.

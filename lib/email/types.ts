@@ -13,6 +13,11 @@ export type OrderEmailData = {
   customerEmail: string;
   customerPhone: string;
   shippingAddress: string;
+  /** Bloc/casă și apartament, cerute separat în checkout. */
+  building?: string | null;
+  apartment?: string | null;
+  /** Mesajul clientului pentru curier. */
+  customerNote?: string | null;
   city: string;
   items: OrderEmailItem[];
   subtotal: number;

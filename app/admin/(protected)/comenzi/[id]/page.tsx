@@ -5,6 +5,7 @@ import { getOrderById } from "@/lib/admin/orders";
 import { updateOrderStatus } from "@/lib/actions/admin-orders";
 import { formatPrice } from "@/lib/format";
 import { formatDateTimeShort } from "@/lib/datetime";
+import { formatShippingAddress } from "@/lib/orders/address";
 import { AwbPanel } from "@/components/admin/AwbPanel";
 import { RefundPanel } from "@/components/admin/RefundPanel";
 import {
@@ -92,7 +93,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-500">Adresă</dt>
                 <dd className="text-right text-slate-900">
-                  {order.shippingAddress}, {order.city}
+                  {formatShippingAddress(order)}, {order.city}
                 </dd>
               </div>
             </dl>
