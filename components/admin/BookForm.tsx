@@ -8,6 +8,7 @@ import { ImageUploader } from "./ImageUploader";
 import { FaqEditor } from "./FaqEditor";
 import { ReviewEditor } from "./ReviewEditor";
 import { SpecEditor } from "./SpecEditor";
+import { VariantEditor } from "./VariantEditor";
 
 type BookFormAction = (
   prevState: BookFormState,
@@ -244,6 +245,17 @@ export function BookForm({
               defaultValue={initialBook?.tags.join(", ") ?? ""}
               placeholder="ex: obiceiuri, productivitate"
               className={inputClass}
+            />
+          </Field>
+        </div>
+
+        <div className="sm:col-span-2">
+          <Field label="Tipuri / variante (clientul alege pe pagina produsului)">
+            <VariantEditor
+              initialVariants={(initialBook?.variants ?? []).map((v) => ({
+                label: v.label,
+                price: v.price == null ? "" : String(v.price),
+              }))}
             />
           </Field>
         </div>

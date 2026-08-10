@@ -60,6 +60,28 @@ function parseSpecs(value: FormDataEntryValue | null): { label: string; value: s
   }
 }
 
+// Tipurile/variantele produsului, dintr-un singur câmp JSON (vezi
+// components/admin/VariantEditor). Prețul gol = costă cât produsul de bază.
+function parseVariants(
+  value: FormDataEntryValue | null
+): { label: string; price?: number }[] {
+  if (typeof value !== "string" || !value.trim()) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((entry) => {
+      if (typeof entry !== "object" || entry === null) return [];
+      const { label, price } = entry as Record<string, unknown>;
+      const l = typeof label === "string" ? label.trim() : "";
+      if (!l) return [];
+      const p = typeof price === "string" ? Number(price.replace(",", ".")) : Number(price);
+      return [Number.isFinite(p) && p > 0 ? { label: l, price: p } : { label: l }];
+    });
+  } catch {
+    return [];
+  }
+}
+
 // Recenziile vin dintr-un singur câmp JSON (vezi components/admin/ReviewEditor).
 function parseReviews(
   value: FormDataEntryValue | null
@@ -108,6 +130,7 @@ async function buildBookData(formData: FormData) {
   const faqs = parseFaqs(formData.get("faqs"));
   const reviews = parseReviews(formData.get("reviews"));
   const specs = parseSpecs(formData.get("specs"));
+  const variants = parseVariants(formData.get("variants"));
 
   const publisher = String(formData.get("publisher") ?? "").trim() || undefined;
   const isbn = String(formData.get("isbn") ?? "").trim() || undefined;
@@ -176,6 +199,7 @@ async function buildBookData(formData: FormData) {
       faqs,
       reviews,
       specs,
+      variants,
       publisher,
       isbn,
       language,

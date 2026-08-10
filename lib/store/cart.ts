@@ -2,13 +2,26 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { BookCardData } from "@/lib/types";
 
-export type CartItem = BookCardData & { quantity: number };
+export type CartItem = BookCardData & {
+  quantity: number;
+  /** Tipul ales (ex. „Suplimente"), gol la produsele fără variante. */
+  variantLabel?: string | null;
+};
+
+/**
+ * Cheia unei linii din coș. Același produs poate apărea de mai multe ori, cu
+ * tipuri diferite (14 tipuri de etichete, carte în 3 limbi), deci id-ul singur
+ * nu mai e suficient.
+ */
+export function cartItemKey(item: { id: string; variantLabel?: string | null }): string {
+  return item.variantLabel ? `${item.id}::${item.variantLabel}` : item.id;
+}
 
 type CartState = {
   items: CartItem[];
-  addItem: (book: BookCardData, quantity?: number) => void;
-  removeItem: (bookId: string) => void;
-  setQuantity: (bookId: string, quantity: number) => void;
+  addItem: (book: BookCardData, quantity?: number, variantLabel?: string | null) => void;
+  removeItem: (key: string) => void;
+  setQuantity: (key: string, quantity: number) => void;
   clear: () => void;
 };
 
@@ -16,29 +29,30 @@ export const useCartStore = create<CartState>()(
   persist(
     (set) => ({
       items: [],
-      addItem: (book, quantity = 1) =>
+      addItem: (book, quantity = 1, variantLabel = null) =>
         set((state) => {
-          const existing = state.items.find((item) => item.id === book.id);
+          const key = cartItemKey({ id: book.id, variantLabel });
+          const existing = state.items.find((item) => cartItemKey(item) === key);
           if (existing) {
             return {
               items: state.items.map((item) =>
-                item.id === book.id
+                cartItemKey(item) === key
                   ? { ...item, quantity: item.quantity + quantity }
                   : item
               ),
             };
           }
-          return { items: [...state.items, { ...book, quantity }] };
+          return { items: [...state.items, { ...book, quantity, variantLabel }] };
         }),
-      removeItem: (bookId) =>
-        set((state) => ({ items: state.items.filter((item) => item.id !== bookId) })),
-      setQuantity: (bookId, quantity) =>
+      removeItem: (key) =>
+        set((state) => ({ items: state.items.filter((item) => cartItemKey(item) !== key) })),
+      setQuantity: (key, quantity) =>
         set((state) => ({
           items:
             quantity <= 0
-              ? state.items.filter((item) => item.id !== bookId)
+              ? state.items.filter((item) => cartItemKey(item) !== key)
               : state.items.map((item) =>
-                  item.id === bookId ? { ...item, quantity } : item
+                  cartItemKey(item) === key ? { ...item, quantity } : item
                 ),
         })),
       clear: () => set({ items: [] }),
@@ -49,6 +63,14 @@ export const useCartStore = create<CartState>()(
 
 export function cartItemPrice(item: CartItem): number {
   return item.discountPrice ?? item.price;
+}
+
+/**
+ * Cum apare produsul în comandă: cu tipul ales lipit de titlu, ca să se vadă
+ * peste tot (admin, emailuri, conținutul coletului la curier) fără câmpuri noi.
+ */
+export function cartItemTitle(item: { title: string; variantLabel?: string | null }): string {
+  return item.variantLabel ? `${item.title} — ${item.variantLabel}` : item.title;
 }
 
 // Transport — NU există livrare gratuită, la nicio sumă a comenzii (a fost o

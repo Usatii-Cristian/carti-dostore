@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendNewOrderEmails } from "@/lib/email/notifications";
 import { tgNewOrder } from "@/lib/telegram";
-import { cartItemPrice, getShippingCost, getCodFee } from "@/lib/store/cart";
+import { cartItemPrice, cartItemTitle, getShippingCost, getCodFee } from "@/lib/store/cart";
 import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { runAfterResponse } from "@/lib/after-response";
@@ -217,7 +217,7 @@ export async function createOrderAndPay(
       items: {
         create: items.map((item) => ({
           bookId: item.id,
-          title: item.title,
+          title: cartItemTitle(item),
           price: cartItemPrice(item),
           quantity: item.quantity,
         })),
@@ -246,7 +246,7 @@ export async function createOrderAndPay(
           customerNote,
           city,
           items: items.map((item) => ({
-            title: item.title,
+            title: cartItemTitle(item),
             price: cartItemPrice(item),
             quantity: item.quantity,
           })),
@@ -268,7 +268,7 @@ export async function createOrderAndPay(
         customerNote,
         city,
         total,
-        items: items.map((item) => ({ title: item.title, quantity: item.quantity })),
+        items: items.map((item) => ({ title: cartItemTitle(item), quantity: item.quantity })),
       }),
       // Cât ne costă PE NOI expedierea (tariful din contractul FAN). E doar
       // informativ, pentru marja văzută în admin, deci se salvează după fapt.

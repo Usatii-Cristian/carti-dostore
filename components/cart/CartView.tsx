@@ -3,7 +3,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { useCartStore, cartItemPrice, SHIPPING_LOCAL, SHIPPING_NATIONAL } from "@/lib/store/cart";
+import {
+  useCartStore,
+  cartItemPrice,
+  cartItemKey,
+  SHIPPING_LOCAL,
+  SHIPPING_NATIONAL,
+} from "@/lib/store/cart";
 import { formatPrice } from "@/lib/format";
 
 export function CartView() {
@@ -46,7 +52,7 @@ export function CartView() {
         <ul className="space-y-4">
           {items.map((item) => (
             <li
-              key={item.id}
+              key={cartItemKey(item)}
               className="flex gap-4 rounded-xl bg-card p-4 shadow-sm ring-1 ring-border/70"
             >
               <Link href={`/carti/${item.slug}`} className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-cream-soft">
@@ -68,11 +74,15 @@ export function CartView() {
                     >
                       {item.title}
                     </Link>
-                    <p className="text-sm text-ink-soft">{item.author}</p>
+                    {item.variantLabel ? (
+                      <p className="text-sm font-medium text-terracotta">{item.variantLabel}</p>
+                    ) : (
+                      <p className="text-sm text-ink-soft">{item.author}</p>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => removeItem(cartItemKey(item))}
                     aria-label={`Scoate „${item.title}” din coș`}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-cream-soft hover:text-terracotta"
                   >
@@ -84,7 +94,7 @@ export function CartView() {
                   <div className="flex items-center gap-2 rounded-full border border-border">
                     <button
                       type="button"
-                      onClick={() => setQuantity(item.id, item.quantity - 1)}
+                      onClick={() => setQuantity(cartItemKey(item), item.quantity - 1)}
                       aria-label="Scade cantitatea"
                       className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-soft"
                     >
@@ -95,7 +105,7 @@ export function CartView() {
                     </span>
                     <button
                       type="button"
-                      onClick={() => setQuantity(item.id, item.quantity + 1)}
+                      onClick={() => setQuantity(cartItemKey(item), item.quantity + 1)}
                       aria-label="Crește cantitatea"
                       className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-soft"
                     >

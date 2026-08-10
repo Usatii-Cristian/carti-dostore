@@ -48,6 +48,9 @@ model Book {
   // Specificații libere (etichetă + valoare), administrate din admin și afișate
   // ca badge-uri pe pagina produsului. Ex: „Vârstă"→„12+", „Pagini"→„300".
   specs          BookSpec[]
+  // Tipurile în care se vinde produsul (ex. cele 14 tipuri de etichete). Gol =
+  // produs fără variante, se adaugă direct în coș.
+  variants       BookVariant[]
   searchText     String
   orderItems     OrderItem[]
   createdAt      DateTime @default(now())
@@ -152,6 +155,16 @@ model RateLimit {
   expiresAt DateTime
 
   @@index([expiresAt])
+}
+
+// Un tip/variantă a produsului (ex. „Suplimente", „Limba italiană"), embedded.
+// Multe produse din catalog există în mai multe variante — etichetele au 14
+// tipuri, cărțile pot fi în 3 limbi — iar clientul trebuie să poată alege
+// exact ce vrea, câte bucăți din fiecare.
+type BookVariant {
+  label String
+  // Preț propriu, dacă varianta costă altfel decât produsul de bază.
+  price Float?
 }
 
 // O specificație a produsului (etichetă + valoare), embedded.

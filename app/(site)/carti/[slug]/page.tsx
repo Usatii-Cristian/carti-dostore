@@ -20,6 +20,7 @@ import { PriceTag } from "@/components/books/PriceTag";
 import { ImageGallery } from "@/components/books/ImageGallery";
 import { BookGrid } from "@/components/books/BookGrid";
 import { AddToCartButton } from "@/components/books/AddToCartButton";
+import { VariantPicker } from "@/components/books/VariantPicker";
 import { FaqAccordion } from "@/components/books/FaqAccordion";
 import { Reviews } from "@/components/books/Reviews";
 import { FavoriteButton } from "@/components/books/FavoriteButton";
@@ -101,10 +102,22 @@ export default async function BookPage({ params }: PageProps) {
             <PriceTag price={book.price} discountPrice={book.discountPrice} size="lg" />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            <AddToCartButton book={book} variant="full" />
-            <FavoriteButton book={book} variant="full" />
-          </div>
+          {/* Produsele cu mai multe tipuri (etichete, cărți în mai multe limbi)
+              se adaugă în coș din tabelul de variante, cu cantitate pe fiecare
+              tip. Restul păstrează butonul simplu. */}
+          {book.variants.length > 0 ? (
+            <>
+              <div className="mt-6">
+                <FavoriteButton book={book} variant="full" />
+              </div>
+              <VariantPicker book={book} variants={book.variants} />
+            </>
+          ) : (
+            <div className="mt-6 flex flex-wrap gap-3">
+              <AddToCartButton book={book} variant="full" />
+              <FavoriteButton book={book} variant="full" />
+            </div>
+          )}
 
           {book.specs.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2.5">
