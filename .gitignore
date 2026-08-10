@@ -42,3 +42,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# fisiere temporare de lucru
+_tmp-*
