@@ -4,6 +4,7 @@ import { getQrStatus } from "@/lib/payments/victoriabank";
 import { sendPaymentConfirmedEmail } from "@/lib/email/notifications";
 import { tgPaymentConfirmed } from "@/lib/telegram";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
+import { runAfterResponse } from "@/lib/after-response";
 
 /**
  * Confirmă plata unei comenzi întrebând BANCA (status autentificat), nu
@@ -34,19 +35,24 @@ export async function confirmOrderPayment(
       },
     });
 
-    await Promise.allSettled([
-      sendPaymentConfirmedEmail({
-        customerName: order.customerName,
-        customerEmail: order.customerEmail,
-        orderNumber: order.orderNumber,
-        total: order.total,
-      }),
-      tgPaymentConfirmed({ orderNumber: order.orderNumber, total: order.total }),
-      // Comanda e plătită, deci e sigură — creăm expediția FAN acum, ca să apară
-      // în contul de curierat fără intervenție manuală. Rambursul iese automat 0
-      // (comanda e deja PAID). Idempotent: dacă are deja AWB, nu face nimic.
-      createAwbForOrder(order.id),
-    ]);
+    // Notificările nu trebuie așteptate: pagina de plată doar întreabă „e gata?",
+    // iar SMTP-ul poate dura secunde bune.
+    runAfterResponse(
+      Promise.allSettled([
+        sendPaymentConfirmedEmail({
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          orderNumber: order.orderNumber,
+          total: order.total,
+        }),
+        tgPaymentConfirmed({ orderNumber: order.orderNumber, total: order.total }),
+      ])
+    );
+
+    // Comanda e plătită, deci e sigură — creăm expediția FAN acum, ca să apară
+    // în contul de curierat fără intervenție manuală. Rambursul iese automat 0
+    // (comanda e deja PAID). Idempotent: dacă are deja AWB, nu face nimic.
+    await createAwbForOrder(order.id);
 
     return "paid";
   }

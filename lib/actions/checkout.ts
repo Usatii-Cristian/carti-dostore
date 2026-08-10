@@ -8,6 +8,7 @@ import { tgNewOrder } from "@/lib/telegram";
 import { cartItemPrice, getShippingCost, getCodFee } from "@/lib/store/cart";
 import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
+import { runAfterResponse } from "@/lib/after-response";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
 import type { CartItem } from "@/lib/store/cart";
@@ -225,67 +226,69 @@ export async function createOrderAndPay(
 
   revalidatePath("/", "layout");
 
-  // Tot ce urmează rulează ÎN PARALEL, după ce comanda e deja salvată: emailuri,
-  // Telegram, AWB-ul FAN și estimarea costului de transport. Înainte, estimarea
-  // se făcea secvențial, înaintea salvării — clientul aștepta degeaba un drum în
-  // plus la FAN pentru o cifră pur informativă, afișată doar în admin.
-  await Promise.allSettled([
-    sendNewOrderEmails(
-      {
+  // Comanda e salvată — de aici încolo nimic nu mai trebuie așteptat de client.
+  // Emailurile (SMTP, secunde bune), Telegram și estimarea tarifului FAN pleacă
+  // „după răspuns" (`waitUntil`), deci pagina de confirmare apare imediat.
+  // Singura excepție e AWB-ul la plata la livrare: rămâne așteptat, ca să fim
+  // siguri că expediția chiar a intrat în contul FAN înainte de a-i spune
+  // clientului că e gata.
+  runAfterResponse(
+    Promise.allSettled([
+      sendNewOrderEmails(
+        {
+          orderNumber,
+          customerName,
+          customerEmail: email,
+          customerPhone: phone,
+          shippingAddress,
+          building,
+          apartment,
+          customerNote,
+          city,
+          items: items.map((item) => ({
+            title: item.title,
+            price: cartItemPrice(item),
+            quantity: item.quantity,
+          })),
+          subtotal,
+          shippingCost,
+          total,
+          paymentMethod,
+        },
+        order.id
+      ),
+      tgNewOrder({
         orderNumber,
         customerName,
-        customerEmail: email,
         customerPhone: phone,
+        customerEmail: email,
         shippingAddress,
         building,
         apartment,
         customerNote,
         city,
-        items: items.map((item) => ({
-          title: item.title,
-          price: cartItemPrice(item),
-          quantity: item.quantity,
-        })),
-        subtotal,
-        shippingCost,
         total,
-        paymentMethod,
-      },
-      order.id
-    ),
-    tgNewOrder({
-      orderNumber,
-      customerName,
-      customerPhone: phone,
-      customerEmail: email,
-      shippingAddress,
-      building,
-      apartment,
-      customerNote,
-      city,
-      total,
-      items: items.map((item) => ({ title: item.title, quantity: item.quantity })),
-    }),
-    // Expediția FAN, pentru comenzile cu plata la livrare: sunt finale în
-    // momentul plasării, deci AWB-ul se creează acum și comanda apare imediat
-    // în contul FAN. Comenzile online își primesc AWB-ul abia după ce banca
-    // confirmă plata (lib/payments/confirm.ts) — până atunci pot fi abandonate.
-    // Nu blochează și nu strică nimic: `createAwbForOrder` nu aruncă, iar dacă
-    // eșuează, AWB-ul se poate genera oricând din admin.
-    paymentMethod !== "ONLINE"
-      ? createAwbForOrder(order.id)
-      : Promise.resolve(null),
-    // Cât ne costă PE NOI expedierea (tariful din contractul FAN). E doar
-    // informativ, pentru marja văzută în admin, deci se salvează după fapt.
-    estimateFanCost(items, city, county, total).then((fanCost) =>
-      fanCost === null
-        ? null
-        : prisma.order.update({ where: { id: order.id }, data: { fanCost } })
-    ),
-  ]);
+        items: items.map((item) => ({ title: item.title, quantity: item.quantity })),
+      }),
+      // Cât ne costă PE NOI expedierea (tariful din contractul FAN). E doar
+      // informativ, pentru marja văzută în admin, deci se salvează după fapt.
+      estimateFanCost(items, city, county, total).then((fanCost) =>
+        fanCost === null
+          ? null
+          : prisma.order.update({ where: { id: order.id }, data: { fanCost } })
+      ),
+    ])
+  );
 
+  // Expediția FAN, pentru comenzile cu plata la livrare: sunt finale în momentul
+  // plasării, deci AWB-ul se creează acum și comanda apare imediat în contul
+  // FAN. Comenzile online își primesc AWB-ul abia după ce banca confirmă plata
+  // (lib/payments/confirm.ts) — până atunci pot fi abandonate.
+  // Nu strică nimic dacă eșuează: `createAwbForOrder` nu aruncă, iar AWB-ul se
+  // poate genera oricând din admin.
   // Plata la livrare (card sau numerar): comanda e gata, mergem direct la succes.
   if (paymentMethod !== "ONLINE") {
+    await createAwbForOrder(order.id);
     redirect(`/checkout/succes?order=${orderNumber}`);
   }
 
