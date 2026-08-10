@@ -226,12 +226,11 @@ export async function createOrderAndPay(
 
   revalidatePath("/", "layout");
 
-  // Comanda e salvată — de aici încolo nimic nu mai trebuie așteptat de client.
-  // Emailurile (SMTP, secunde bune), Telegram și estimarea tarifului FAN pleacă
-  // „după răspuns" (`waitUntil`), deci pagina de confirmare apare imediat.
-  // Singura excepție e AWB-ul la plata la livrare: rămâne așteptat, ca să fim
-  // siguri că expediția chiar a intrat în contul FAN înainte de a-i spune
-  // clientului că e gata.
+  // Comanda e salvată — de aici încolo clientul nu mai are ce aștepta. Tot ce
+  // urmează (emailuri prin SMTP, Telegram, AWB-ul FAN, estimarea tarifului)
+  // pleacă „după răspuns", prin `waitUntil`: pagina de confirmare apare imediat,
+  // iar munca se termină în fundal, garantat de platformă. Înainte se aștepta
+  // totul și clientul stătea ~5 secunde pe buton.
   runAfterResponse(
     Promise.allSettled([
       sendNewOrderEmails(
@@ -277,18 +276,18 @@ export async function createOrderAndPay(
           ? null
           : prisma.order.update({ where: { id: order.id }, data: { fanCost } })
       ),
+      // Expediția FAN, pentru comenzile cu plata la livrare: sunt finale în
+      // momentul plasării, deci AWB-ul se creează acum și comanda apare în
+      // contul FAN fără intervenție. Comenzile online își primesc AWB-ul abia
+      // după ce banca confirmă plata (lib/payments/confirm.ts) — până atunci pot
+      // fi abandonate. Dacă FAN e picat, `createAwbForOrder` nu aruncă, iar
+      // AWB-ul se poate genera oricând din admin.
+      paymentMethod !== "ONLINE" ? createAwbForOrder(order.id) : Promise.resolve(null),
     ])
   );
 
-  // Expediția FAN, pentru comenzile cu plata la livrare: sunt finale în momentul
-  // plasării, deci AWB-ul se creează acum și comanda apare imediat în contul
-  // FAN. Comenzile online își primesc AWB-ul abia după ce banca confirmă plata
-  // (lib/payments/confirm.ts) — până atunci pot fi abandonate.
-  // Nu strică nimic dacă eșuează: `createAwbForOrder` nu aruncă, iar AWB-ul se
-  // poate genera oricând din admin.
   // Plata la livrare (card sau numerar): comanda e gata, mergem direct la succes.
   if (paymentMethod !== "ONLINE") {
-    await createAwbForOrder(order.id);
     redirect(`/checkout/succes?order=${orderNumber}`);
   }
 
