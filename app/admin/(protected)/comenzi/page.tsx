@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/format";
 import { formatDateTimeShort } from "@/lib/datetime";
 import { OrderStatusBadge, PaymentStatusBadge, ORDER_STATUS_LABELS } from "@/components/admin/StatusBadge";
 import { AdminPagination } from "@/components/admin/AdminPagination";
+import { PaymentsReconciler } from "@/components/admin/PaymentsReconciler";
 
 export const metadata: Metadata = { title: "Comenzi — Admin Dostore Carti" };
 
@@ -21,6 +22,8 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
   return (
     <div>
+      <PaymentsReconciler />
+
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Comenzi</h1>

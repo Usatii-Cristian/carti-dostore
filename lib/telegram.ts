@@ -70,6 +70,26 @@ export async function tgPaymentConfirmed(order: {
   await send(`💳 <b>Plată confirmată</b> — comanda ${esc(order.orderNumber)} (${order.total} lei)`);
 }
 
+/**
+ * Comanda online la care clientul n-a dus plata la capăt (QR expirat sau
+ * anulat). Magazinul trebuie să afle: până acum astfel de comenzi apăreau ca
+ * orice comandă nouă, dar nu ajungeau niciodată la curier — și nimeni nu știa
+ * de ce. Cu mesajul ăsta se poate suna clientul și oferi plata la livrare.
+ */
+export async function tgPaymentExpired(order: {
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  total: number;
+}): Promise<void> {
+  await send(
+    `⚠️ <b>Plată neefectuată</b> — comanda ${esc(order.orderNumber)} (${order.total} lei)\n` +
+      `👤 ${esc(order.customerName)} · 📞 ${esc(order.customerPhone)}\n` +
+      `Clientul a ales plata online, dar n-a achitat, iar codul QR a expirat. ` +
+      `Comanda a fost marcată anulată și NU a plecat la curier — sună clientul dacă vrei să o salvezi.`
+  );
+}
+
 export async function tgStatusChange(order: {
   orderNumber: string;
   statusLabel: string;

@@ -9,6 +9,7 @@ import { cartItemPrice, getShippingCost, getCodFee } from "@/lib/store/cart";
 import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { runAfterResponse } from "@/lib/after-response";
+import { reconcilePendingPayments } from "@/lib/payments/reconcile";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
 import type { CartItem } from "@/lib/store/cart";
@@ -283,6 +284,10 @@ export async function createOrderAndPay(
       // fi abandonate. Dacă FAN e picat, `createAwbForOrder` nu aruncă, iar
       // AWB-ul se poate genera oricând din admin.
       paymentMethod !== "ONLINE" ? createAwbForOrder(order.id) : Promise.resolve(null),
+      // Ocazie bună să închidem comenzile online rămase neconfirmate: cele
+      // plătite își primesc AWB-ul, cele cu QR expirat se anulează. Vezi
+      // lib/payments/reconcile.ts.
+      reconcilePendingPayments(),
     ])
   );
 
