@@ -53,6 +53,7 @@ const FIELDS: {
   colSpan?: boolean;
   /** Câmpurile opționale nu intră în validarea „formular complet". */
   optional?: boolean;
+  hint?: string;
 }[] = [
   {
     name: "customerName",
@@ -93,6 +94,7 @@ const FIELDS: {
     autoComplete: "address-line2",
     placeholder: "bl. 3 sau casă",
     optional: true,
+    hint: "Lasă gol dacă stai la casă.",
   },
   {
     name: "apartment",
@@ -101,6 +103,7 @@ const FIELDS: {
     autoComplete: "address-line3",
     placeholder: "ap. 41",
     optional: true,
+    hint: "Lasă gol dacă nu e cazul.",
   },
 ];
 
@@ -225,10 +228,12 @@ export function CheckoutView() {
                       : "border-border focus:border-terracotta"
                   }`}
                 />
-                {state.fieldErrors?.[field.name] && (
+                {state.fieldErrors?.[field.name] ? (
                   <p id={`${field.name}-error`} className="mt-1.5 text-xs font-medium text-terracotta">
                     {state.fieldErrors[field.name]}
                   </p>
+                ) : (
+                  field.hint && <p className="mt-1.5 text-xs text-ink-soft">{field.hint}</p>
                 )}
               </div>
             ))}

@@ -191,12 +191,6 @@ export async function createOrderAndPay(
   const total = subtotal + shippingCost;
   const orderNumber = generateOrderNumber();
 
-  // Cât ne costă pe noi expedierea, după tariful FAN. Greutățile le citim din
-  // DB, nu din coșul din localStorage — clientul nu trebuie să poată influența
-  // un input de tarifare. Nu blochează comanda: `getShippingPrice` întoarce
-  // null dacă FAN nu răspunde sau nu e configurat.
-  const fanCost = county ? await estimateFanCost(items, city, county, total) : null;
-
   const order = await prisma.order.create({
     data: {
       orderNumber,
@@ -212,7 +206,6 @@ export async function createOrderAndPay(
       paymentMethod,
       // Dovada consimțământului, cu momentul exact.
       termsAcceptedAt: new Date(),
-      fanCost,
       subtotal,
       shippingCost,
       total,
@@ -232,8 +225,10 @@ export async function createOrderAndPay(
 
   revalidatePath("/", "layout");
 
-  // Confirmare către client + notificare către admin (email + Telegram). Nimic
-  // din astea nu blochează și nu poate strica fluxul de plată.
+  // Tot ce urmează rulează ÎN PARALEL, după ce comanda e deja salvată: emailuri,
+  // Telegram, AWB-ul FAN și estimarea costului de transport. Înainte, estimarea
+  // se făcea secvențial, înaintea salvării — clientul aștepta degeaba un drum în
+  // plus la FAN pentru o cifră pur informativă, afișată doar în admin.
   await Promise.allSettled([
     sendNewOrderEmails(
       {
@@ -280,6 +275,13 @@ export async function createOrderAndPay(
     paymentMethod !== "ONLINE"
       ? createAwbForOrder(order.id)
       : Promise.resolve(null),
+    // Cât ne costă PE NOI expedierea (tariful din contractul FAN). E doar
+    // informativ, pentru marja văzută în admin, deci se salvează după fapt.
+    estimateFanCost(items, city, county, total).then((fanCost) =>
+      fanCost === null
+        ? null
+        : prisma.order.update({ where: { id: order.id }, data: { fanCost } })
+    ),
   ]);
 
   // Plata la livrare (card sau numerar): comanda e gata, mergem direct la succes.
