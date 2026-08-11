@@ -32,10 +32,12 @@ export type PaymentReceiptData = {
   paidAt: Date;
 };
 
+// Fără adresa sediului: emailurile ajung la clienți, iar adresa juridică nu are
+// ce căuta în ele (rămâne pe paginile Termeni și Confidențialitate). Restul —
+// denumire, cod fiscal, IBAN, contact — sunt necesare pe un document de plată.
 const SELLER = {
   name: "Free Life SRL",
   fiscalCode: "1025600059594",
-  address: "Str. Petru Zadnipru 19/2, Chișinău, Republica Moldova",
   iban: "MD46VI022511400000572MDL, VictoriaBank",
   email: "dostore.moldova@gmail.com",
   phone: "+373 68 812 853",
@@ -163,8 +165,6 @@ export function PaymentReceiptEmail({ receipt }: { receipt: PaymentReceiptData }
       <Text style={{ ...styles.itemMeta, lineHeight: "1.7" }}>
         <span style={styles.strong}>Vânzător:</span> {SELLER.name}, cod fiscal{" "}
         {SELLER.fiscalCode}
-        <br />
-        {SELLER.address}
         <br />
         IBAN: {SELLER.iban}
         <br />
