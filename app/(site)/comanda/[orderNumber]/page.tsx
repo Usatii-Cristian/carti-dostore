@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/format";
 import { STATUS_META } from "@/lib/orders/status";
 import { formatShippingAddress } from "@/lib/orders/address";
 import { OrderTimeline } from "@/components/orders/OrderTimeline";
+import { ClearCartOnMount } from "@/components/checkout/ClearCartOnMount";
 
 export const metadata: Metadata = {
   title: "Status comandă",
@@ -14,7 +15,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-type PageProps = { params: Promise<{ orderNumber: string }> };
+type PageProps = {
+  params: Promise<{ orderNumber: string }>;
+  // `?nou=1` vine imediat după plasarea comenzii: atunci pagina salută clientul
+  // și golește coșul. Redirectul de după plată vine aici, nu pe o adresă de tip
+  // /checkout/succes?order=… — unele firewall-uri corporative tratau acel tipar
+  // ca pe un site de jocuri de noroc și blocau clientul (sesizare BNM).
+  searchParams: Promise<{ nou?: string }>;
+};
 
 function formatDate(date: Date): string {
   return new Date(date).toLocaleDateString("ro-RO", {
@@ -30,8 +38,10 @@ function daysUntil(date: Date): number {
   return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
 }
 
-export default async function OrderTrackingPage({ params }: PageProps) {
+export default async function OrderTrackingPage({ params, searchParams }: PageProps) {
   const { orderNumber } = await params;
+  const { nou } = await searchParams;
+  const isNew = nou === "1";
 
   const order = await prisma.order.findUnique({
     where: { orderNumber: decodeURIComponent(orderNumber) },
@@ -49,8 +59,12 @@ export default async function OrderTrackingPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+      {isNew && <ClearCartOnMount />}
+
       <div className="text-center">
-        <h1 className="font-serif text-3xl font-semibold text-ink sm:text-4xl">Status comandă</h1>
+        <h1 className="font-serif text-3xl font-semibold text-ink sm:text-4xl">
+          {isNew ? "Îți mulțumim pentru comandă!" : "Status comandă"}
+        </h1>
         <p className="mt-2 text-ink-soft">
           Comanda <span className="font-semibold text-ink">{order.orderNumber}</span>
         </p>

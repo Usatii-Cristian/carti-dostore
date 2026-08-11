@@ -78,7 +78,7 @@ export function Footer() {
             <ul className="mt-4 space-y-2.5 text-sm text-cream/70">
               <li className="flex items-center gap-2">
                 <QrCode className="h-4.5 w-4.5 text-gold" aria-hidden="true" />
-                Plată online prin QR
+                MIA Plăți Instant
               </li>
               <li className="flex items-center gap-2">
                 <CreditCard className="h-4.5 w-4.5 text-gold" aria-hidden="true" />
@@ -99,11 +99,13 @@ export function Footer() {
             <div className="mt-6 flex flex-col items-start gap-4">
               {/* Aceeași înălțime pentru ambele sigle (lățimea diferă natural,
                   fiindcă au proporții diferite). */}
+              {/* Sigla oficială MIA (varianta pentru fundal închis), preluată
+                  din identitatea de brand publicată pe mia.bnm.md. */}
               <Image
-                src="/plati/mia-alb.png"
-                alt="MIA — plăți instant"
-                width={161}
-                height={40}
+                src="/plati/mia-logo-alb.svg"
+                alt="MIA Plăți Instant"
+                width={268}
+                height={48}
                 className="h-10 w-auto object-contain"
               />
               <Image

@@ -37,7 +37,7 @@ export function PaymentQr({
         if (!active) return;
         if (data.status === "paid") {
           setState("paid");
-          router.push(`/checkout/succes?order=${orderNumber}`);
+          router.push(`/comanda/${orderNumber}?nou=1`);
         } else if (data.status === "failed") {
           setState("failed");
         }

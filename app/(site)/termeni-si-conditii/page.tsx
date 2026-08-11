@@ -24,14 +24,16 @@ const sections = [
   },
   {
     title: "5. Livrarea",
-    body: "Livrarea este asigurată de FAN Courier, în toată Republica Moldova, în 1-3 zile lucrătoare de la confirmarea comenzii, la adresa indicată de client. După expediere primești un număr AWB cu care poți urmări coletul. Termenele de livrare și eventualele întârzieri cauzate de curier sunt guvernate de condițiile de transport ale FAN Courier. Detalii despre costuri găsești pe pagina Livrare și plată.",
+    body:
+      "Toate comenzile se livrează prin curier — Dostore Cărți nu are magazin fizic și nu oferă ridicare personală, deci livrarea face parte din orice comandă, iar costul ei se adaugă la valoarea produselor. Livrarea este asigurată de FAN Courier, în toată Republica Moldova, în 1-3 zile lucrătoare de la confirmarea comenzii, la adresa indicată de client. Costul livrării este de 60 MDL pentru municipiul Chișinău și 85 MDL pentru restul Republicii Moldova, indiferent de valoarea comenzii; la plata la livrare (card sau numerar) se adaugă o taxă de ramburs de 15 MDL. Costul exact este afișat în coș și la finalizarea comenzii, înainte de plată, iar clientul confirmă expres acceptarea livrării la checkout. După expediere primești un număr AWB cu care poți urmări coletul. Termenele de livrare și eventualele întârzieri cauzate de curier sunt guvernate de condițiile de transport ale FAN Courier.",
   },
   {
     title: "6. Metodele de plată",
-    body: "Acceptăm trei metode: (a) plata online pe site prin MIA — sistemul național de plăți instant al Băncii Naționale a Moldovei, disponibil din aplicația oricărei bănci participante; (b) plata cu cardul la livrare, la curier; (c) plata în numerar la livrare. Plățile se efectuează în lei moldovenești (MDL).",
+    body:
+      "Acceptăm trei metode: (a) MIA Plăți Instant (MIA Instant Payments) — plata online pe site, prin sistemul național de plăți instant al Băncii Naționale a Moldovei, disponibil din aplicația oricărei bănci participante; (b) plata cu cardul la livrare, la curier; (c) plata în numerar la livrare. Plățile se efectuează în lei moldovenești (MDL). După confirmarea plății online, clientul primește pe email bonul electronic al cumpărăturii, cu produsele achitate, suma, metoda de plată și referința tranzacției.",
   },
   {
-    title: "7. Plata instant prin MIA",
+    title: "7. MIA Plăți Instant (MIA Instant Payments)",
     body: "MIA este sistemul național de plăți instant al Republicii Moldova, dezvoltat de Banca Națională a Moldovei. Plata se face direct din contul bancar, prin scanarea unui cod QR generat la finalizarea comenzii, cu aplicația băncii tale (ex. VB24, maib ID sau alta bancă participantă) — fără introducerea datelor cardului pe site-ul nostru. Plata se confirmă în câteva secunde, iar comanda este marcată automat ca achitată. Codul QR are o valabilitate limitată, stabilită de sistemul MIA; dacă expiră fără a fi folosit, comanda rămâne înregistrată și te putem contacta pentru a o finaliza.",
   },
   {

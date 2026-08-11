@@ -11,6 +11,8 @@ import {
   getCodFee,
   isLocalDelivery,
   COD_FEE,
+  SHIPPING_LOCAL,
+  SHIPPING_NATIONAL,
 } from "@/lib/store/cart";
 import { createOrderAndPay, type CheckoutState } from "@/lib/actions/checkout";
 import { formatPrice } from "@/lib/format";
@@ -27,8 +29,11 @@ const PHONE_REGEX = /^[0-9+\s()-]{6,20}$/;
 const PAYMENT_METHODS = [
   {
     value: "ONLINE",
-    label: "Plătește acum, pe site (card / QR)",
-    hint: "Scanezi un cod QR și plătești instant din aplicația băncii.",
+    // Numele oficial al serviciului, cerut expres de BNM: nu „card/QR", ci
+    // MIA Plăți Instant. Logo-ul oficial apare lângă opțiune.
+    label: "MIA Plăți Instant (MIA Instant Payments)",
+    hint: "Plătești instant din aplicația băncii tale, scanând codul QR MIA. Banii se transferă direct din cont, fără card.",
+    logo: "/plati/mia-logo.svg",
   },
   {
     value: "CARD_ON_DELIVERY",
@@ -126,6 +131,10 @@ export function CheckoutView() {
     county: state.values?.county ?? "",
   });
   const [termsChecked, setTermsChecked] = useState(state.values?.terms === "on");
+  // Bifa de livrare: pornește bifată (nu există altă modalitate de a primi
+  // comanda), dar clientul o poate debifa — și atunci vede de ce nu poate
+  // continua, în loc să i se factureze tacit un serviciu.
+  const [deliveryAccepted, setDeliveryAccepted] = useState(true);
   // Metoda de plată e urmărită ca să putem afișa taxa de ramburs (15 lei) doar
   // după ce clientul alege efectiv plata la livrare.
   const [paymentMethod, setPaymentMethod] = useState<string>(
@@ -146,6 +155,7 @@ export function CheckoutView() {
     // cu ea, iar fără raion FAN nu acceptă expediția, deci comanda ar rămâne
     // nelivrabilă. Aceeași regulă e verificată și pe server.
     values.county.trim().length > 0 &&
+    deliveryAccepted &&
     termsChecked;
 
   if (items.length === 0) {
@@ -278,6 +288,47 @@ export function CheckoutView() {
             </div>
           </div>
 
+          {/* Livrarea, declarată explicit: preț la vedere și o bifă a clientului.
+              Cerut de BNM la verificarea site-ului — clientul trebuie să vadă
+              cât costă livrarea și să confirme că o acceptă, iar dacă magazinul
+              livrează exclusiv prin curier, asta trebuie spus pe față. */}
+          <fieldset className="border-t border-border pt-5">
+            <legend className="mb-3 font-serif text-lg font-semibold text-ink">Livrare</legend>
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3.5 transition-colors has-[:checked]:border-terracotta has-[:checked]:bg-terracotta/5">
+              <input
+                type="checkbox"
+                name="deliveryAccepted"
+                checked={deliveryAccepted}
+                onChange={(event) => setDeliveryAccepted(event.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-terracotta"
+              />
+              <span className="flex-1">
+                <span className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="text-sm font-semibold text-ink">
+                    Livrare prin curier, la adresa indicată
+                  </span>
+                  <span className="text-sm font-semibold text-terracotta">
+                    {cityChosen
+                      ? formatPrice(shipping)
+                      : `${SHIPPING_LOCAL}–${SHIPPING_NATIONAL} lei`}
+                  </span>
+                </span>
+                <span className="mt-1 block text-xs text-ink-soft">
+                  {formatPrice(SHIPPING_LOCAL)} în Chișinău și {formatPrice(SHIPPING_NATIONAL)} în
+                  restul Republicii Moldova, prin FAN Courier, în 1–3 zile lucrătoare.
+                </span>
+                <span className="mt-1 block text-xs text-ink-soft">
+                  Produsele se expediază doar prin curier — nu avem ridicare personală, deci
+                  livrarea face parte din orice comandă. Detalii în{" "}
+                  <Link href="/termeni-si-conditii" target="_blank" className="font-medium text-terracotta underline">
+                    Termeni și condiții
+                  </Link>
+                  .
+                </span>
+              </span>
+            </label>
+          </fieldset>
+
           <fieldset className="border-t border-border pt-5">
             <legend className="mb-3 font-serif text-lg font-semibold text-ink">
               Metoda de plată
@@ -296,8 +347,19 @@ export function CheckoutView() {
                     onChange={() => setPaymentMethod(method.value)}
                     className="mt-0.5 h-4 w-4 accent-terracotta"
                   />
-                  <span>
-                    <span className="block text-sm font-semibold text-ink">{method.label}</span>
+                  <span className="flex-1">
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-sm font-semibold text-ink">{method.label}</span>
+                      {"logo" in method && method.logo && (
+                        <Image
+                          src={method.logo}
+                          alt="MIA Plăți Instant"
+                          width={291}
+                          height={54}
+                          className="h-5 w-auto"
+                        />
+                      )}
+                    </span>
                     <span className="block text-xs text-ink-soft">{method.hint}</span>
                     {method.value !== "ONLINE" && (
                       <span className="mt-1 block text-xs font-medium text-terracotta">
@@ -354,11 +416,25 @@ export function CheckoutView() {
           <button
             type="submit"
             disabled={pending || !isFormComplete}
-            title={!isFormComplete ? "Completează toate datele și bifează acordul mai sus" : undefined}
+            title={
+              !isFormComplete
+                ? "Completează toate datele, acceptă livrarea și bifează acordul de mai sus"
+                : undefined
+            }
             className="flex w-full items-center justify-center rounded-full bg-terracotta px-7 py-3.5 font-semibold text-cream transition-opacity hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-terracotta"
           >
             {pending ? "Se procesează..." : `Trimite comanda · ${formatPrice(total)}`}
           </button>
+
+          {!deliveryAccepted && (
+            <p role="alert" className="text-center text-xs font-medium text-terracotta">
+              Comanda ajunge la tine doar prin curier. Dacă nu accepți livrarea, scrie-ne la{" "}
+              <a href="mailto:dostore.moldova@gmail.com" className="underline">
+                dostore.moldova@gmail.com
+              </a>{" "}
+              și găsim o soluție.
+            </p>
+          )}
         </form>
 
         <div className="h-fit space-y-4 rounded-xl bg-card p-6 shadow-sm ring-1 ring-border/70">
@@ -394,13 +470,13 @@ export function CheckoutView() {
             </div>
             <div className="flex justify-between">
               <dt className="text-ink-soft">
-                Transport
+                Livrare prin curier
                 <span className="block text-xs text-ink-soft/70">
                   {cityChosen
                     ? isLocalDelivery(values.city)
                       ? "Chișinău"
                       : "În toată țara"
-                    : "Alege localitatea"}
+                    : `${SHIPPING_LOCAL} lei Chișinău · ${SHIPPING_NATIONAL} lei restul țării`}
                 </span>
               </dt>
               <dd className="font-medium text-ink">{formatPrice(shipping)}</dd>

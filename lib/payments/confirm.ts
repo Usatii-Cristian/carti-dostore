@@ -1,7 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getQrStatus } from "@/lib/payments/victoriabank";
-import { sendPaymentConfirmedEmail } from "@/lib/email/notifications";
+import { sendPaymentReceiptEmail } from "@/lib/email/notifications";
 import { tgPaymentConfirmed } from "@/lib/telegram";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { runAfterResponse } from "@/lib/after-response";
@@ -17,7 +17,10 @@ import { runAfterResponse } from "@/lib/after-response";
 export async function confirmOrderPayment(
   orderNumber: string
 ): Promise<"paid" | "pending" | "failed"> {
-  const order = await prisma.order.findUnique({ where: { orderNumber } });
+  const order = await prisma.order.findUnique({
+    where: { orderNumber },
+    include: { items: true },
+  });
   if (!order || !order.qrHeaderUUID) return "failed";
 
   if (order.paymentStatus === "PAID") return "paid";
@@ -39,11 +42,26 @@ export async function confirmOrderPayment(
     // iar SMTP-ul poate dura secunde bune.
     runAfterResponse(
       Promise.allSettled([
-        sendPaymentConfirmedEmail({
+        // Bonul electronic către client — dovada cumpărăturii, cerută de BNM.
+        sendPaymentReceiptEmail({
+          orderNumber: order.orderNumber,
           customerName: order.customerName,
           customerEmail: order.customerEmail,
-          orderNumber: order.orderNumber,
+          customerPhone: order.customerPhone,
+          shippingAddress: order.shippingAddress,
+          building: order.building,
+          apartment: order.apartment,
+          city: order.city,
+          items: order.items.map((item) => ({
+            title: item.title,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+          subtotal: order.subtotal,
+          shippingCost: order.shippingCost,
           total: order.total,
+          paymentReference: result.paymentReference ?? order.paymentId,
+          paidAt: new Date(),
         }),
         tgPaymentConfirmed({ orderNumber: order.orderNumber, total: order.total }),
       ])

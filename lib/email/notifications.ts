@@ -4,7 +4,10 @@ import { SITE_URL } from "@/lib/site";
 import { prisma } from "@/lib/prisma";
 import { OrderConfirmationEmail } from "./templates/OrderConfirmationEmail";
 import { AdminOrderNotificationEmail } from "./templates/AdminOrderNotificationEmail";
-import { PaymentConfirmedEmail } from "./templates/PaymentConfirmedEmail";
+import {
+  PaymentReceiptEmail,
+  type PaymentReceiptData,
+} from "./templates/PaymentReceiptEmail";
 import { NewsletterWelcomeEmail } from "./templates/NewsletterWelcomeEmail";
 import { OrderStatusUpdateEmail } from "./templates/OrderStatusUpdateEmail";
 import { NewBookAnnouncementEmail } from "./templates/NewBookAnnouncementEmail";
@@ -51,21 +54,17 @@ export async function sendNewOrderEmails(
   await Promise.allSettled(tasks);
 }
 
-export async function sendPaymentConfirmedEmail(input: {
-  customerName: string;
-  customerEmail: string;
-  orderNumber: string;
-  total: number;
-}): Promise<void> {
+/**
+ * Bonul electronic trimis după confirmarea plății. A înlocuit vechiul email de
+ * confirmare, care spunea doar că banii au intrat: BNM cere ca după plată
+ * clientul să primească pe email dovada cumpărăturii — ce a cumpărat, cât a
+ * plătit, prin ce metodă și cu ce referință de tranzacție.
+ */
+export async function sendPaymentReceiptEmail(receipt: PaymentReceiptData): Promise<void> {
   await sendEmail({
-    to: input.customerEmail,
-    subject: `Plata pentru comanda ${input.orderNumber} a fost confirmată`,
-    react: PaymentConfirmedEmail({
-      customerName: input.customerName,
-      orderNumber: input.orderNumber,
-      total: input.total,
-      trackingUrl: trackingUrl(input.orderNumber),
-    }),
+    to: receipt.customerEmail,
+    subject: `Bon electronic — comanda ${receipt.orderNumber} (${receipt.total.toFixed(2)} lei)`,
+    react: PaymentReceiptEmail({ receipt }),
   });
 }
 

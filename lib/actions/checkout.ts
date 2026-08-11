@@ -293,7 +293,7 @@ export async function createOrderAndPay(
 
   // Plata la livrare (card sau numerar): comanda e gata, mergem direct la succes.
   if (paymentMethod !== "ONLINE") {
-    redirect(`/checkout/succes?order=${orderNumber}`);
+    redirect(`/comanda/${orderNumber}?nou=1`);
   }
 
   // Plată online prin VictoriaBank (MIA). Fără credențiale, `createQrPayment`
@@ -320,5 +320,5 @@ export async function createOrderAndPay(
     redirect(`/checkout/plata?order=${orderNumber}`);
   }
 
-  redirect(`/checkout/succes?order=${orderNumber}`);
+  redirect(`/comanda/${orderNumber}?nou=1`);
 }
