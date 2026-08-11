@@ -131,10 +131,10 @@ export function CheckoutView() {
     county: state.values?.county ?? "",
   });
   const [termsChecked, setTermsChecked] = useState(state.values?.terms === "on");
-  // Bifa de livrare: pornește bifată (nu există altă modalitate de a primi
-  // comanda), dar clientul o poate debifa — și atunci vede de ce nu poate
-  // continua, în loc să i se factureze tacit un serviciu.
-  const [deliveryAccepted, setDeliveryAccepted] = useState(true);
+  // Bifa de livrare pornește NEBIFATĂ, intenționat: BNM a cerut ca livrarea să
+  // fie ceva ce clientul acceptă el, nu un serviciu adăugat tacit. O căsuță deja
+  // bifată n-ar fi o alegere reală.
+  const [deliveryAccepted, setDeliveryAccepted] = useState(false);
   // Metoda de plată e urmărită ca să putem afișa taxa de ramburs (15 lei) doar
   // după ce clientul alege efectiv plata la livrare.
   const [paymentMethod, setPaymentMethod] = useState<string>(
@@ -428,11 +428,12 @@ export function CheckoutView() {
 
           {!deliveryAccepted && (
             <p role="alert" className="text-center text-xs font-medium text-terracotta">
-              Comanda ajunge la tine doar prin curier. Dacă nu accepți livrarea, scrie-ne la{" "}
+              Bifează livrarea prin curier ca să poți trimite comanda — produsele ajung la tine
+              doar prin curier. Dacă ai nevoie de altă înțelegere, scrie-ne la{" "}
               <a href="mailto:dostore.moldova@gmail.com" className="underline">
                 dostore.moldova@gmail.com
-              </a>{" "}
-              și găsim o soluție.
+              </a>
+              .
             </p>
           )}
         </form>

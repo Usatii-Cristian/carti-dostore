@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Phone, Package, MapPin, CalendarClock, Truck } from "lucide-react";
+import Image from "next/image";
+import { Phone, Package, MapPin, CalendarClock, Truck, CreditCard } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { STATUS_META } from "@/lib/orders/status";
@@ -150,6 +151,29 @@ export default async function OrderTrackingPage({ params, searchParams }: PagePr
               <dd className="font-semibold text-ink">{order.trackingNumber}</dd>
             </div>
           )}
+          <div className="flex items-center justify-between gap-4">
+            <dt className="flex items-center gap-2 text-ink-soft">
+              <CreditCard className="h-4 w-4" aria-hidden="true" /> Plată
+            </dt>
+            <dd className="flex items-center gap-2 text-right font-semibold text-ink">
+              {order.paymentMethod === "ONLINE" ? (
+                <>
+                  <Image
+                    src="/plati/mia-logo.svg"
+                    alt="MIA Plăți Instant"
+                    width={291}
+                    height={54}
+                    className="h-4 w-auto"
+                  />
+                  <span>MIA Plăți Instant</span>
+                </>
+              ) : order.paymentMethod === "CARD_ON_DELIVERY" ? (
+                "Card la livrare"
+              ) : (
+                "Numerar la livrare"
+              )}
+            </dd>
+          </div>
           <div className="flex items-center justify-between gap-4 border-t border-border pt-3">
             <dt className="text-ink-soft">Sumă comandă</dt>
             <dd className="text-base font-semibold text-terracotta">{formatPrice(order.total)}</dd>
