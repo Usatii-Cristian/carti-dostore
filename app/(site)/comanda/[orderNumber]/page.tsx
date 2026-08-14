@@ -56,6 +56,9 @@ export default async function OrderTrackingPage({ params, searchParams }: PagePr
     new Date(order.createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
   const isDelivered = order.status === "DELIVERED";
   const isCancelled = order.status === "CANCELLED";
+  // Comandă online care încă n-a fost achitată — plata se poate relua.
+  const awaitingPayment =
+    order.paymentMethod === "ONLINE" && order.paymentStatus === "UNPAID" && !isCancelled;
   const remainingDays = daysUntil(estimated);
 
   return (
@@ -85,6 +88,26 @@ export default async function OrderTrackingPage({ params, searchParams }: PagePr
           Actualizat la {formatDate(order.updatedAt)}
         </p>
       </div>
+
+      {/* Comandă online neachitată: clientul trebuie să poată relua plata chiar
+          de aici. Linkul din emailul de confirmare duce pe pagina asta, iar
+          fără buton nu avea cum să finalizeze. */}
+      {awaitingPayment && (
+        <div className="mt-8 rounded-xl border border-terracotta/30 bg-terracotta/5 p-5 text-center">
+          <p className="font-semibold text-ink">Comanda așteaptă plata</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            Ai ales plata prin MIA Plăți Instant. Finalizează plata ca să pregătim coletul —
+            durează câteva secunde, direct din aplicația băncii tale.
+          </p>
+          <Link
+            href={`/checkout/plata?order=${encodeURIComponent(order.orderNumber)}`}
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
+          >
+            <CreditCard className="h-4.5 w-4.5" aria-hidden="true" />
+            Finalizează plata · {formatPrice(order.total)}
+          </Link>
+        </div>
+      )}
 
       {/* Estimare livrare */}
       {!isCancelled && (

@@ -16,7 +16,19 @@ export type Variant = { label: string; price?: number | null };
  * cine vrea 2 seturi „Suplimente" și 1 „Top 10 provocări" face o singură
  * operație, iar în coș apar ca linii separate.
  */
-export function VariantPicker({ book, variants }: { book: BookCardData; variants: Variant[] }) {
+export function VariantPicker({
+  book,
+  variants,
+  compact = false,
+  onAdded,
+}: {
+  book: BookCardData;
+  variants: Variant[];
+  /** În fereastra din catalog nu repetăm titlul și cadrul secțiunii. */
+  compact?: boolean;
+  /** Anunță părintele (fereastra) că s-a adăugat, ca să se poată închide. */
+  onAdded?: () => void;
+}) {
   const addItem = useCartStore((state) => state.addItem);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [justAdded, setJustAdded] = useState(false);
@@ -43,15 +55,20 @@ export function VariantPicker({ book, variants }: { book: BookCardData; variants
     }
     setQuantities({});
     setJustAdded(true);
+    onAdded?.();
     window.setTimeout(() => setJustAdded(false), 2500);
   }
 
   return (
-    <div className="mt-6 rounded-xl border border-border bg-card p-4 sm:p-5">
-      <h2 className="font-serif text-lg font-semibold text-ink">Alege tipul</h2>
-      <p className="mt-1 text-sm text-ink-soft">
-        Pune cantitatea dorită la fiecare tip. Poți comanda mai multe tipuri odată.
-      </p>
+    <div className={compact ? "" : "mt-6 rounded-xl border border-border bg-card p-4 sm:p-5"}>
+      {!compact && (
+        <>
+          <h2 className="font-serif text-lg font-semibold text-ink">Alege tipul</h2>
+          <p className="mt-1 text-sm text-ink-soft">
+            Pune cantitatea dorită la fiecare tip. Poți comanda mai multe tipuri odată.
+          </p>
+        </>
+      )}
 
       <ul className="mt-4 divide-y divide-border">
         {variants.map((variant) => {

@@ -19,6 +19,9 @@ export function SearchBar() {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
+  // Ce interogare a fost efectiv căutată (nu ce e în câmp acum) — o folosim în
+  // mesajul „n-am găsit nimic", ca să nu clipească textul în timp ce se scrie.
+  const [searchedFor, setSearchedFor] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -37,6 +40,9 @@ export function SearchBar() {
         if (!res.ok) return;
         const data = await res.json();
         setSuggestions(data.results ?? []);
+        // Deschidem lista și când nu e nimic: altfel clientul care scrie greșit
+        // rămâne fără niciun semn că s-a căutat ceva.
+        setSearchedFor(trimmed);
         setOpen(true);
       } catch {
         // cerere anulată sau eșuată — ignorăm, sugestiile sunt un bonus
@@ -94,6 +100,25 @@ export function SearchBar() {
           </button>
         </div>
       </form>
+
+      {/* Fără rezultate: spunem asta explicit, în loc să nu apară nimic. */}
+      {open && query.trim() && suggestions.length === 0 && searchedFor === query.trim() && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-card p-4 text-center shadow-lg">
+          <p className="text-sm font-medium text-ink">
+            Nu am găsit niciun produs pentru „{searchedFor}”
+          </p>
+          <p className="mt-1 text-xs text-ink-soft">
+            Încearcă alt cuvânt sau răsfoiește catalogul.
+          </p>
+          <Link
+            href="/carti"
+            onClick={() => setOpen(false)}
+            className="mt-3 inline-block rounded-full bg-terracotta px-5 py-2 text-sm font-semibold text-cream transition-colors hover:bg-terracotta-dark"
+          >
+            Vezi toate produsele
+          </Link>
+        </div>
+      )}
 
       {open && query.trim() && suggestions.length > 0 && (
         <ul className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-lg">

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { ShoppingCart, Check, ListChecks } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
+import { VariantDialog } from "./VariantDialog";
 import type { BookCardData } from "@/lib/types";
 
 export function AddToCartButton({
@@ -15,11 +15,12 @@ export function AddToCartButton({
 }) {
   const addItem = useCartStore((state) => state.addItem);
   const [justAdded, setJustAdded] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   // Produsele cu mai multe tipuri (etichete, cărți în mai multe limbi) NU pot fi
   // adăugate direct din listă: n-am ști ce tip vrea clientul, iar în coș ar
-  // ajunge o linie fără variantă, imposibil de expediat corect. Butonul devine
-  // link către pagina produsului, unde se alege tipul și cantitatea.
+  // ajunge o linie fără variantă, imposibil de expediat corect. Butonul deschide
+  // o fereastră în care alegerea tipului e obligatorie.
   const hasVariants = (book.variants?.length ?? 0) > 0;
 
   function handleAdd() {
@@ -30,19 +31,33 @@ export function AddToCartButton({
 
   if (hasVariants) {
     return (
-      <Link
-        href={`/carti/${book.slug}`}
-        aria-label={`Alege tipul pentru „${book.title}”`}
-        title="Alege tipul dorit"
-        className={
-          variant === "full"
-            ? "flex items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
-            : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
-        }
-      >
-        <ListChecks className={variant === "full" ? "h-4.5 w-4.5" : "h-4 w-4"} aria-hidden="true" />
-        {variant === "full" && "Alege tipul"}
-      </Link>
+      <>
+        <button
+          type="button"
+          onClick={() => setPickerOpen(true)}
+          aria-label={`Alege tipul pentru „${book.title}”`}
+          title="Alege tipul dorit"
+          className={
+            variant === "full"
+              ? "flex cursor-pointer items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
+              : "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
+          }
+        >
+          <ListChecks
+            className={variant === "full" ? "h-4.5 w-4.5" : "h-4 w-4"}
+            aria-hidden="true"
+          />
+          {variant === "full" && "Alege tipul"}
+        </button>
+
+        {pickerOpen && (
+          <VariantDialog
+            book={book}
+            variants={book.variants ?? []}
+            onClose={() => setPickerOpen(false)}
+          />
+        )}
+      </>
     );
   }
 
