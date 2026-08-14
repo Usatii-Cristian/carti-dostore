@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath, updateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 
 /**
@@ -14,9 +14,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  updateTag(CACHE_TAGS.books);
-  updateTag(CACHE_TAGS.categories);
-  updateTag(CACHE_TAGS.blog);
+  // `updateTag` merge DOAR în Server Actions (vezi docs Next 16); într-un route
+  // handler se folosește `revalidateTag`.
+  revalidateTag(CACHE_TAGS.books);
+  revalidateTag(CACHE_TAGS.categories);
+  revalidateTag(CACHE_TAGS.blog);
   revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true, revalidatedAt: new Date().toISOString() });
