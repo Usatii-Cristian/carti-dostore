@@ -16,9 +16,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   // `updateTag` merge DOAR în Server Actions (vezi docs Next 16); într-un route
   // handler se folosește `revalidateTag`.
-  revalidateTag(CACHE_TAGS.books);
-  revalidateTag(CACHE_TAGS.categories);
-  revalidateTag(CACHE_TAGS.blog);
+  revalidateTag(CACHE_TAGS.books, "max");
+  revalidateTag(CACHE_TAGS.categories, "max");
+  revalidateTag(CACHE_TAGS.blog, "max");
   revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true, revalidatedAt: new Date().toISOString() });
