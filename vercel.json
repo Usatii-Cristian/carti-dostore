@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/reconcile-payments",
-      "schedule": "0 7 * * *"
+      "schedule": "*/10 * * * *"
     }
   ]
 }

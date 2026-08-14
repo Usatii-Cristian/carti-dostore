@@ -2,7 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { getQrStatus } from "@/lib/payments/victoriabank";
 import { sendPaymentReceiptEmail } from "@/lib/email/notifications";
-import { tgPaymentConfirmed } from "@/lib/telegram";
+import { tgPaymentConfirmed, tgPaymentExpired } from "@/lib/telegram";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { runAfterResponse } from "@/lib/after-response";
 
@@ -76,6 +76,31 @@ export async function confirmOrderPayment(
   }
 
   if (result.status === "Expired" || result.status === "Cancelled" || result.status === "Inactive") {
+    // Codul QR a murit fără plată. Închidem comanda AICI, în singurul loc care
+    // vorbește cu banca — așa notificarea pleacă imediat ce cineva află
+    // (pagina de plată care face polling, webhook-ul băncii, cron-ul de
+    // reconciliere sau adminul), nu abia la următoarea comandă din magazin.
+    // Gardat: doar prima dată, ca să nu repetăm mesajul la fiecare verificare.
+    if (order.paymentStatus !== "FAILED") {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          paymentStatus: "FAILED",
+          status: order.status === "CANCELLED" ? order.status : "CANCELLED",
+          statusHistory: [...order.statusHistory, { status: "CANCELLED", at: new Date() }],
+        },
+      });
+
+      runAfterResponse(
+        tgPaymentExpired({
+          orderNumber: order.orderNumber,
+          customerName: order.customerName,
+          customerPhone: order.customerPhone,
+          total: order.total,
+        })
+      );
+    }
+
     return "failed";
   }
 
