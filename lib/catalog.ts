@@ -85,6 +85,10 @@ export function getCatalog(query: CatalogQuery): Promise<CatalogResult> {
   // ele ajung în componente care le tratează ca `Date`.
   return unstable_cache(() => queryCatalog(query), ["catalog", key], {
     tags: [CACHE_TAGS.books, CACHE_TAGS.categories],
+    // Plasă de siguranță: tag-urile acoperă modificările făcute din admin, dar
+    // nu și pe cele scrise direct în baza de date (scripturi de întreținere).
+    // Fără asta, catalogul putea servi produse fără tipurile nou adăugate.
+    revalidate: 3600,
   })().then(reviveDates);
 }
 
