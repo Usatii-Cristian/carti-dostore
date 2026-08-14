@@ -57,6 +57,8 @@ export type SendEmailInput = {
   subject: string;
   react: ReactElement;
   replyTo?: string;
+  /** Documente atașate (ex. bonul electronic în PDF). */
+  attachments?: { filename: string; content: Buffer; contentType?: string }[];
 };
 
 export type SendEmailResult = {
@@ -75,6 +77,7 @@ export async function sendEmail({
   subject,
   react,
   replyTo,
+  attachments,
 }: SendEmailInput): Promise<SendEmailResult> {
   if (!isConfigured) {
     console.info(
@@ -98,6 +101,7 @@ export async function sendEmail({
       html,
       text,
       replyTo,
+      attachments,
     });
 
     return { ok: true, id: info.messageId };

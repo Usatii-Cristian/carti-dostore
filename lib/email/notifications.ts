@@ -11,6 +11,7 @@ import {
 import { NewsletterWelcomeEmail } from "./templates/NewsletterWelcomeEmail";
 import { OrderStatusUpdateEmail } from "./templates/OrderStatusUpdateEmail";
 import { NewBookAnnouncementEmail } from "./templates/NewBookAnnouncementEmail";
+import { buildReceiptPdf } from "./pdf/receipt-pdf";
 import { STATUS_EMAIL } from "@/lib/orders/status";
 import type { OrderStatus } from "@prisma/client";
 import type { OrderEmailData } from "./types";
@@ -68,10 +69,27 @@ export async function sendNewOrderEmails(
  * plătit, prin ce metodă și cu ce referință de tranzacție.
  */
 export async function sendPaymentReceiptEmail(receipt: PaymentReceiptData): Promise<void> {
+  // PDF-ul e un plus, nu o condiție: dacă generarea eșuează, emailul pleacă tot,
+  // fiindcă el e dovada cerută. Nu rămâne clientul fără nimic pentru un atașament.
+  let attachments: { filename: string; content: Buffer; contentType: string }[] | undefined;
+  try {
+    const pdf = await buildReceiptPdf(receipt);
+    attachments = [
+      {
+        filename: `Bon-${receipt.orderNumber}.pdf`,
+        content: pdf,
+        contentType: "application/pdf",
+      },
+    ];
+  } catch (error) {
+    console.error("[email] generarea bonului PDF a eșuat:", error);
+  }
+
   await sendEmail({
     to: receipt.customerEmail,
     subject: `Bon electronic — comanda ${receipt.orderNumber} (${receipt.total.toFixed(2)} lei)`,
     react: PaymentReceiptEmail({ receipt }),
+    attachments,
   });
 }
 

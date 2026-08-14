@@ -3,6 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Nu expune „X-Powered-By: Next.js" — info leak inutil despre stack.
   poweredByHeader: false,
+  // Fișierele citite la runtime cu `fs` (fonturile și siglele din bonul PDF) nu
+  // sunt detectate automat de tracing-ul Vercel — fără asta, funcția ajunge în
+  // producție fără ele și generarea bonului crapă.
+  outputFileTracingIncludes: {
+    "/**": [
+      "./lib/email/pdf/fonts/**",
+      "./public/plati/mia-logo.png",
+      "./public/logo-nou.png",
+    ],
+  },
   // lucide-react exportă mii de iconițe dintr-un singur barrel file. Fără asta,
   // bundler-ul trage tot modulul ca să găsească cele ~20 pe care le folosim.
   experimental: {
