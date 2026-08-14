@@ -61,7 +61,7 @@ export function OrderConfirmationEmail({
       </Section>
 
       <Text style={{ ...styles.strong, fontSize: "15px", margin: "0 0 8px" }}>
-        Cărțile tale
+        Produsele tale
       </Text>
       {order.items.map((item, index) => (
         <Row key={index} style={styles.itemRow}>
