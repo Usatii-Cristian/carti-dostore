@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Check, ListChecks } from "lucide-react";
+import { ShoppingCart, Check } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { VariantDialog } from "./VariantDialog";
 import type { BookCardData } from "@/lib/types";
@@ -43,11 +43,14 @@ export function AddToCartButton({
               : "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
           }
         >
-          <ListChecks
+          {/* Aceeași iconiță de coș ca la restul produselor — clientul nu are de
+              ce să vadă un buton diferit; diferența apare abia la apăsare, când
+              se deschide fereastra de alegere a tipului. */}
+          <ShoppingCart
             className={variant === "full" ? "h-4.5 w-4.5" : "h-4 w-4"}
             aria-hidden="true"
           />
-          {variant === "full" && "Alege tipul"}
+          {variant === "full" && "Adaugă în coș"}
         </button>
 
         {pickerOpen && (
