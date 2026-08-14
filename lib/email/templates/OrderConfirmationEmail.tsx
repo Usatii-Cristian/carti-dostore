@@ -8,9 +8,12 @@ import { formatShippingAddress } from "@/lib/orders/address";
 export function OrderConfirmationEmail({
   order,
   trackingUrl,
+  paymentUrl,
 }: {
   order: OrderEmailData;
   trackingUrl?: string;
+  /** Pagina de plată — doar la comenzile online. */
+  paymentUrl?: string;
 }) {
   const firstName = order.customerName.split(" ")[0] || order.customerName;
 
@@ -40,8 +43,10 @@ export function OrderConfirmationEmail({
           </>
         ) : (
           <>
-            Îți pregătim comanda cu grijă — vei primi un mesaj de îndată ce plata e confirmată
-            și comanda pleacă spre tine.
+            Ai ales plata prin <span style={styles.strong}>MIA Plăți Instant</span>. Dacă ai
+            achitat deja, e totul în regulă — primești separat bonul electronic, iar noi
+            pregătim coletul. Dacă n-ai apucat să finalizezi plata, o poți face din butonul
+            de mai jos.
           </>
         )}
       </Text>
@@ -107,12 +112,23 @@ export function OrderConfirmationEmail({
         </Row>
       </Section>
 
-      {trackingUrl && (
+      {/* La plata online butonul duce la pagina de plată: dacă e deja achitată,
+          acea pagină trimite singură clientul la comanda lui, deci linkul e bun
+          în ambele situații. */}
+      {!payOnDelivery && paymentUrl ? (
         <Section style={{ textAlign: "center", marginTop: "24px" }}>
-          <Button href={trackingUrl} style={styles.button}>
-            Urmărește comanda
+          <Button href={paymentUrl} style={styles.button}>
+            Finalizează plata
           </Button>
         </Section>
+      ) : (
+        trackingUrl && (
+          <Section style={{ textAlign: "center", marginTop: "24px" }}>
+            <Button href={trackingUrl} style={styles.button}>
+              Urmărește comanda
+            </Button>
+          </Section>
+        )
       )}
 
       <Text style={{ ...styles.paragraph, margin: "24px 0 0" }}>

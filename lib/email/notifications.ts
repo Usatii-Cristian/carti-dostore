@@ -33,7 +33,14 @@ export async function sendNewOrderEmails(
     sendEmail({
       to: order.customerEmail,
       subject: `Am primit comanda ta ${order.orderNumber}`,
-      react: OrderConfirmationEmail({ order, trackingUrl: trackingUrl(order.orderNumber) }),
+      react: OrderConfirmationEmail({
+        order,
+        trackingUrl: trackingUrl(order.orderNumber),
+        paymentUrl:
+          order.paymentMethod === "ONLINE"
+            ? `${SITE_URL}/checkout/plata?order=${encodeURIComponent(order.orderNumber)}`
+            : undefined,
+      }),
     }),
   ];
 
