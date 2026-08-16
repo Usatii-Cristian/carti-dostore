@@ -62,7 +62,10 @@ function readOptional(file: string): Buffer | null {
 }
 
 export async function buildReceiptPdf(receipt: PaymentReceiptData): Promise<Buffer> {
-  const doc = new PDFDocument({ size: "A4", margin: 48, info: {
+  // `font: REGULAR` din construcție: altfel PDFKit pornește pe Helvetica și
+  // citește fișierele .afm din node_modules, care nu ajung în bundle-ul de pe
+  // Vercel — generarea crăpa în producție cu ENOENT.
+  const doc = new PDFDocument({ size: "A4", margin: 48, font: REGULAR, info: {
     Title: `Bon electronic ${receipt.orderNumber}`,
     Author: SELLER.company,
     Subject: "Confirmare de plată",

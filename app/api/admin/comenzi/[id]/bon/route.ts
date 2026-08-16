@@ -23,7 +23,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Comanda nu există." }, { status: 404 });
   }
 
-  const pdf = await buildReceiptPdf({
+  let pdf: Buffer;
+  try {
+    pdf = await buildReceiptPdf({
     orderNumber: order.orderNumber,
     customerName: order.customerName,
     customerEmail: order.customerEmail,
@@ -44,7 +46,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     // Bonul poartă momentul plății; pentru comenzile la livrare (încă neîncasate)
     // rămâne data comenzii, ca documentul să aibă totuși un reper corect.
     paidAt: order.paymentStatus === "PAID" ? order.updatedAt : order.createdAt,
-  });
+    });
+  } catch (error) {
+    // Ruta e doar pentru admin, deci putem întoarce motivul exact — altfel
+    // depanarea generării PDF pe serverless ar fi oarbă.
+    console.error("[bon] generarea PDF a eșuat:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
 
   return new NextResponse(new Uint8Array(pdf), {
     headers: {

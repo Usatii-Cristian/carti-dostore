@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
       "./lib/email/pdf/fonts/**",
       "./public/plati/mia-logo.png",
       "./public/logo-nou.png",
+      "./node_modules/pdfkit/js/data/**",
     ],
   },
   // lucide-react exportă mii de iconițe dintr-un singur barrel file. Fără asta,
