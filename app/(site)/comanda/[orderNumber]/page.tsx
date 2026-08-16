@@ -56,9 +56,13 @@ export default async function OrderTrackingPage({ params, searchParams }: PagePr
     new Date(order.createdAt.getTime() + 3 * 24 * 60 * 60 * 1000);
   const isDelivered = order.status === "DELIVERED";
   const isCancelled = order.status === "CANCELLED";
-  // Comandă online care încă n-a fost achitată — plata se poate relua.
+  // Comandă online neachitată — plata se poate relua. Include și cazul în care
+  // codul QR a expirat și comanda a fost închisă automat: clientul primește un
+  // cod nou de pe pagina de plată, în loc să fie nevoit să comande din nou.
+  const paymentExpired = order.paymentMethod === "ONLINE" && order.paymentStatus === "FAILED";
   const awaitingPayment =
-    order.paymentMethod === "ONLINE" && order.paymentStatus === "UNPAID" && !isCancelled;
+    order.paymentMethod === "ONLINE" &&
+    ((order.paymentStatus === "UNPAID" && !isCancelled) || paymentExpired);
   const remainingDays = daysUntil(estimated);
 
   return (
@@ -94,17 +98,20 @@ export default async function OrderTrackingPage({ params, searchParams }: PagePr
           fără buton nu avea cum să finalizeze. */}
       {awaitingPayment && (
         <div className="mt-8 rounded-xl border border-terracotta/30 bg-terracotta/5 p-5 text-center">
-          <p className="font-semibold text-ink">Comanda așteaptă plata</p>
+          <p className="font-semibold text-ink">
+            {paymentExpired ? "Codul de plată a expirat" : "Comanda așteaptă plata"}
+          </p>
           <p className="mt-1 text-sm text-ink-soft">
-            Ai ales plata prin MIA Plăți Instant. Finalizează plata ca să pregătim coletul —
-            durează câteva secunde, direct din aplicația băncii tale.
+            {paymentExpired
+              ? "Codurile MIA sunt valabile 30 de minute. Comanda ta e păstrată — cere un cod nou și poți plăti în continuare."
+              : "Ai ales plata prin MIA Plăți Instant. Finalizează plata ca să pregătim coletul — durează câteva secunde, direct din aplicația băncii tale."}
           </p>
           <Link
             href={`/checkout/plata?order=${encodeURIComponent(order.orderNumber)}`}
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
           >
             <CreditCard className="h-4.5 w-4.5" aria-hidden="true" />
-            Finalizează plata · {formatPrice(order.total)}
+            {paymentExpired ? "Reia plata" : "Finalizează plata"} · {formatPrice(order.total)}
           </Link>
         </div>
       )}
