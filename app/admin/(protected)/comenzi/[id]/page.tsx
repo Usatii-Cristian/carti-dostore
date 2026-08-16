@@ -100,7 +100,19 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
           </section>
 
           <section className="rounded-xl border border-slate-200 bg-white p-5">
-            <h2 className="mb-3 font-semibold text-slate-900">Istoric plată</h2>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="font-semibold text-slate-900">Istoric plată</h2>
+              {/* Bonul se poate descărca oricând — clienții îl mai cer după ce
+                  își pierd emailul. */}
+              <a
+                href={`/api/admin/comenzi/${order.id}/bon`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:border-slate-900 hover:text-slate-900"
+              >
+                Bon PDF
+              </a>
+            </div>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-500">ID plată</dt>
