@@ -1,15 +1,34 @@
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useState, useEffect, useTransition, useOptimistic } from "react";
+import { useState, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
-import { SORT_OPTIONS } from "@/lib/books";
-import type { CatalogFacets } from "@/lib/catalog";
+import { SORT_OPTIONS, type CategorySort } from "@/lib/books";
+
+/** Filtrele active, ținute de părinte (CatalogBrowser). */
+export type FacetValue = {
+  categorii: string[];
+  minPrice: number;
+  maxPrice: number;
+  reduceri: boolean;
+  bestsellers: boolean;
+  noutati: boolean;
+  sort: CategorySort;
+};
+
+export type FacetCounts = {
+  categorii: { value: string; label: string; count: number }[];
+  reduceri: number;
+  bestsellers: number;
+  noutati: number;
+  priceMin: number;
+  priceMax: number;
+};
 
 type Props = {
-  facets: CatalogFacets;
-  minPrice?: number;
-  maxPrice?: number;
+  facets: FacetCounts;
+  value: FacetValue;
+  onChange: (next: FacetValue) => void;
+  onReset: () => void;
 };
 
 function FacetGroup({ title, children }: { title: string; children: React.ReactNode }) {
@@ -53,98 +72,61 @@ function CheckboxRow({
   );
 }
 
-export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const realParams = useSearchParams();
-  // `isPending` NU era folosit: la un click pe filtru nu se schimba nimic
-  // vizual până venea răspunsul de la server, deci părea că site-ul s-a blocat.
-  // Acum bifa se aplică instant, iar panoul semnalează discret că se lucrează.
-  const [isPending, startTransition] = useTransition();
+export function FacetSidebar({ facets, value, onChange, onReset }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Starea optimistă a filtrelor: bifa se vede pe loc, înainte ca serverul să
-  // răspundă. Când navigarea se termină, React revine la valorile reale din URL
-  // (care între timp le conțin pe cele noi) — deci nu poate rămâne desincronizat.
-  const [optimisticQuery, setOptimisticQuery] = useOptimistic(realParams.toString());
-  const params = new URLSearchParams(optimisticQuery);
+  const selectedCategories = value.categorii;
 
-  const selectedCategories = (params.get("categorii") ?? "").split(",").filter(Boolean);
+  // Valorile din slider trăiesc local cât timp se trage de el, ca lista să nu se
+  // recalculeze la fiecare pixel; se aplică la eliberare sau la ieșirea din câmp.
+  const [localMin, setLocalMin] = useState(value.minPrice);
+  const [localMax, setLocalMax] = useState(value.maxPrice);
 
-  // Valorile din slider trăiesc local ca să nu lovim serverul la fiecare pixel;
-  // se comit în URL abia la eliberarea mouse-ului (onPointerUp/onChange final).
-  const [localMin, setLocalMin] = useState(minPrice ?? facets.priceMin);
-  const [localMax, setLocalMax] = useState(maxPrice ?? facets.priceMax);
-
-  // Sincronizăm sliderul local cu URL-ul când filtrele se schimbă din altă parte.
+  // Sincronizăm sliderul când filtrele se schimbă din altă parte (ex. resetare).
   /* eslint-disable react-hooks/set-state-in-effect -- sync intenționat prop→state */
   useEffect(() => {
-    setLocalMin(minPrice ?? facets.priceMin);
-    setLocalMax(maxPrice ?? facets.priceMax);
-  }, [minPrice, maxPrice, facets.priceMin, facets.priceMax]);
+    setLocalMin(value.minPrice);
+    setLocalMax(value.maxPrice);
+  }, [value.minPrice, value.maxPrice]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  function apply(mutate: (next: URLSearchParams) => void) {
-    const next = new URLSearchParams(params.toString());
-    mutate(next);
-    next.delete("page"); // orice schimbare de filtru te duce înapoi la pagina 1
-    startTransition(() => {
-      setOptimisticQuery(next.toString());
-      router.push(`${pathname}?${next.toString()}`, { scroll: false });
-    });
-  }
-
   function toggleCategory(slug: string, checked: boolean) {
-    const next = checked
-      ? [...selectedCategories, slug]
-      : selectedCategories.filter((value) => value !== slug);
-    apply((params) => {
-      if (next.length > 0) params.set("categorii", next.join(","));
-      else params.delete("categorii");
+    onChange({
+      ...value,
+      categorii: checked
+        ? [...selectedCategories, slug]
+        : selectedCategories.filter((current) => current !== slug),
     });
   }
 
-  function toggleFlag(key: string, checked: boolean) {
-    apply((params) => {
-      if (checked) params.set(key, "1");
-      else params.delete(key);
-    });
+  function toggleFlag(key: "reduceri" | "bestsellers" | "noutati", checked: boolean) {
+    onChange({ ...value, [key]: checked });
   }
 
   function commitPrice(min: number, max: number) {
-    apply((params) => {
-      if (min > facets.priceMin) params.set("minPrice", String(min));
-      else params.delete("minPrice");
-      if (max < facets.priceMax) params.set("maxPrice", String(max));
-      else params.delete("maxPrice");
-    });
+    if (min === value.minPrice && max === value.maxPrice) return;
+    onChange({ ...value, minPrice: min, maxPrice: max });
   }
 
   const activeCount =
     selectedCategories.length +
-    (params.get("reduceri") ? 1 : 0) +
-    (params.get("bestsellers") ? 1 : 0) +
-    (params.get("noutati") ? 1 : 0) +
-    (params.get("minPrice") || params.get("maxPrice") ? 1 : 0);
+    (value.reduceri ? 1 : 0) +
+    (value.bestsellers ? 1 : 0) +
+    (value.noutati ? 1 : 0) +
+    (value.minPrice > facets.priceMin || value.maxPrice < facets.priceMax ? 1 : 0);
 
   const span = Math.max(1, facets.priceMax - facets.priceMin);
   const leftPct = ((localMin - facets.priceMin) / span) * 100;
   const rightPct = ((localMax - facets.priceMin) / span) * 100;
 
   const content = (
-    <div
-      className={`space-y-5 transition-opacity duration-150 ${isPending ? "opacity-60" : ""}`}
-      aria-busy={isPending}
-    >
+    <div className="space-y-5">
       <div>
         <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-navy">Sortează după</h3>
         <select
-          value={params.get("sort") ?? "recomandat"}
+          value={value.sort}
           onChange={(event) =>
-            apply((params) => {
-              if (event.target.value === "recomandat") params.delete("sort");
-              else params.set("sort", event.target.value);
-            })
+            onChange({ ...value, sort: event.target.value as FacetValue["sort"] })
           }
           className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-ink focus:border-terracotta focus:outline-none"
         >
@@ -227,7 +209,7 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
         <CheckboxRow
           label="Doar la reducere"
           count={facets.reduceri}
-          checked={params.get("reduceri") === "1"}
+          checked={value.reduceri}
           onChange={(checked) => toggleFlag("reduceri", checked)}
         />
       </FacetGroup>
@@ -248,13 +230,13 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
         <CheckboxRow
           label="Bestsellers"
           count={facets.bestsellers}
-          checked={params.get("bestsellers") === "1"}
+          checked={value.bestsellers}
           onChange={(checked) => toggleFlag("bestsellers", checked)}
         />
         <CheckboxRow
           label="Noutăți"
           count={facets.noutati}
-          checked={params.get("noutati") === "1"}
+          checked={value.noutati}
           onChange={(checked) => toggleFlag("noutati", checked)}
         />
       </FacetGroup>
@@ -262,12 +244,7 @@ export function FacetSidebar({ facets, minPrice, maxPrice }: Props) {
       {activeCount > 0 && (
         <button
           type="button"
-          onClick={() =>
-            startTransition(() => {
-              setOptimisticQuery("");
-              router.push(pathname, { scroll: false });
-            })
-          }
+          onClick={onReset}
           className="flex w-full items-center justify-center gap-2 rounded-full border border-border py-2.5 text-sm font-semibold text-ink-soft transition-colors hover:border-terracotta hover:text-terracotta"
         >
           <X className="h-4 w-4" aria-hidden="true" />

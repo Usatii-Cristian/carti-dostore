@@ -1,12 +1,10 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import type { Prisma, Book } from "@prisma/client";
-import { sortToOrderBy, type CategorySort } from "@/lib/books";
+import type { CategorySort } from "@/lib/books";
 import { CACHE_TAGS } from "@/lib/cache-tags";
-import { reviveDates } from "@/lib/revive-dates";
 
-// Câte produse se încarcă odată. Restul apar la apăsarea butonului „Afișează
-// mai multe" (care crește `page`), ca prima încărcare să fie ușoară.
+// Câte produse se văd la prima încărcare. Restul apar la „Afișează mai multe" —
+// filtrarea și paginarea se fac acum în browser, pe datele deja aduse.
 export const CATALOG_PAGE_SIZE = 12;
 
 export type CatalogQuery = {
@@ -20,159 +18,143 @@ export type CatalogQuery = {
   page: number;
 };
 
-export type FacetOption = {
-  value: string;
-  label: string;
-  count: number;
+/**
+ * Un produs, cu exact câmpurile de care are nevoie catalogul: cardul + ce se
+ * filtrează și se sortează. Nu trimitem descrieri, recenzii sau FAQ-uri în
+ * browser — ar umfla pagina degeaba.
+ */
+export type CatalogBook = {
+  id: string;
+  slug: string;
+  title: string;
+  author: string;
+  coverImage: string;
+  price: number;
+  discountPrice: number | null;
+  rating: number;
+  reviewCount: number;
+  variants: { label: string }[];
+  categorySlug: string;
+  isBestseller: boolean;
+  isNew: boolean;
+  /** ISO — folosit la sortarea „cele mai noi". */
+  createdAt: string;
+  displayOrder: number;
 };
 
-export type CatalogFacets = {
-  categorii: FacetOption[];
-  reduceri: number;
-  bestsellers: number;
-  noutati: number;
+export type CatalogSnapshot = {
+  books: CatalogBook[];
+  categories: { value: string; label: string }[];
   priceMin: number;
   priceMax: number;
 };
 
-const DISCOUNTED: Prisma.BookWhereInput = { discountPrice: { not: null } };
-
-function buildWhere(query: CatalogQuery, categoryIds: string[]): Prisma.BookWhereInput {
-  return {
-    ...(categoryIds.length > 0 && { categoryId: { in: categoryIds } }),
-    ...((query.minPrice !== undefined || query.maxPrice !== undefined) && {
-      price: {
-        ...(query.minPrice !== undefined && { gte: query.minPrice }),
-        ...(query.maxPrice !== undefined && { lte: query.maxPrice }),
-      },
-    }),
-    ...(query.reduceri && DISCOUNTED),
-    ...(query.bestsellers && { isBestseller: true }),
-    ...(query.noutati && { isNew: true }),
-  };
-}
-
-type CatalogResult = {
-  books: Book[];
-  total: number;
-  totalPages: number;
-  facets: CatalogFacets;
-};
-
 /**
- * Fiecare click pe un filtru re-randează pagina pe server, iar asta însemna 8
- * interogări MongoDB Atlas (produse + total + numărători pe fațete + interval de
- * preț). De-aici senzația de „se încarcă greu".
+ * TOT catalogul, într-o singură interogare cachată.
  *
- * Rezultatul e cachat pe combinația de filtre: a doua oară când cineva bifează
- * aceeași combinație (foarte des — sunt puține combinații reale), răspunsul vine
- * din memorie, fără drum până la Atlas. Se invalidează la orice modificare de
- * produs/categorie din admin (revalidateTag), deci nu servim date vechi.
+ * Înainte, fiecare bifă de filtru însemna un drum nou la server: șapte
+ * interogări (produse, total, numărători pe categorii, reduceri, bestsellers,
+ * noutăți, interval de preț), o navigare Next și o re-randare — vizibil ca
+ * întârziere la fiecare click. Catalogul are zeci de produse, nu zeci de mii,
+ * deci e mai ieftin să-l aducem o dată întreg și să filtrăm în browser:
+ * filtrele devin instantanee, iar serverul face o singură interogare, cachată
+ * și invalidată la modificările din admin.
  */
-export function getCatalog(query: CatalogQuery): Promise<CatalogResult> {
-  const key = JSON.stringify([
-    [...query.categorii].sort(),
-    query.minPrice ?? "",
-    query.maxPrice ?? "",
-    query.reduceri,
-    query.bestsellers,
-    query.noutati,
-    query.sort,
-    query.page,
-  ]);
+export const getCatalogSnapshot = unstable_cache(
+  async (): Promise<CatalogSnapshot> => {
+    const [books, categories] = await Promise.all([
+      prisma.book.findMany({
+        orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          author: true,
+          coverImage: true,
+          price: true,
+          discountPrice: true,
+          rating: true,
+          reviewCount: true,
+          variants: { select: { label: true } },
+          isBestseller: true,
+          isNew: true,
+          createdAt: true,
+          displayOrder: true,
+          category: { select: { slug: true, name: true } },
+        },
+      }),
+      prisma.category.findMany({
+        orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
+        select: { slug: true, name: true },
+      }),
+    ]);
 
-  // `reviveDates`: cache-ul întoarce `createdAt`/`updatedAt` ca string-uri, iar
-  // ele ajung în componente care le tratează ca `Date`.
-  return unstable_cache(() => queryCatalog(query), ["catalog", key], {
-    tags: [CACHE_TAGS.books, CACHE_TAGS.categories],
-    // Plasă de siguranță: tag-urile acoperă modificările făcute din admin, dar
-    // nu și pe cele scrise direct în baza de date (scripturi de întreținere).
-    // Fără asta, catalogul putea servi produse fără tipurile nou adăugate.
-    revalidate: 3600,
-  })().then(reviveDates);
-}
+    const prices = books.map((book) => book.price);
 
-async function queryCatalog(query: CatalogQuery): Promise<CatalogResult> {
-  const categories = await prisma.category.findMany({
-    orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
-  });
-  const selectedIds = categories
-    .filter((category) => query.categorii.includes(category.slug))
-    .map((category) => category.id);
-
-  const where = buildWhere(query, selectedIds);
-  // `page` = câte pagini sunt afișate CUMULAT: butonul „Afișează mai multe" o
-  // incrementează și adăugăm produse la cele deja vizibile, în loc să paginăm.
-  const take = query.page * CATALOG_PAGE_SIZE;
-
-  // Numărătorile pe categorii ignoră filtrul de categorie (altfel bifarea uneia
-  // ar duce restul la 0 și n-ai mai putea adăuga a doua) — dar respectă
-  // celelalte filtre active, ca cifrele să fie sincere.
-  const whereWithoutCategory = buildWhere({ ...query, categorii: [] }, []);
-
-  const [books, total, grouped, reduceri, bestsellers, noutati, priceRange] = await Promise.all([
-    prisma.book.findMany({
-      where,
-      orderBy: sortToOrderBy(query.sort),
-      take,
-    }),
-    prisma.book.count({ where }),
-    prisma.book.groupBy({
-      by: ["categoryId"],
-      where: whereWithoutCategory,
-      _count: { _all: true },
-    }),
-    prisma.book.count({ where: { ...whereWithoutCategory, ...DISCOUNTED } }),
-    prisma.book.count({ where: { ...whereWithoutCategory, isBestseller: true } }),
-    prisma.book.count({ where: { ...whereWithoutCategory, isNew: true } }),
-    prisma.book.aggregate({ _min: { price: true }, _max: { price: true } }),
-  ]);
-
-  const countByCategory = new Map(grouped.map((row) => [row.categoryId, row._count._all]));
-
-  return {
-    books,
-    total,
-    totalPages: Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE)),
-    facets: {
-      categorii: categories.map((category) => ({
+    return {
+      books: books.map((book) => ({
+        id: book.id,
+        slug: book.slug,
+        title: book.title,
+        author: book.author,
+        coverImage: book.coverImage,
+        price: book.price,
+        discountPrice: book.discountPrice,
+        rating: book.rating,
+        reviewCount: book.reviewCount,
+        variants: book.variants,
+        categorySlug: book.category.slug,
+        isBestseller: book.isBestseller,
+        isNew: book.isNew,
+        createdAt: book.createdAt.toISOString(),
+        displayOrder: book.displayOrder,
+      })),
+      categories: categories.map((category) => ({
         value: category.slug,
         label: category.name,
-        count: countByCategory.get(category.id) ?? 0,
       })),
-      reduceri,
-      bestsellers,
-      noutati,
-      priceMin: Math.floor(priceRange._min.price ?? 0),
-      priceMax: Math.ceil(priceRange._max.price ?? 1000),
-    },
-  };
-}
+      priceMin: prices.length > 0 ? Math.floor(Math.min(...prices)) : 0,
+      priceMax: prices.length > 0 ? Math.ceil(Math.max(...prices)) : 0,
+    };
+  },
+  ["catalog-snapshot"],
+  {
+    tags: [CACHE_TAGS.books, CACHE_TAGS.categories],
+    // Plasă de siguranță pentru modificările scrise direct în baza de date
+    // (scripturi de întreținere), care nu trec prin invalidarea din admin.
+    revalidate: 3600,
+  }
+);
 
-export function parseCatalogQuery(search: Record<string, string | string[] | undefined>): CatalogQuery {
-  const one = (key: string): string | undefined => {
-    const value = search[key];
+/** Citește filtrele din adresa paginii, ca linkurile partajate să funcționeze. */
+export function parseCatalogQuery(
+  params: Record<string, string | string[] | undefined>
+): CatalogQuery {
+  const single = (key: string): string | undefined => {
+    const value = params[key];
     return Array.isArray(value) ? value[0] : value;
   };
 
-  const positive = (key: string): number | undefined => {
-    const raw = one(key);
+  const number = (key: string): number | undefined => {
+    const raw = single(key);
     if (!raw) return undefined;
     const parsed = Number(raw);
-    return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
+    return Number.isFinite(parsed) ? parsed : undefined;
   };
 
+  const rawSort = single("sort");
   const validSorts: CategorySort[] = ["recomandat", "noi", "pret-asc", "pret-desc", "rating"];
-  const rawSort = one("sort") as CategorySort | undefined;
 
   return {
-    categorii: (one("categorii") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
-    minPrice: positive("minPrice"),
-    maxPrice: positive("maxPrice"),
-    reduceri: one("reduceri") === "1",
-    bestsellers: one("bestsellers") === "1",
-    noutati: one("noutati") === "1",
-    sort: rawSort && validSorts.includes(rawSort) ? rawSort : "recomandat",
-    page: Math.max(1, Number(one("page")) || 1),
+    categorii: (single("categorii") ?? "").split(",").filter(Boolean),
+    minPrice: number("minPrice"),
+    maxPrice: number("maxPrice"),
+    reduceri: single("reduceri") === "1",
+    bestsellers: single("bestsellers") === "1",
+    noutati: single("noutati") === "1",
+    sort: rawSort && validSorts.includes(rawSort as CategorySort)
+      ? (rawSort as CategorySort)
+      : "recomandat",
+    page: Math.max(1, Number(single("page") ?? 1) || 1),
   };
 }
