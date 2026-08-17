@@ -268,6 +268,7 @@ export async function createOrderAndPay(
         customerNote,
         city,
         total,
+        paymentMethod,
         items: items.map((item) => ({ title: cartItemTitle(item), quantity: item.quantity })),
       }),
       // Cât ne costă PE NOI expedierea (tariful din contractul FAN). E doar

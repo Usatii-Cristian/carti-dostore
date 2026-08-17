@@ -49,9 +49,21 @@ export async function tgNewOrder(order: {
   customerNote?: string | null;
   city: string;
   total: number;
+  paymentMethod?: "ONLINE" | "CARD_ON_DELIVERY" | "CASH_ON_DELIVERY";
   items: { title: string; quantity: number }[];
 }): Promise<void> {
   const lines = order.items.map((i) => `• ${esc(i.title)} × ${i.quantity}`).join("\n");
+  // Metoda de plată contează la prima privire: comenzile online se expediază
+  // abia după confirmarea banilor, cele la livrare pleacă imediat.
+  const payment =
+    order.paymentMethod === "ONLINE"
+      ? "MIA Plăți Instant (se expediază după confirmarea plății)"
+      : order.paymentMethod === "CARD_ON_DELIVERY"
+        ? "Card la livrare"
+        : order.paymentMethod === "CASH_ON_DELIVERY"
+          ? "Numerar la livrare"
+          : null;
+
   await send(
     `🆕 <b>Comandă nouă</b> ${esc(order.orderNumber)}\n` +
       `👤 ${esc(order.customerName)}\n` +
@@ -59,6 +71,7 @@ export async function tgNewOrder(order: {
       `📧 ${esc(order.customerEmail)}\n` +
       `📍 ${esc(formatShippingAddress(order))}, ${esc(order.city)}\n` +
       (order.customerNote ? `📝 ${esc(order.customerNote)}\n` : "") +
+      (payment ? `💳 ${esc(payment)}\n` : "") +
       `💰 <b>${order.total} lei</b>\n\n${lines}`
   );
 }
