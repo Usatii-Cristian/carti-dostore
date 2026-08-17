@@ -30,9 +30,15 @@ const nextConfig: NextConfig = {
     staleTimes: { dynamic: 60, static: 180 },
   },
   images: {
-    // Next 16 acceptă doar calitățile declarate aici. 70 e cea folosită în
-    // catalog; 75 rămâne implicita pentru restul imaginilor.
-    qualities: [70, 75],
+    // AVIF înaintea WebP: pe aceleași coperți iese cu 20–40% mai mic, iar
+    // browserele care nu-l acceptă primesc automat WebP.
+    formats: ["image/avif", "image/webp"],
+    // Imaginile de produs nu se schimbă după încărcare, deci varianta optimizată
+    // poate sta mult în cache-ul CDN (implicit era ordinul minutelor).
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    // Next 16 acceptă doar calitățile declarate aici. 65 pentru miniaturile din
+    // catalog, 75 pentru imaginile mari de pe pagina produsului.
+    qualities: [65, 70, 75],
     remotePatterns: [
       {
         protocol: "https",

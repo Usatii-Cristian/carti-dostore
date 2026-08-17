@@ -14,15 +14,18 @@ export function BookCard({ book, priority = false }: { book: BookCardData; prior
           `object-contain` păstrează întreg și ce se încarcă din admin, unde
           proporția sursei poate fi oricare (upload-ul folosește `fit: inside`). */}
       <div className="relative aspect-[5/7] w-full overflow-hidden bg-cream">
-        <Link href={`/carti/${book.slug}`} className="relative block h-full w-full">
+        {/* : o listă cu 19 carduri trimitea ~50 de cereri de
+            preîncărcare la fiecare deschidere. Paginile de produs sunt oricum
+            prerandate și servite din CDN, deci navigarea rămâne instantanee. */}
+        <Link href={`/carti/${book.slug}`} prefetch={false} className="relative block h-full w-full">
           <Image
             src={book.coverImage}
             alt={`Coperta cărții ${book.title}`}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
-            // 70 în loc de 75: pe coperți diferența nu se vede, dar taie ~20%
+            // 65 în loc de 75: pe coperți diferența nu se vede, dar taie ~30%
             // din greutatea catalogului, unde se încarcă zeci de imagini.
-            quality={70}
+            quality={65}
             // Primele carduri sunt elementul LCP al listei: le încărcăm devreme,
             // restul rămân leneșe.
             priority={priority}
@@ -45,6 +48,7 @@ export function BookCard({ book, priority = false }: { book: BookCardData; prior
       <div className="flex flex-1 flex-col gap-1.5 p-3.5">
         <Link
           href={`/carti/${book.slug}`}
+          prefetch={false}
           className="line-clamp-2 text-sm font-semibold text-ink hover:text-terracotta"
         >
           {book.title}
