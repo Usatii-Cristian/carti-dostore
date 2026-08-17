@@ -28,7 +28,10 @@ export function BookGrid({
   return (
     <div className={`grid gap-4 sm:gap-5 ${VARIANT_CLASSES[variant]}`}>
       {books.map((book, index) => (
-        <BookCard key={book.id} book={book} priority={index < 4} />
+        {/* Doar primele două: pe telefon grila are două coloane, deci atât se
+           vede fără scroll. Patru preîncărcări se concurau între ele și
+           întârziau exact imaginea măsurată ca LCP. */}
+        <BookCard key={book.id} book={book} priority={index < 2} />
       ))}
     </div>
   );
