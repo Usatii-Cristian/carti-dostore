@@ -120,9 +120,8 @@ export const getCatalogSnapshot = unstable_cache(
   ["catalog-snapshot"],
   {
     tags: [CACHE_TAGS.books, CACHE_TAGS.categories],
-    // Plasă de siguranță pentru modificările scrise direct în baza de date
-    // (scripturi de întreținere), care nu trec prin invalidarea din admin.
-    revalidate: 3600,
+    // Aceeași fereastră ca paginile: 5 minute.
+    revalidate: 300,
   }
 );
 

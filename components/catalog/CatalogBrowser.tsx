@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FacetSidebar, type FacetValue } from "./FacetSidebar";
 import { BookGrid } from "@/components/books/BookGrid";
 import { formatProductCount } from "@/lib/format";
-import { CATALOG_PAGE_SIZE, type CatalogBook, type CatalogQuery, type CatalogSnapshot } from "@/lib/catalog";
+import { CATALOG_PAGE_SIZE, parseCatalogQuery, type CatalogBook, type CatalogSnapshot } from "@/lib/catalog";
 
 /**
  * Catalogul: datele vin de la server (o singură interogare, cachată), filtrarea
@@ -16,23 +16,39 @@ import { CATALOG_PAGE_SIZE, type CatalogBook, type CatalogQuery, type CatalogSna
  * la server. Adresa paginii se actualizează totuși (fără reîncărcare), ca un
  * link cu filtre să poată fi trimis mai departe.
  */
-export function CatalogBrowser({
-  snapshot,
-  initial,
-}: {
-  snapshot: CatalogSnapshot;
-  initial: CatalogQuery;
-}) {
+export function CatalogBrowser({ snapshot }: { snapshot: CatalogSnapshot }) {
   const [value, setValue] = useState<FacetValue>({
-    categorii: initial.categorii,
-    minPrice: initial.minPrice ?? snapshot.priceMin,
-    maxPrice: initial.maxPrice ?? snapshot.priceMax,
-    reduceri: initial.reduceri,
-    bestsellers: initial.bestsellers,
-    noutati: initial.noutati,
-    sort: initial.sort,
+    categorii: [],
+    minPrice: snapshot.priceMin,
+    maxPrice: snapshot.priceMax,
+    reduceri: false,
+    bestsellers: false,
+    noutati: false,
+    sort: "recomandat",
   });
-  const [visiblePages, setVisiblePages] = useState(initial.page);
+  const [visiblePages, setVisiblePages] = useState(1);
+
+  // Filtrele dintr-un link partajat (/carti?categorii=…) se aplică aici, după
+  // montare. Pagina în sine rămâne una singură, prerandată și servită din CDN
+  // pentru toată lumea — de-asta nu citim adresa pe server.
+  /* eslint-disable react-hooks/set-state-in-effect -- citim adresa o singură dată, la montare */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if ([...params.keys()].length === 0) return;
+
+    const query = parseCatalogQuery(Object.fromEntries(params.entries()));
+    setValue({
+      categorii: query.categorii,
+      minPrice: query.minPrice ?? snapshot.priceMin,
+      maxPrice: query.maxPrice ?? snapshot.priceMax,
+      reduceri: query.reduceri,
+      bestsellers: query.bestsellers,
+      noutati: query.noutati,
+      sort: query.sort,
+    });
+    setVisiblePages(query.page);
+  }, [snapshot.priceMin, snapshot.priceMax]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /** Ține adresa în pas cu filtrele, fără să renavigheze pagina. */
   function syncUrl(next: FacetValue) {

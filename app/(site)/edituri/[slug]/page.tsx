@@ -1,9 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getPublisherBySlug, getBooksByPublisher } from "@/lib/publishers";
+import { getPublisherBySlug, getBooksByPublisher, getAllPublishers } from "@/lib/publishers";
 import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
 type PageProps = { params: Promise<{ slug: string }> };
+
+// Pagina depinde doar de slug, deci se poate prerandă și servi din CDN, cu
+// aceeași fereastră de 5 minute ca restul magazinului.
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const publishers = await getAllPublishers();
+  return publishers.map((publisher) => ({ slug: publisher.slug }));
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;

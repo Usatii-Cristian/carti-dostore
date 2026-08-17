@@ -8,7 +8,7 @@ import { Markdown } from "@/components/blog/Markdown";
 
 // Prerandare statică + ISR 1h (ca la produse). 404-ul corect e asigurat după
 // eliminarea loading.tsx de la nivel de /blog.
-export const revalidate = 3600;
+export const revalidate = 300;
 
 export async function generateStaticParams() {
   const posts = await prisma.blogPost.findMany({

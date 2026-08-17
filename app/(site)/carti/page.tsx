@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getCatalogSnapshot, parseCatalogQuery } from "@/lib/catalog";
+import { getCatalogSnapshot } from "@/lib/catalog";
 import { CatalogBrowser } from "@/components/catalog/CatalogBrowser";
 
 export const metadata: Metadata = {
   title: "Toate produsele",
   description:
     "Cărți, uleiuri esențiale, materiale de training și promoționale — filtrează după categorie, preț și oferte.",
-};
-
-type PageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 /**
@@ -22,9 +18,13 @@ type PageProps = {
  * produse. Filtrele din adresă sunt citite în continuare, ca linkurile deja
  * trimise (sau cele partajate) să deschidă aceeași selecție.
  */
-export default async function CatalogPage({ searchParams }: PageProps) {
-  const [snapshot, search] = await Promise.all([getCatalogSnapshot(), searchParams]);
-  const initial = parseCatalogQuery(search);
+// ISR: pagina nu depinde de niciun parametru din adresă, deci se prerandează o
+// dată și se servește din CDN pentru toată lumea. Filtrele din link sunt citite
+// în browser, de componenta de catalog.
+export const revalidate = 300;
+
+export default async function CatalogPage() {
+  const snapshot = await getCatalogSnapshot();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -38,7 +38,7 @@ export default async function CatalogPage({ searchParams }: PageProps) {
 
       <h1 className="mb-6 font-serif text-3xl font-semibold text-ink sm:text-4xl">Produse</h1>
 
-      <CatalogBrowser snapshot={snapshot} initial={initial} />
+      <CatalogBrowser snapshot={snapshot} />
     </div>
   );
 }
