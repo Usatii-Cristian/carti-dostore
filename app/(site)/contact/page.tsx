@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Building2, Store } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -42,9 +42,22 @@ export default function ContactPage() {
           </div>
         </a>
 
-        {/* Adresa sediului NU se afișează public — comenzile se livrează prin
-            curier, deci clientul n-are nevoie de ea. Rămâne doar în datele
-            legale de firmă din Termeni și condiții, unde e obligatorie. */}
+        {/* Adresa juridică se afișează AICI, obligatoriu: BNM a cerut-o expres
+            pe pagina de Contact, la verificarea comerciantului pentru MIA. */}
+        <div className="flex items-start gap-3 rounded-xl bg-card p-6 shadow-sm ring-1 ring-border/70">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cream-soft text-terracotta">
+            <Building2 className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <p className="font-semibold text-ink">Adresa juridică</p>
+            <p className="mt-1 text-sm text-ink-soft">
+              Free Life SRL, cod fiscal 1025600059594
+              <br />
+              Str. Petru Zadnipru 19/2, Chișinău, Republica Moldova
+            </p>
+          </div>
+        </div>
+
         <div className="flex items-start gap-3 rounded-xl bg-card p-6 shadow-sm ring-1 ring-border/70">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cream-soft text-terracotta">
             <MapPin className="h-5 w-5" aria-hidden="true" />
@@ -63,6 +76,23 @@ export default function ContactPage() {
             <p className="font-semibold text-ink">Program</p>
             <p className="mt-1 text-sm text-ink-soft">Luni–Vineri, 09:00–18:00</p>
           </div>
+        </div>
+      </div>
+
+      {/* Vânzare exclusiv online — declarat explicit, cum cere BNM: dacă nu
+          există punct de vânzare fizic, comerciantul trebuie să spună asta. */}
+      <div className="mt-5 flex items-start gap-3 rounded-xl border border-dashed border-border p-5">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cream-soft text-terracotta">
+          <Store className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <p className="font-semibold text-ink">Punct de vânzare</p>
+          <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+            Dostore Cărți funcționează exclusiv online: nu avem magazin fizic și nici ridicare
+            personală de la sediu. Toate comenzile se livrează prin curier, în toată Republica
+            Moldova. Adresa de mai sus este sediul juridic al companiei, pentru corespondență
+            oficială.
+          </p>
         </div>
       </div>
     </div>
