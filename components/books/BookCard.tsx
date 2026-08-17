@@ -6,7 +6,7 @@ import { PriceTag } from "./PriceTag";
 import { FavoriteButton } from "./FavoriteButton";
 import { AddToCartButton } from "./AddToCartButton";
 
-export function BookCard({ book }: { book: BookCardData }) {
+export function BookCard({ book, priority = false }: { book: BookCardData; priority?: boolean }) {
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-xl bg-cream ring-1 ring-transparent transition-all duration-200 hover:shadow-lg hover:ring-border">
       {/* Proporția reală a coperților (706x1000 ≈ 5/7), nu pătrat: încadrarea în
@@ -20,6 +20,12 @@ export function BookCard({ book }: { book: BookCardData }) {
             alt={`Coperta cărții ${book.title}`}
             fill
             sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
+            // 70 în loc de 75: pe coperți diferența nu se vede, dar taie ~20%
+            // din greutatea catalogului, unde se încarcă zeci de imagini.
+            quality={70}
+            // Primele carduri sunt elementul LCP al listei: le încărcăm devreme,
+            // restul rămân leneșe.
+            priority={priority}
             className="object-contain"
           />
         </Link>

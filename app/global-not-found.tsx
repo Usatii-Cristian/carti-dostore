@@ -12,23 +12,10 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Playfair_Display, Inter } from "next/font/google";
 import { Home, Search } from "lucide-react";
 import { NotFoundRedirect } from "@/components/layout/NotFoundRedirect";
 import "./globals.css";
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin", "latin-ext"],
-  weight: ["600"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin", "latin-ext"],
-  display: "swap",
-});
+import { inter, playfairDisplay } from "@/app/fonts";
 
 export const metadata: Metadata = {
   title: "Pagina nu a fost găsită — Dostore Cărți",

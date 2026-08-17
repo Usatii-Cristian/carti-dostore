@@ -30,6 +30,9 @@ const nextConfig: NextConfig = {
     staleTimes: { dynamic: 60, static: 180 },
   },
   images: {
+    // Next 16 acceptă doar calitățile declarate aici. 70 e cea folosită în
+    // catalog; 75 rămâne implicita pentru restul imaginilor.
+    qualities: [70, 75],
     remotePatterns: [
       {
         protocol: "https",

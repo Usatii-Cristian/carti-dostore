@@ -27,8 +27,8 @@ export function BookGrid({
 
   return (
     <div className={`grid gap-4 sm:gap-5 ${VARIANT_CLASSES[variant]}`}>
-      {books.map((book) => (
-        <BookCard key={book.id} book={book} />
+      {books.map((book, index) => (
+        <BookCard key={book.id} book={book} priority={index < 4} />
       ))}
     </div>
   );
