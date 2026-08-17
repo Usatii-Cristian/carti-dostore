@@ -3,6 +3,10 @@ import Link from "next/link";
 import { getAllCategories } from "@/lib/categories";
 import { CategoryIcon } from "@/components/CategoryIcon";
 
+// Date din catalog: prerandate și reîmprospătate la 5 minute (ISR), plus
+// invalidare imediată la orice modificare din admin.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Categorii",
   description: "Toate categoriile de cărți disponibile pe Dostore Carti.",

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { BookOpen, Heart, Truck } from "lucide-react";
 
+// Conținut fix, scris în cod: pagina se prerandează la build și se servește
+// din CDN, fără nicio revalidare — răspuns instant.
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: "Despre noi",
   description: "Povestea Dostore Carti — librăria ta online din Moldova.",

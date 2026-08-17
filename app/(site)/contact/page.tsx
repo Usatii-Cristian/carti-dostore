@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Phone, Mail, MapPin, Clock, Building2, Store } from "lucide-react";
 
+// Conținut fix, scris în cod: pagina se prerandează la build și se servește
+// din CDN, fără nicio revalidare — răspuns instant.
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: "Contact",
   description: "Datele de contact Dostore Carti — telefon, email, adresă și program de lucru.",

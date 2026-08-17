@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { getTopRatedBooks } from "@/lib/books";
 import { SimpleBookListing } from "@/components/catalog/SimpleBookListing";
 
+// Date din catalog: prerandate și reîmprospătate la 5 minute (ISR), plus
+// invalidare imediată la orice modificare din admin.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Top recomandări",
   description: "Cărțile cel mai bine evaluate de cititorii Dostore Carti.",

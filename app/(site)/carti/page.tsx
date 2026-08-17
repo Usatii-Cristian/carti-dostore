@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { getCatalogSnapshot } from "@/lib/catalog";
 import { CatalogBrowser } from "@/components/catalog/CatalogBrowser";
@@ -38,7 +39,11 @@ export default async function CatalogPage() {
 
       <h1 className="mb-6 font-serif text-3xl font-semibold text-ink sm:text-4xl">Produse</h1>
 
-      <CatalogBrowser snapshot={snapshot} />
+      {/* Suspense: CatalogBrowser citește adresa (useSearchParams), iar pagina
+          rămâne prerandată — fără boundary, Next ar face-o dinamică. */}
+      <Suspense fallback={<p className="text-sm text-ink-soft">Se încarcă produsele…</p>}>
+        <CatalogBrowser snapshot={snapshot} />
+      </Suspense>
     </div>
   );
 }

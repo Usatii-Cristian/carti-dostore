@@ -9,6 +9,10 @@ import {
   BLOG_PAGE_SIZE,
 } from "@/lib/blog";
 
+// Date din catalog: prerandate și reîmprospătate la 5 minute (ISR), plus
+// invalidare imediată la orice modificare din admin.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Blog",
   description:

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { RotateCcw, Clock, Wallet } from "lucide-react";
 
+// Conținut fix, scris în cod: pagina se prerandează la build și se servește
+// din CDN, fără nicio revalidare — răspuns instant.
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: "Retur și rambursare",
   description: "Politica de retur și rambursare pentru comenzile plasate pe Dostore Carti.",

@@ -3,6 +3,10 @@ import Link from "next/link";
 import { Building2 } from "lucide-react";
 import { getAllPublishers } from "@/lib/publishers";
 
+// Date din catalog: prerandate și reîmprospătate la 5 minute (ISR), plus
+// invalidare imediată la orice modificare din admin.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Edituri",
   description: "Editurile cu care colaborăm pentru a-ți aduce cele mai bune cărți.",

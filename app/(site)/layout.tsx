@@ -8,11 +8,6 @@ import { StoreHydration } from "@/components/providers/StoreHydration";
 import { SITE_URL } from "@/lib/site";
 import "../globals.css";
 
-// ISR: paginile magazinului sunt prerandate (servite rapid din CDN) și
-// revalidate periodic + la cerere (revalidatePath din admin la orice modificare).
-// Mult mai rapid decât force-dynamic, care lovea baza de date la fiecare request.
-export const revalidate = 300;
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   // Site-ul e accesibil și pe adresa *.vercel.app, iar fără canonical Google

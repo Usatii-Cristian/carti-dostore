@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Truck, CreditCard, Banknote } from "lucide-react";
 
+// Conținut fix, scris în cod: pagina se prerandează la build și se servește
+// din CDN, fără nicio revalidare — răspuns instant.
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: "Livrare și plată",
   description: "Află tot ce trebuie despre livrare și metodele de plată disponibile pe Dostore Carti.",

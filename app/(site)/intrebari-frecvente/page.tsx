@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 
+// Conținut fix, scris în cod: pagina se prerandează la build și se servește
+// din CDN, fără nicio revalidare — răspuns instant.
+export const revalidate = false;
+
 export const metadata: Metadata = {
   title: "Întrebări frecvente",
   description: "Răspunsuri la cele mai frecvente întrebări despre comenzi, livrare și plată pe Dostore Carti.",

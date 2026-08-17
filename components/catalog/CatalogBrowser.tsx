@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { FacetSidebar, type FacetValue } from "./FacetSidebar";
 import { BookGrid } from "@/components/books/BookGrid";
 import { formatProductCount } from "@/lib/format";
@@ -28,12 +29,17 @@ export function CatalogBrowser({ snapshot }: { snapshot: CatalogSnapshot }) {
   });
   const [visiblePages, setVisiblePages] = useState(1);
 
-  // Filtrele dintr-un link partajat (/carti?categorii=…) se aplică aici, după
-  // montare. Pagina în sine rămâne una singură, prerandată și servită din CDN
-  // pentru toată lumea — de-asta nu citim adresa pe server.
-  /* eslint-disable react-hooks/set-state-in-effect -- citim adresa o singură dată, la montare */
+  // Filtrele din adresă (/carti?categorii=…) se aplică aici: la deschiderea unui
+  // link partajat, DAR și când clientul e deja pe pagină și alege o categorie din
+  // meniul din antet — acela e un link intern, deci componenta nu se remontează
+  // și fără urmărirea adresei filtrul nu s-ar aplica (exact ce se întâmpla).
+  // Pagina rămâne prerandată: adresa se citește în browser, nu pe server.
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+
+  /* eslint-disable react-hooks/set-state-in-effect -- sincronizare intenționată adresă→stare */
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(search);
     if ([...params.keys()].length === 0) return;
 
     const query = parseCatalogQuery(Object.fromEntries(params.entries()));
@@ -47,7 +53,7 @@ export function CatalogBrowser({ snapshot }: { snapshot: CatalogSnapshot }) {
       sort: query.sort,
     });
     setVisiblePages(query.page);
-  }, [snapshot.priceMin, snapshot.priceMax]);
+  }, [search, snapshot.priceMin, snapshot.priceMax]);
   /* eslint-enable react-hooks/set-state-in-effect */
 
   /** Ține adresa în pas cu filtrele, fără să renavigheze pagina. */

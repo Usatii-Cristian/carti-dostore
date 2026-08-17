@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { CACHE_TAGS } from "@/lib/cache-tags";
+import { cachedQuery, CATALOG_REVALIDATE_SECONDS } from "@/lib/cache";
 import { reviveDates } from "@/lib/revive-dates";
 
 /**
@@ -18,7 +19,7 @@ const cachedCategories = unstable_cache(
       orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
     }),
   ["all-categories"],
-  { tags: [CACHE_TAGS.categories] }
+  { tags: [CACHE_TAGS.categories], revalidate: CATALOG_REVALIDATE_SECONDS }
 );
 
 export async function getAllCategories() {
@@ -31,19 +32,32 @@ export async function getAllCategories() {
  * cu `featuredOrder`. Dacă nu e bifată niciuna, cădem pe primele alfabetic,
  * ca secțiunea să nu rămână goală.
  */
-export async function getPopularCategories(limit = 4) {
-  const featured = await prisma.category.findMany({
-    where: { featured: true },
-    orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
-    take: limit,
-  });
+const cachedPopular = cachedQuery(
+  (limit: number) =>
+    prisma.category.findMany({
+      where: { featured: true },
+      orderBy: [{ featuredOrder: "asc" }, { name: "asc" }],
+      take: limit,
+    }),
+  ["popular-categories"],
+  [CACHE_TAGS.categories]
+);
 
-  if (featured.length > 0) return featured;
+export async function getPopularCategories(limit = 4) {
+  const featured = await cachedPopular(limit);
+  if (featured.length > 0) return reviveDates(featured);
 
   const all = await getAllCategories();
   return all.slice(0, limit);
 }
 
-export function getCategoryBySlug(slug: string) {
-  return prisma.category.findUnique({ where: { slug } });
+const cachedCategoryBySlug = cachedQuery(
+  (slug: string) => prisma.category.findUnique({ where: { slug } }),
+  ["category-by-slug"],
+  [CACHE_TAGS.categories]
+);
+
+export async function getCategoryBySlug(slug: string) {
+  const category = await cachedCategoryBySlug(slug);
+  return category ? reviveDates(category) : null;
 }
