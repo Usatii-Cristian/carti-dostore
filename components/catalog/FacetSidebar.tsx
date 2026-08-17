@@ -31,6 +31,16 @@ type Props = {
   onReset: () => void;
 };
 
+/**
+ * Cifrele tastate de client, curățate. Câmpurile de preț nu mai sunt de tip
+ * „number" (aduceau săgețile browserului, care arătau prost în panou), deci
+ * validăm noi ce se scrie.
+ */
+function toPrice(raw: string, fallback: number): number {
+  const digits = raw.replace(/[^0-9]/g, "");
+  return digits ? Number(digits) : fallback;
+}
+
 function FacetGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-t border-border pt-5">
@@ -140,13 +150,15 @@ export function FacetSidebar({ facets, value, onChange, onReset }: Props) {
 
       <FacetGroup title="Preț">
         <div className="flex items-center gap-2">
+          {/* `type="text"` + `inputMode="numeric"`: tastatură de cifre pe telefon,
+              dar fără săgețile de incrementare ale browserului, care stăteau urât
+              în panou. */}
           <div className="relative flex-1">
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={localMin}
-              min={facets.priceMin}
-              max={localMax}
-              onChange={(event) => setLocalMin(Number(event.target.value))}
+              onChange={(event) => setLocalMin(toPrice(event.target.value, facets.priceMin))}
               onBlur={() => commitPrice(localMin, localMax)}
               aria-label="Preț minim"
               className="w-full rounded-lg border border-border bg-card py-2 pl-3 pr-10 text-sm tabular-nums text-ink focus:border-terracotta focus:outline-none"
@@ -158,11 +170,10 @@ export function FacetSidebar({ facets, value, onChange, onReset }: Props) {
           <span className="text-ink-soft">—</span>
           <div className="relative flex-1">
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={localMax}
-              min={localMin}
-              max={facets.priceMax}
-              onChange={(event) => setLocalMax(Number(event.target.value))}
+              onChange={(event) => setLocalMax(toPrice(event.target.value, facets.priceMax))}
               onBlur={() => commitPrice(localMin, localMax)}
               aria-label="Preț maxim"
               className="w-full rounded-lg border border-border bg-card py-2 pl-3 pr-10 text-sm tabular-nums text-ink focus:border-terracotta focus:outline-none"
@@ -173,7 +184,11 @@ export function FacetSidebar({ facets, value, onChange, onReset }: Props) {
           </div>
         </div>
 
-        {/* Slider cu două capete: două input[range] suprapuse peste o bară comună. */}
+        {/* Slider cu două capete: două input[range] suprapuse peste o bară comună.
+            Butonașele au nevoie de reguli SEPARATE pentru Chrome
+            (::-webkit-slider-thumb) și Firefox (::-moz-range-thumb) — fără cele
+            de Firefox, pointer-events rămânea "none" acolo și glisorul nu se
+            putea trage deloc. */}
         <div className="relative mt-4 h-5">
           <div className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-border" />
           <div
@@ -189,7 +204,7 @@ export function FacetSidebar({ facets, value, onChange, onReset }: Props) {
             onChange={(event) => setLocalMin(Math.min(Number(event.target.value), localMax))}
             onPointerUp={() => commitPrice(localMin, localMax)}
             onKeyUp={() => commitPrice(localMin, localMax)}
-            className="pointer-events-none absolute inset-x-0 top-0 h-5 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-cream [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:shadow"
+            className="pointer-events-none absolute inset-x-0 top-0 h-5 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-cream [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:shadow [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-cream [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-track]:bg-transparent"
           />
           <input
             type="range"
@@ -200,7 +215,7 @@ export function FacetSidebar({ facets, value, onChange, onReset }: Props) {
             onChange={(event) => setLocalMax(Math.max(Number(event.target.value), localMin))}
             onPointerUp={() => commitPrice(localMin, localMax)}
             onKeyUp={() => commitPrice(localMin, localMax)}
-            className="pointer-events-none absolute inset-x-0 top-0 h-5 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-cream [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:shadow"
+            className="pointer-events-none absolute inset-x-0 top-0 h-5 w-full cursor-pointer appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-grab [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-cream [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:shadow [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:cursor-grab [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-cream [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-track]:bg-transparent"
           />
         </div>
       </FacetGroup>
