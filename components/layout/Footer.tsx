@@ -125,7 +125,7 @@ export function Footer() {
         </div>
         {/* Datele complete de identificare, vizibile pe tot site-ul — inclusiv
             adresa juridică, cerută de BNM la verificarea comerciantului MIA. */}
-        <p className="mt-2 text-center text-[11px] text-cream/40 sm:text-left">
+        <p className="mt-2 text-center text-xs text-cream/50 sm:text-left">
           Free Life SRL, cod fiscal 1025600059594 · Str. Petru Zadnipru 19/2, Chișinău, Republica
           Moldova · IBAN MD46VI022511400000572MDL, VictoriaBank
         </p>

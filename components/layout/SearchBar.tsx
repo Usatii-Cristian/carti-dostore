@@ -94,7 +94,7 @@ export function SearchBar() {
           <button
             type="submit"
             aria-label="Caută"
-            className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
+            className="absolute right-1.5 top-1/2 flex h-10 w-10 -translate-y-1/2 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
           >
             <Search className="h-4 w-4" aria-hidden="true" />
           </button>

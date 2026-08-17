@@ -40,7 +40,7 @@ export function AddToCartButton({
           className={
             variant === "full"
               ? "flex cursor-pointer items-center gap-2 rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
-              : "flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
+              : "flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-terracotta sm:h-9 sm:w-9 text-cream transition-colors hover:bg-terracotta-dark"
           }
         >
           {/* Aceeași iconiță de coș ca la restul produselor — clientul nu are de
@@ -86,7 +86,7 @@ export function AddToCartButton({
       type="button"
       onClick={handleAdd}
       aria-label={`Adaugă „${book.title}” în coș`}
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-terracotta text-cream transition-colors hover:bg-terracotta-dark"
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-terracotta sm:h-9 sm:w-9 text-cream transition-colors hover:bg-terracotta-dark"
     >
       {justAdded ? (
         <Check className="h-4 w-4" aria-hidden="true" />

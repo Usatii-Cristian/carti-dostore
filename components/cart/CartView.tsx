@@ -84,7 +84,7 @@ export function CartView() {
                     type="button"
                     onClick={() => removeItem(cartItemKey(item))}
                     aria-label={`Scoate „${item.title}” din coș`}
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-cream-soft hover:text-terracotta"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-cream-soft hover:text-terracotta sm:h-8 sm:w-8"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -96,7 +96,7 @@ export function CartView() {
                       type="button"
                       onClick={() => setQuantity(cartItemKey(item), item.quantity - 1)}
                       aria-label="Scade cantitatea"
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-soft"
+                      className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors sm:h-8 sm:w-8 hover:bg-cream-soft"
                     >
                       <Minus className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
@@ -107,7 +107,7 @@ export function CartView() {
                       type="button"
                       onClick={() => setQuantity(cartItemKey(item), item.quantity + 1)}
                       aria-label="Crește cantitatea"
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-soft"
+                      className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors sm:h-8 sm:w-8 hover:bg-cream-soft"
                     >
                       <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>

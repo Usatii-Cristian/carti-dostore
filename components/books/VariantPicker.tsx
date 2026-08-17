@@ -95,7 +95,7 @@ export function VariantPicker({
                   onClick={() => setQuantity(variant.label, quantity - 1)}
                   disabled={quantity === 0}
                   aria-label={`Scade cantitatea pentru ${variant.label}`}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-soft disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink sm:h-8 sm:w-8 transition-colors hover:bg-cream-soft disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Minus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -104,7 +104,7 @@ export function VariantPicker({
                   type="button"
                   onClick={() => setQuantity(variant.label, quantity + 1)}
                   aria-label={`Crește cantitatea pentru ${variant.label}`}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-cream-soft"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink sm:h-8 sm:w-8 transition-colors hover:bg-cream-soft"
                 >
                   <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>

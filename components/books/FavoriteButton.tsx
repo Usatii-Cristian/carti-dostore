@@ -44,7 +44,7 @@ export function FavoriteButton({
       onClick={() => toggle(book)}
       aria-label={isFavorite ? "Scoate din favorite" : "Adaugă la favorite"}
       aria-pressed={isFavorite}
-      className={`flex h-8 w-8 items-center justify-center rounded-full bg-card/90 shadow-sm backdrop-blur transition-colors ${
+      className={`flex h-10 w-10 items-center justify-center rounded-full bg-card/90 sm:h-8 sm:w-8 shadow-sm backdrop-blur transition-colors ${
         isFavorite ? "text-terracotta" : "text-navy hover:text-terracotta"
       }`}
     >
