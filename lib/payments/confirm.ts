@@ -35,6 +35,8 @@ export async function confirmOrderPayment(
         paymentStatus: "PAID",
         status: order.status === "PENDING" ? "CONFIRMED" : order.status,
         paymentId: result.paymentReference ?? order.paymentId,
+        // Momentul exact în care banca a confirmat banii.
+        paidAt: new Date(),
       },
     });
 

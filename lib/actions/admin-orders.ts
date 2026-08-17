@@ -32,11 +32,17 @@ export async function updateOrderStatus(id: string, formData: FormData) {
 
   const statusChanged = order.status !== status;
 
+  // Când plata trece pe „achitat" (curierul a încasat rambursul sau adminul
+  // confirmă manual), reținem și MOMENTUL. Până acum se ghicea din `updatedAt`,
+  // care se schimbă la orice modificare a comenzii.
+  const becamePaid = paymentStatus === "PAID" && order.paymentStatus !== "PAID";
+
   await prisma.order.update({
     where: { id },
     data: {
       status,
       paymentStatus,
+      ...(becamePaid ? { paidAt: order.paidAt ?? new Date() } : {}),
       trackingNumber: trackingNumber || null,
       // La schimbarea statusului, adăugăm un eveniment în timeline-ul de tracking.
       ...(statusChanged

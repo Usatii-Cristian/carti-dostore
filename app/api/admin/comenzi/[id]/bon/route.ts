@@ -45,7 +45,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     paymentReference: order.paymentId,
     // Bonul poartă momentul plății; pentru comenzile la livrare (încă neîncasate)
     // rămâne data comenzii, ca documentul să aibă totuși un reper corect.
-    paidAt: order.paymentStatus === "PAID" ? order.updatedAt : order.createdAt,
+    paidAt: order.paidAt ?? (order.paymentStatus === "PAID" ? order.updatedAt : order.createdAt),
     });
   } catch (error) {
     // Ruta e doar pentru admin, deci putem întoarce motivul exact — altfel

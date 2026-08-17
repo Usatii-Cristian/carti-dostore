@@ -115,6 +115,22 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
             </div>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between gap-4">
+                <dt className="text-slate-500">Metodă</dt>
+                <dd className="text-right font-medium text-slate-900">
+                  {order.paymentMethod === "ONLINE"
+                    ? "MIA Plăți Instant (online)"
+                    : order.paymentMethod === "CARD_ON_DELIVERY"
+                      ? "Card la livrare"
+                      : "Numerar la livrare"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-500">Achitată la</dt>
+                <dd className="text-right text-slate-900">
+                  {order.paidAt ? formatDateTimeShort(order.paidAt) : "— neachitată —"}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
                 <dt className="text-slate-500">ID plată</dt>
                 <dd className="text-right text-slate-900">{order.paymentId ?? "—"}</dd>
               </div>

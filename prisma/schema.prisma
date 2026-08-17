@@ -124,6 +124,10 @@ model Order {
   paymentMethod     PaymentMethod      @default(ONLINE)
   paymentStatus     PaymentStatus      @default(UNPAID)
   paymentId         String?
+  // Momentul în care banii au intrat efectiv: la confirmarea plății online sau,
+  // la plata la livrare, când comanda e marcată livrată în admin. Până acum
+  // singurul reper era `updatedAt`, care se schimbă la orice modificare.
+  paidAt            DateTime?
   // Plată VictoriaBank MIA (QR). Le păstrăm ca să interogăm statusul la bancă
   // și să potrivim semnalele (webhook) cu comanda.
   qrHeaderUUID      String?
