@@ -21,8 +21,8 @@ import localFont from "next/font/local";
 export const inter = localFont({
   src: "./fonts/inter-latin-ro.woff2",
   variable: "--font-inter",
-  // Font variabil: o singură axă de greutate acoperă tot ce folosim.
-  weight: "100 900",
+  // Subsetul păstrează axa de greutate 400–700, cât folosim efectiv.
+  weight: "400 700",
   style: "normal",
   display: "swap",
   fallback: ["system-ui", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
@@ -31,7 +31,8 @@ export const inter = localFont({
 export const playfairDisplay = localFont({
   src: "./fonts/playfair-latin-ro.woff2",
   variable: "--font-playfair",
-  weight: "400 900",
+  // Subsetul e fixat pe greutatea 600 — singura folosită la titluri.
+  weight: "600",
   style: "normal",
   display: "swap",
   // Doar pentru titluri, care apar mai jos în pagină: nu-l punem în lanțul
