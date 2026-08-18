@@ -49,3 +49,16 @@ export async function POST(request: Request) {
   // 204 recomandat de docs, dar 200 e acceptat — răspundem OK ca banca să nu reîncerce.
   return NextResponse.json({ ok: true });
 }
+
+// Deschis în browser, adresa asta primea 405 (browserul face GET, iar webhook-ul
+// acceptă doar POST) — arăta ca o eroare de site atât pentru noi, cât și pentru
+// cine verifică URL-ul înainte de înregistrare. Răspundem cu o confirmare
+// scurtă, fără nicio informație sensibilă.
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    endpoint: "victoriabank-mia-signal",
+    method: "POST",
+    message: "Endpoint activ. Semnalele de plată se trimit prin POST.",
+  });
+}
