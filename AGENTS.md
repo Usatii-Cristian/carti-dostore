@@ -280,6 +280,27 @@ driver-ul) se bundle-uiește pentru Edge și crapă la runtime cu erori de tipul
   Rulează doar pe Node.js (route handler-ul din `app/api/auth/[...nextauth]/route.ts`,
   Server Components, Server Actions).
 
+### Conturi de admin și protecția la ghicirea parolei
+
+Conturile se creează/resetează cu `npm run admin:create -- <email> <parolă>`
+(`scripts/create-admin.mts`): parola se stochează DOAR ca hash bcrypt (cost 12), iar emailul
+se normalizează la litere mici — exact cum îl caută `authorize()`, altfel un cont salvat cu
+majuscule n-ar mai putea fi găsit la login. `npm run admin:create -- --list` arată conturile
+existente.
+
+`authorize()` (`lib/auth.ts`) limitează încercările, fiindcă `/admin/login` e public și
+parola e singura apărare: **10 încercări / 10 min pe IP** și **6 / 10 min pe adresă** (a doua
+cheie e împotriva unui atac distribuit pe mai multe IP-uri, care ar ocoli-o pe prima).
+Contorul stă în MongoDB (`RateLimit`), nu în memorie — pe serverless fiecare instanță are
+propria memorie, deci un contor local n-ar limita nimic. La login reușit contoarele se
+șterg, ca un admin care doar a greșit parola să nu rămână blocat. Blocarea răspunde identic
+cu „parolă greșită": nu confirmăm atacatorului nici că adresa există, nici că a declanșat
+limitarea.
+
+Tot ca să nu scurgem informație, comparăm bcrypt **și când adresa nu există** (`DUMMY_HASH`):
+fără asta, un email inexistent ar răspunde vizibil mai repede decât unul real, iar diferența
+de timp ar spune care adrese sunt valide.
+
 ### `proxy.ts` (NU `middleware.ts`) — protecția rutelor `/admin/*`
 
 Next.js 16 a redenumit Middleware în **Proxy**: fișierul se numește `proxy.ts` (la rădăcină,

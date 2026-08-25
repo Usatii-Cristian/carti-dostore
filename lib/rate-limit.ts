@@ -73,6 +73,34 @@ export async function checkRateLimit(
   return { ok: true, retryAfterSeconds: 0 };
 }
 
+/**
+ * Amprentă dintr-un `Request` brut, pentru locurile care nu au context de
+ * Server Component (ex. `authorize()` din NextAuth). Aceeași formulă ca
+ * `getClientFingerprint`, ca cheile să fie interschimbabile.
+ */
+export function fingerprintFromRequest(request: Request | undefined): string {
+  const forwarded = request?.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const ip = forwarded || request?.headers.get("x-real-ip")?.trim() || "unknown";
+  return hashKey(ip);
+}
+
+/** Hash cu salt din env — nu ținem IP-uri sau adrese de email brute în contor. */
+export function hashKey(value: string): string {
+  return createHash("sha256")
+    .update(`${value}|${process.env.NEXTAUTH_SECRET ?? "bookstore"}`)
+    .digest("hex")
+    .slice(0, 32);
+}
+
+/**
+ * Șterge contorul unei chei. Folosit după o autentificare reușită: încercările
+ * eșuate ale unui admin care doar a greșit parola nu trebuie să-l blocheze după
+ * ce a intrat cu succes.
+ */
+export async function resetRateLimit(key: string): Promise<void> {
+  await prisma.rateLimit.deleteMany({ where: { key } });
+}
+
 /** „acum 3 ore" / „acum 20 de minute" — pentru mesajele de eroare. */
 export function formatRetryAfter(seconds: number): string {
   if (seconds < 60) return "câteva secunde";
