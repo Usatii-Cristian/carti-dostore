@@ -3,7 +3,6 @@ import { sendEmail } from "./send";
 import { SITE_URL } from "@/lib/site";
 import { prisma } from "@/lib/prisma";
 import { OrderConfirmationEmail } from "./templates/OrderConfirmationEmail";
-import { AdminOrderNotificationEmail } from "./templates/AdminOrderNotificationEmail";
 import {
   PaymentReceiptEmail,
   type PaymentReceiptData,
@@ -20,46 +19,30 @@ function trackingUrl(orderNumber: string): string {
   return `${SITE_URL}/comanda/${encodeURIComponent(orderNumber)}`;
 }
 
-const ADMIN_RECIPIENT = process.env.EMAIL_ADMIN ?? process.env.ADMIN_EMAIL;
-
 // Toate funcțiile de mai jos sunt „fire-and-log": nu aruncă niciodată, ca un
 // email eșuat să nu strice comanda / plata / abonarea. `sendEmail` însuși
 // prinde erorile, dar folosim și allSettled pentru trimiterile multiple.
 
-export async function sendNewOrderEmails(
-  order: OrderEmailData,
-  orderId: string
-): Promise<void> {
-  const tasks: Promise<unknown>[] = [
-    sendEmail({
-      to: order.customerEmail,
-      subject: `Am primit comanda ta ${order.orderNumber}`,
-      react: OrderConfirmationEmail({
-        order,
-        trackingUrl: trackingUrl(order.orderNumber),
-        paymentUrl:
-          order.paymentMethod === "ONLINE"
-            ? `${SITE_URL}/checkout/plata?order=${encodeURIComponent(order.orderNumber)}`
-            : undefined,
-      }),
+/**
+ * Confirmarea trimisă CLIENTULUI la plasarea comenzii.
+ *
+ * Notificarea către magazin NU mai pleacă de aici: e o notificare care trebuie
+ * să ajungă, deci trece prin outbox (`lib/notifications/outbox.ts`, canalul
+ * `admin-email`), care o reîncearcă dacă SMTP-ul e picat.
+ */
+export async function sendCustomerOrderEmail(order: OrderEmailData): Promise<void> {
+  await sendEmail({
+    to: order.customerEmail,
+    subject: `Am primit comanda ta ${order.orderNumber}`,
+    react: OrderConfirmationEmail({
+      order,
+      trackingUrl: trackingUrl(order.orderNumber),
+      paymentUrl:
+        order.paymentMethod === "ONLINE"
+          ? `${SITE_URL}/checkout/plata?order=${encodeURIComponent(order.orderNumber)}`
+          : undefined,
     }),
-  ];
-
-  if (ADMIN_RECIPIENT) {
-    tasks.push(
-      sendEmail({
-        to: ADMIN_RECIPIENT,
-        subject: `Comandă nouă ${order.orderNumber} — ${order.total} lei`,
-        react: AdminOrderNotificationEmail({
-          order,
-          adminUrl: `${SITE_URL}/admin/comenzi/${orderId}`,
-        }),
-        replyTo: order.customerEmail,
-      })
-    );
-  }
-
-  await Promise.allSettled(tasks);
+  });
 }
 
 /**

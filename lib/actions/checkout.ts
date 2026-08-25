@@ -3,8 +3,13 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { sendNewOrderEmails } from "@/lib/email/notifications";
-import { tgNewOrder } from "@/lib/telegram";
+import { sendCustomerOrderEmail } from "@/lib/email/notifications";
+import { buildNewOrderMessage } from "@/lib/telegram";
+import {
+  enqueueNotification,
+  deliverNotification,
+  flushNotifications,
+} from "@/lib/notifications/outbox";
 import { cartItemPrice, cartItemTitle, getShippingCost, getCodFee } from "@/lib/store/cart";
 import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
@@ -227,37 +232,38 @@ export async function createOrderAndPay(
 
   revalidatePath("/", "layout");
 
-  // Comanda e salvată — de aici încolo clientul nu mai are ce aștepta. Tot ce
-  // urmează (emailuri prin SMTP, Telegram, AWB-ul FAN, estimarea tarifului)
-  // pleacă „după răspuns", prin `waitUntil`: pagina de confirmare apare imediat,
-  // iar munca se termină în fundal, garantat de platformă. Înainte se aștepta
-  // totul și clientul stătea ~5 secunde pe buton.
-  runAfterResponse(
-    Promise.allSettled([
-      sendNewOrderEmails(
-        {
-          orderNumber,
-          customerName,
-          customerEmail: email,
-          customerPhone: phone,
-          shippingAddress,
-          building,
-          apartment,
-          customerNote,
-          city,
-          items: items.map((item) => ({
-            title: cartItemTitle(item),
-            price: cartItemPrice(item),
-            quantity: item.quantity,
-          })),
-          subtotal,
-          shippingCost,
-          total,
-          paymentMethod,
-        },
-        order.id
-      ),
-      tgNewOrder({
+  const orderEmailData = {
+    orderNumber,
+    customerName,
+    customerEmail: email,
+    customerPhone: phone,
+    shippingAddress,
+    building,
+    apartment,
+    customerNote,
+    city,
+    items: items.map((item) => ({
+      title: cartItemTitle(item),
+      price: cartItemPrice(item),
+      quantity: item.quantity,
+    })),
+    subtotal,
+    shippingCost,
+    total,
+    paymentMethod,
+  };
+
+  // Notificările către magazin (Telegram + email) se scriu în coadă ACUM,
+  // sincron, în aceeași cerere care a creat comanda. Sunt două scrieri scurte
+  // în baza de date, dar ele sunt garanția: dacă trimiterea de mai jos eșuează
+  // sau funcția e tăiată înainte s-o termine, rândurile rămân în coadă și se
+  // reîncearcă singure. Așa nu se mai poate întâmpla ca o comandă reală să
+  // intre fără ca nimeni să afle (vezi lib/notifications/outbox.ts).
+  const queued = await Promise.all([
+    enqueueNotification({
+      channel: "telegram",
+      dedupeKey: `telegram:new-order:${orderNumber}`,
+      payload: buildNewOrderMessage({
         orderNumber,
         customerName,
         customerPhone: phone,
@@ -271,6 +277,26 @@ export async function createOrderAndPay(
         paymentMethod,
         items: items.map((item) => ({ title: cartItemTitle(item), quantity: item.quantity })),
       }),
+    }),
+    enqueueNotification({
+      channel: "admin-email",
+      dedupeKey: `admin-email:new-order:${orderNumber}`,
+      payload: JSON.stringify({ order: orderEmailData, orderId: order.id }),
+    }),
+  ]);
+
+  // Comanda e salvată — de aici încolo clientul nu mai are ce aștepta. Tot ce
+  // urmează (emailuri prin SMTP, Telegram, AWB-ul FAN, estimarea tarifului)
+  // pleacă „după răspuns", prin `waitUntil`: pagina de confirmare apare imediat,
+  // iar munca se termină în fundal, garantat de platformă. Înainte se aștepta
+  // totul și clientul stătea ~5 secunde pe buton.
+  runAfterResponse(
+    Promise.allSettled([
+      sendCustomerOrderEmail(orderEmailData),
+      ...queued.map(deliverNotification),
+      // Ocazie bună să reluăm notificările rămase netrimise de la comenzile
+      // anterioare: o comandă nouă „repară" tăcerea celei de dinainte.
+      flushNotifications(),
       // Cât ne costă PE NOI expedierea (tariful din contractul FAN). E doar
       // informativ, pentru marja văzută în admin, deci se salvează după fapt.
       estimateFanCost(items, city, county, total).then((fanCost) =>

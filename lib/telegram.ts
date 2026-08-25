@@ -1,41 +1,29 @@
 import "server-only";
 
-// Notificări către grupul de Telegram prin Bot API. Provider-agnostic, no-op
-// dacă nu e configurat, și nu aruncă niciodată (o notificare eșuată nu strică
-// comanda/plata) — exact ca la email.
+/**
+ * Notificările către grupul de Telegram.
+ *
+ * Fișierul ăsta doar COMPUNE mesajele. Trimiterea propriu-zisă trece prin
+ * outbox (`lib/notifications/outbox.ts`): mesajul se scrie întâi în baza de
+ * date, apoi se încearcă trimiterea, iar dacă eșuează se reîncearcă singur.
+ *
+ * De ce s-a schimbat: înainte se trimitea direct și eșecul se loga în consolă.
+ * Când grupul a devenit supergrup, Telegram a început să răspundă cu 400
+ * (id-ul grupului se schimbă la conversie) — mesajele nu mai ajungeau, dar
+ * nimic nu semnala asta. Comenzi reale au intrat fără ca magazinul să afle.
+ * Acum o notificare netrimisă rămâne vizibilă în panoul de admin și se reia
+ * automat până pleacă.
+ */
 
 import { formatShippingAddress } from "@/lib/orders/address";
-
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.TELEGRAM_CHAT_ID;
+import { notify } from "@/lib/notifications/outbox";
 
 function esc(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-async function send(text: string): Promise<void> {
-  if (!token || !chatId) {
-    console.info("[telegram] SKIP (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID neconfigurate)");
-    return;
-  }
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      }),
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      console.error("[telegram] eroare:", res.status, body.slice(0, 200));
-    }
-  } catch (error) {
-    console.error("[telegram] trimiterea a eșuat:", error);
-  }
+function send(dedupeKey: string, text: string): Promise<void> {
+  return notify({ channel: "telegram", dedupeKey: `telegram:${dedupeKey}`, payload: text });
 }
 
 export async function tgNewOrder(order: {
@@ -52,6 +40,24 @@ export async function tgNewOrder(order: {
   paymentMethod?: "ONLINE" | "CARD_ON_DELIVERY" | "CASH_ON_DELIVERY";
   items: { title: string; quantity: number }[];
 }): Promise<void> {
+  await send(`new-order:${order.orderNumber}`, buildNewOrderMessage(order));
+}
+
+/** Textul comenzii noi, separat ca să-l putem pune la coadă și din checkout. */
+export function buildNewOrderMessage(order: {
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail: string;
+  shippingAddress: string;
+  building?: string | null;
+  apartment?: string | null;
+  customerNote?: string | null;
+  city: string;
+  total: number;
+  paymentMethod?: "ONLINE" | "CARD_ON_DELIVERY" | "CASH_ON_DELIVERY";
+  items: { title: string; quantity: number }[];
+}): string {
   const lines = order.items.map((i) => `• ${esc(i.title)} × ${i.quantity}`).join("\n");
   // Metoda de plată contează la prima privire: comenzile online se expediază
   // abia după confirmarea banilor, cele la livrare pleacă imediat.
@@ -64,15 +70,15 @@ export async function tgNewOrder(order: {
           ? "Numerar la livrare"
           : null;
 
-  await send(
+  return (
     `🆕 <b>Comandă nouă</b> ${esc(order.orderNumber)}\n` +
-      `👤 ${esc(order.customerName)}\n` +
-      `📞 ${esc(order.customerPhone)}\n` +
-      `📧 ${esc(order.customerEmail)}\n` +
-      `📍 ${esc(formatShippingAddress(order))}, ${esc(order.city)}\n` +
-      (order.customerNote ? `📝 ${esc(order.customerNote)}\n` : "") +
-      (payment ? `💳 ${esc(payment)}\n` : "") +
-      `💰 <b>${order.total} lei</b>\n\n${lines}`
+    `👤 ${esc(order.customerName)}\n` +
+    `📞 ${esc(order.customerPhone)}\n` +
+    `📧 ${esc(order.customerEmail)}\n` +
+    `📍 ${esc(formatShippingAddress(order))}, ${esc(order.city)}\n` +
+    (order.customerNote ? `📝 ${esc(order.customerNote)}\n` : "") +
+    (payment ? `💳 ${esc(payment)}\n` : "") +
+    `💰 <b>${order.total} lei</b>\n\n${lines}`
   );
 }
 
@@ -80,7 +86,10 @@ export async function tgPaymentConfirmed(order: {
   orderNumber: string;
   total: number;
 }): Promise<void> {
-  await send(`💳 <b>Plată confirmată</b> — comanda ${esc(order.orderNumber)} (${order.total} lei)`);
+  await send(
+    `paid:${order.orderNumber}`,
+    `💳 <b>Plată confirmată</b> — comanda ${esc(order.orderNumber)} (${order.total} lei)`
+  );
 }
 
 /**
@@ -96,6 +105,7 @@ export async function tgPaymentExpired(order: {
   total: number;
 }): Promise<void> {
   await send(
+    `expired:${order.orderNumber}`,
     `⚠️ <b>Plată neefectuată</b> — comanda ${esc(order.orderNumber)} (${order.total} lei)\n` +
       `👤 ${esc(order.customerName)} · 📞 ${esc(order.customerPhone)}\n` +
       `Clientul a ales plata online, dar n-a achitat, iar codul QR a expirat. ` +
@@ -107,5 +117,10 @@ export async function tgStatusChange(order: {
   orderNumber: string;
   statusLabel: string;
 }): Promise<void> {
-  await send(`🔄 Comanda <b>${esc(order.orderNumber)}</b> → ${esc(order.statusLabel)}`);
+  // Aceeași comandă poate trece de mai multe ori prin același status (revenire
+  // pe „În procesare"), deci cheia include și momentul.
+  await send(
+    `status:${order.orderNumber}:${order.statusLabel}:${Date.now()}`,
+    `🔄 Comanda <b>${esc(order.orderNumber)}</b> → ${esc(order.statusLabel)}`
+  );
 }

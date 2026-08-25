@@ -249,3 +249,50 @@ model BlogPost {
 
   @@index([published, publishedAt])
 }
+
+/**
+ * Setări scrise de aplicație în timpul rulării (nu de om, în Vercel).
+ *
+ * Există pentru un caz concret: Telegram schimbă id-ul unui grup când acesta
+ * devine supergrup, iar mesajele către id-ul vechi eșuează. Reținerea noului id
+ * doar în memoria funcției nu ajută — pe serverless fiecare instanță pornește
+ * curată și ar redescoperi eroarea la fiecare comandă. Aici rămâne salvat.
+ */
+model Setting {
+  key       String   @id @map("_id")
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+/**
+ * Coada de notificări („outbox"). Fiecare notificare care TREBUIE să ajungă
+ * (Telegram, emailul de comandă nouă către magazin) se scrie mai întâi aici,
+ * SINCRON, în aceeași cerere care creează comanda — abia apoi se încearcă
+ * trimiterea.
+ *
+ * De ce: până acum notificările plecau doar „după răspuns" (waitUntil) și
+ * eșecul era doar logat. Dacă Telegram răspundea cu eroare (exact ce s-a
+ * întâmplat când grupul a devenit supergrup) sau funcția era tăiată înainte să
+ * termine, notificarea dispărea fără urmă și nimeni nu afla de comandă. Cu
+ * rândul salvat în baza de date, o notificare netrimisă rămâne vizibilă și se
+ * reîncearcă singură (la comanda următoare, la deschiderea adminului sau din
+ * cron), până când chiar pleacă.
+ */
+model Notification {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  channel   String // "telegram" | "admin-email"
+  // Cheie de idempotență (ex. „telegram:new-order:BS-20260823-IYLQW7"): oprește
+  // dublurile când aceeași notificare e pusă la coadă de două ori.
+  dedupeKey String    @unique
+  payload   String // text gata formatat (Telegram) sau JSON (email)
+  status    String    @default("PENDING") // PENDING | SENDING | SENT | FAILED
+  attempts  Int       @default(0)
+  lastError String?
+  // Când merită reîncercată. Crește progresiv după fiecare eșec.
+  nextTryAt DateTime  @default(now())
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([status, nextTryAt])
+}

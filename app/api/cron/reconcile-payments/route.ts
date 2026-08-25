@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { reconcilePendingPayments } from "@/lib/payments/reconcile";
+import { flushNotifications } from "@/lib/notifications/outbox";
 
 /**
  * Aceeași reconciliere, rulată de cron-ul Vercel (vezi `vercel.json`), ca să
@@ -22,6 +23,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
-  const summary = await reconcilePendingPayments();
-  return NextResponse.json(summary);
+  // Ultima plasă de siguranță pentru notificări: chiar dacă nu mai intră nicio
+  // comandă și nimeni nu deschide adminul, coada se golește o dată pe zi.
+  const [summary, notifications] = await Promise.all([
+    reconcilePendingPayments(),
+    flushNotifications(50),
+  ]);
+  return NextResponse.json({ ...summary, notifications });
 }

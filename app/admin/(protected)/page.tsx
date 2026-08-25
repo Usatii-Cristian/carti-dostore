@@ -4,6 +4,7 @@ import { ShoppingCart, Wallet, BookOpen } from "lucide-react";
 import { getDashboardStats } from "@/lib/admin/dashboard";
 import { formatPrice } from "@/lib/format";
 import { OrderStatusBadge, PaymentStatusBadge } from "@/components/admin/StatusBadge";
+import { NotificationsAlert } from "@/components/admin/NotificationsAlert";
 
 export const metadata: Metadata = { title: "Dashboard — Admin Dostore Carti" };
 
@@ -31,6 +32,8 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold text-slate-900">Dashboard</h1>
+
+      <NotificationsAlert />
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         {cards.map(({ label, value, icon: Icon }) => (
