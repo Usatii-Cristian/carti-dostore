@@ -157,6 +157,26 @@ export async function createOrderAndPay(
     return { status: "error", message: "Verifică datele introduse.", fieldErrors: errors, values };
   }
 
+  // Disponibilitatea se verifică pe SERVER, nu doar prin butonul inactiv din
+  // pagină: coșul trăiește în localStorage, deci un produs adăugat acum o
+  // săptămână poate fi între timp epuizat. Fără verificarea asta am fi luat
+  // banii și am fi generat AWB pentru ceva ce nu avem.
+  const unavailable = await prisma.book.findMany({
+    where: { id: { in: items.map((item) => item.id) }, inStock: false },
+    select: { title: true },
+  });
+  if (unavailable.length > 0) {
+    const names = unavailable.map((book) => `„${book.title}"`).join(", ");
+    return {
+      status: "error",
+      message:
+        unavailable.length === 1
+          ? `${names} nu mai este în stoc. Scoate-l din coș ca să poți continua.`
+          : `Aceste produse nu mai sunt în stoc: ${names}. Scoate-le din coș ca să poți continua.`,
+      values,
+    };
+  }
+
   const { customerName, email, phone, shippingAddress, building, apartment, customerNote } =
     values;
   let { city, county } = values;

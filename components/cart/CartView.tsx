@@ -11,11 +11,15 @@ import {
   SHIPPING_NATIONAL,
 } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/format";
+import { useOutOfStockIds } from "@/lib/store/use-out-of-stock";
 
 export function CartView() {
   const items = useCartStore((state) => state.items);
   const setQuantity = useCartStore((state) => state.setQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
+  // Coșul e salvat în localStorage: un produs adăugat mai demult poate fi între
+  // timp epuizat. Verificăm starea reală înainte ca clientul să ajungă la plată.
+  const outOfStockIds = useOutOfStockIds();
 
   if (items.length === 0) {
     return (
@@ -39,6 +43,7 @@ export function CartView() {
     );
   }
 
+  const hasUnavailable = items.some((item) => outOfStockIds.has(item.id));
   const subtotal = items.reduce((sum, item) => sum + cartItemPrice(item) * item.quantity, 0);
   // În coș nu știm încă localitatea, deci nu putem afișa un cost exact — arătăm
   // intervalul și lăsăm calculul final pe checkout, unde se alege orașul.
@@ -78,6 +83,11 @@ export function CartView() {
                       <p className="text-sm font-medium text-terracotta">{item.variantLabel}</p>
                     ) : (
                       <p className="text-sm text-ink-soft">{item.author}</p>
+                    )}
+                    {outOfStockIds.has(item.id) && (
+                      <p className="mt-1 inline-block rounded-full bg-ink/10 px-2 py-0.5 text-xs font-semibold text-ink-soft">
+                        Nu mai este în stoc
+                      </p>
                     )}
                   </div>
                   <button
@@ -147,12 +157,18 @@ export function CartView() {
             </div>
           </dl>
 
-          <Link
-            href="/checkout"
-            className="mt-5 flex w-full items-center justify-center rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
-          >
-            Finalizează comanda
-          </Link>
+          {hasUnavailable ? (
+            <p className="mt-5 rounded-xl bg-ink/5 px-4 py-3 text-center text-sm font-medium text-ink-soft">
+              Scoate din coș produsele epuizate ca să poți finaliza comanda.
+            </p>
+          ) : (
+            <Link
+              href="/checkout"
+              className="mt-5 flex w-full items-center justify-center rounded-full bg-terracotta px-7 py-3 font-semibold text-cream transition-colors hover:bg-terracotta-dark"
+            >
+              Finalizează comanda
+            </Link>
+          )}
         </div>
       </div>
     </div>

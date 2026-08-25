@@ -14,6 +14,7 @@ import {
   SHIPPING_LOCAL,
   SHIPPING_NATIONAL,
 } from "@/lib/store/cart";
+import { useOutOfStockIds } from "@/lib/store/use-out-of-stock";
 import { createOrderAndPay, type CheckoutState } from "@/lib/actions/checkout";
 import { formatPrice } from "@/lib/format";
 import { CityAutocomplete } from "./CityAutocomplete";
@@ -114,6 +115,9 @@ const FIELDS: {
 
 export function CheckoutView() {
   const items = useCartStore((state) => state.items);
+  // Produsele epuizate între timp: serverul refuză oricum comanda, dar e mai
+  // corect ca vizitatorul să afle aici, nu după ce completează tot formularul.
+  const outOfStockIds = useOutOfStockIds();
   const boundAction = createOrderAndPay.bind(null, items);
   const [state, formAction, pending] = useActionState(boundAction, initialState);
 
@@ -145,6 +149,8 @@ export function CheckoutView() {
     setValues((current) => ({ ...current, [name]: value }));
   }
 
+  const hasUnavailable = items.some((item) => outOfStockIds.has(item.id));
+
   const isFormComplete =
     values.customerName.trim().length >= 3 &&
     EMAIL_REGEX.test(values.email.trim()) &&
@@ -156,7 +162,8 @@ export function CheckoutView() {
     // nelivrabilă. Aceeași regulă e verificată și pe server.
     values.county.trim().length > 0 &&
     deliveryAccepted &&
-    termsChecked;
+    termsChecked &&
+    !hasUnavailable;
 
   if (items.length === 0) {
     return (
@@ -417,14 +424,26 @@ export function CheckoutView() {
             type="submit"
             disabled={pending || !isFormComplete}
             title={
-              !isFormComplete
-                ? "Completează toate datele, acceptă livrarea și bifează acordul de mai sus"
-                : undefined
+              hasUnavailable
+                ? "Coșul conține produse epuizate"
+                : !isFormComplete
+                  ? "Completează toate datele, acceptă livrarea și bifează acordul de mai sus"
+                  : undefined
             }
             className="flex w-full items-center justify-center rounded-full bg-terracotta px-7 py-3.5 font-semibold text-cream transition-opacity hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-terracotta"
           >
             {pending ? "Se procesează..." : `Trimite comanda · ${formatPrice(total)}`}
           </button>
+
+          {hasUnavailable && (
+            <p role="alert" className="text-center text-xs font-medium text-terracotta">
+              Unul dintre produsele din coș nu mai este în stoc. Întoarce-te la{" "}
+              <a href="/cos" className="underline">
+                coș
+              </a>{" "}
+              și scoate-l ca să poți trimite comanda.
+            </p>
+          )}
 
           {!deliveryAccepted && (
             <p role="alert" className="text-center text-xs font-medium text-terracotta">

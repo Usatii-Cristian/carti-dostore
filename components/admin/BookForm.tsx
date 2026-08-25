@@ -278,6 +278,20 @@ export function BookForm({
           </Field>
         </div>
 
+        {/* Disponibilitatea: lista în loc de bifă, ca să nu existe dubii ce
+            înseamnă starea nebifată. Un produs marcat epuizat rămâne vizibil în
+            catalog, dar nu se poate adăuga în coș. */}
+        <Field label="Disponibilitate">
+          <select
+            name="inStock"
+            defaultValue={initialBook?.inStock === false ? "0" : "1"}
+            className={inputClass}
+          >
+            <option value="1">În stoc</option>
+            <option value="0">Nu este în stoc</option>
+          </select>
+        </Field>
+
         <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
           <input
             type="checkbox"

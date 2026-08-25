@@ -37,12 +37,21 @@ export function BookCard({ book, priority = false }: { book: BookCardData; prior
           <FavoriteButton book={book} />
         </div>
 
-        {book.discountPrice != null && book.discountPrice < book.price && (
-          <span className="absolute left-2 top-2 rounded-full bg-terracotta px-2 py-0.5 text-[11px] font-semibold text-cream">
-            Reducere
+        {book.inStock === false ? (
+          // Produsul epuizat rămâne în listă (poate reveni în stoc), dar se vede
+          // din prima că nu se poate comanda — altfel clientul ar afla abia la
+          // butonul inactiv.
+          <span className="absolute left-2 top-2 rounded-full bg-ink/75 px-2 py-0.5 text-[11px] font-semibold text-cream">
+            Stoc epuizat
           </span>
+        ) : (
+          book.discountPrice != null &&
+          book.discountPrice < book.price && (
+            <span className="absolute left-2 top-2 rounded-full bg-terracotta px-2 py-0.5 text-[11px] font-semibold text-cream">
+              Reducere
+            </span>
+          )
         )}
-
       </div>
 
       <div className="flex flex-1 flex-col gap-1.5 p-3.5">

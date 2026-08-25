@@ -102,10 +102,29 @@ export default async function BookPage({ params }: PageProps) {
             <PriceTag price={book.price} discountPrice={book.discountPrice} size="lg" />
           </div>
 
+          {/* Disponibilitatea, setată din admin. Nu afișăm cantități — doar cele
+              două stări pe care le are magazinul cu adevărat. */}
+          <p
+            className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
+              book.inStock ? "bg-emerald-50 text-emerald-700" : "bg-ink/10 text-ink-soft"
+            }`}
+          >
+            <span
+              aria-hidden="true"
+              className={`h-2 w-2 rounded-full ${book.inStock ? "bg-emerald-500" : "bg-ink-soft"}`}
+            />
+            {book.inStock ? "În stoc" : "Nu este în stoc"}
+          </p>
+
           {/* Produsele cu mai multe tipuri (etichete, cărți în mai multe limbi)
               se adaugă în coș din tabelul de variante, cu cantitate pe fiecare
               tip. Restul păstrează butonul simplu. */}
-          {book.variants.length > 0 ? (
+          {!book.inStock ? (
+            <div className="mt-6 flex flex-wrap gap-3">
+              <AddToCartButton book={book} variant="full" />
+              <FavoriteButton book={book} variant="full" />
+            </div>
+          ) : book.variants.length > 0 ? (
             <>
               <div className="mt-6">
                 <FavoriteButton book={book} variant="full" />

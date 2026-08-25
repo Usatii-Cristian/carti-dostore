@@ -14,4 +14,11 @@ export type BookCardData = {
    * fiindcă n-am ști ce tip vrea clientul — butonul duce la pagina produsului.
    */
   variants?: { label: string }[];
+  /**
+   * Disponibilitatea, setată din admin. Opțional pentru compatibilitate cu
+   * coșul salvat în localStorage înainte de introducerea câmpului: acolo lipsa
+   * lui înseamnă „nu știm", nu „epuizat", iar verificarea reală se face oricum
+   * pe server, la plasarea comenzii.
+   */
+  inStock?: boolean;
 };

@@ -34,6 +34,7 @@ export type CatalogBook = {
   rating: number;
   reviewCount: number;
   variants: { label: string }[];
+  inStock: boolean;
   categorySlug: string;
   isBestseller: boolean;
   isNew: boolean;
@@ -76,6 +77,7 @@ export const getCatalogSnapshot = unstable_cache(
           rating: true,
           reviewCount: true,
           variants: { select: { label: true } },
+          inStock: true,
           isBestseller: true,
           isNew: true,
           createdAt: true,
@@ -103,6 +105,7 @@ export const getCatalogSnapshot = unstable_cache(
         rating: book.rating,
         reviewCount: book.reviewCount,
         variants: book.variants,
+        inStock: book.inStock,
         categorySlug: book.category.slug,
         isBestseller: book.isBestseller,
         isNew: book.isNew,
