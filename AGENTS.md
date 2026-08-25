@@ -188,6 +188,46 @@ un JPEG de câteva sute de KB / câțiva MB cu ~90% (ex. 386KB → 38KB), ca sut
 ocupe spațiu minim. Limita de intrare e 10MB brut; dacă `sharp` crapă pe un fișier corupt,
 ruta răspunde 400, nu 500.
 
+### Notificările de comandă trec printr-o coadă (outbox) — nu se mai pot pierde
+
+Notificările care TREBUIE să ajungă la magazin (Telegram + emailul de comandă nouă) se
+scriu întâi în baza de date (`Notification`), **sincron, în cererea care creează comanda**,
+și abia apoi se încearcă trimiterea. Motivul e un bug real: grupul de Telegram a fost
+convertit în supergrup, ceea ce îi schimbă id-ul, Bot API a început să răspundă cu 400 +
+`migrate_to_chat_id`, iar codul doar loga eroarea — două comenzi reale au intrat fără ca
+nimeni să afle. Eșecul nu era problema; **tăcerea** era.
+
+- `lib/telegram-transport.ts` — trimiterea brută. Tratează migrarea în supergrup și
+  **salvează noul id în `Setting`** (nu doar în memoria instanței: pe serverless fiecare
+  funcție pornește curată și ar redescoperi eroarea la fiecare comandă), plus 429
+  (`retry_after`) și căderile de rețea. **Nu înghite erorile** — le întoarce apelantului.
+- `lib/notifications/outbox.ts` — coada. Idempotentă pe `dedupeKey`, cu claim atomic
+  (`updateMany` condiționat) împotriva trimiterilor duble între instanțe și backoff
+  progresiv, maxim 10 încercări.
+- `flushNotifications()` se cheamă din **patru** locuri, ca să nu depindem de unul singur:
+  la fiecare comandă nouă (o comandă „repară" tăcerea celei anterioare), la deschiderea
+  panoului de admin (`/api/admin/reconcile-payments`), din cron-ul zilnic și din lista de
+  comenzi.
+- `components/admin/NotificationsAlert.tsx` afișează în admin ce n-a plecat, cu eroarea
+  exactă. Dacă adaugi o notificare nouă care contează, trece-o prin outbox, nu prin fetch
+  direct.
+- `EMAIL_ADMIN` trebuie să fie o cutie poștală REALĂ. A fost mult timp `admin@bookstore.md`,
+  o adresă inexistentă rămasă de la instalare, deci notificările de comandă nu ajungeau
+  nicăieri. Ultimul refugiu în cod e `SMTP_USER`.
+
+### Disponibilitate: `inStock`, fără cantități
+
+Produsele au doar două stări, setate manual din admin (listă cu două opțiuni, nu bifă — o
+bifă nebifată era ambiguă). Un produs epuizat rămâne vizibil în catalog, dar nu se poate
+comanda. Verificat pe patru niveluri: cardul din catalog, pagina produsului, coșul +
+checkout-ul (prin `/api/stock`, fiindcă un coș din localStorage poate fi vechi de o
+săptămână) și, decisiv, Server Action-ul de checkout, care refuză comanda. Primele trei
+sunt doar ca vizitatorul să afle mai devreme; garanția e ultima.
+
+⚠️ MongoDB n-are migrări: un câmp nou lipsește din documentele existente, iar Prisma refuză
+să citească un câmp obligatoriu absent. La orice câmp non-opțional adăugat pe un model cu
+date, rulează un backfill (vezi `scripts/backfill-in-stock.mts`) după `prisma db push`.
+
 ### Email tranzacțional — SMTP (nodemailer) în spatele unei abstracții
 
 Emailurile automate trec toate prin `lib/email/send.ts` (`sendEmail(...)`) — un strat
