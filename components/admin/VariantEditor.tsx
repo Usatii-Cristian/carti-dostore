@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Trash2, ListPlus } from "lucide-react";
 
-export type VariantDraft = { label: string; price: string };
+export type VariantDraft = { label: string; price: string; stock: string };
 
 /**
  * Tipurile în care se vinde produsul (ex. cele 14 tipuri de etichete, sau cele
@@ -26,7 +26,7 @@ export function VariantEditor({ initialVariants = [] }: { initialVariants?: Vari
       .split("\n")
       .map((line) => line.trim())
       .filter(Boolean)
-      .map((label) => ({ label, price: "" }));
+      .map((label) => ({ label, price: "", stock: "0" }));
     if (rows.length === 0) return;
     setVariants((current) => [...current, ...rows]);
     setBulk("");
@@ -56,7 +56,15 @@ export function VariantEditor({ initialVariants = [] }: { initialVariants?: Vari
             onChange={(e) => update(index, { price: e.target.value })}
             placeholder="Preț (opțional)"
             inputMode="decimal"
-            className="w-36 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-900 focus:outline-none"
+            className="w-32 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-900 focus:outline-none"
+          />
+          <input
+            type="number"
+            value={variant.stock}
+            onChange={(e) => update(index, { stock: e.target.value })}
+            placeholder="Stoc"
+            min="0"
+            className="w-24 rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-900 focus:outline-none"
           />
           <button
             type="button"

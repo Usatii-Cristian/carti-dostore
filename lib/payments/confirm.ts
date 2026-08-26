@@ -5,6 +5,7 @@ import { sendPaymentReceiptEmail } from "@/lib/email/notifications";
 import { tgPaymentConfirmed, tgPaymentExpired } from "@/lib/telegram";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { runAfterResponse } from "@/lib/after-response";
+import { adjustOrderStock } from "@/lib/orders/stock";
 
 /**
  * Confirmă plata unei comenzi întrebând BANCA (status autentificat), nu
@@ -29,16 +30,21 @@ export async function confirmOrderPayment(
   if (!result) return "pending";
 
   if (result.status === "Paid") {
+    const wasPending = order.status === "PENDING";
     await prisma.order.update({
       where: { id: order.id },
       data: {
         paymentStatus: "PAID",
-        status: order.status === "PENDING" ? "CONFIRMED" : order.status,
+        status: wasPending ? "CONFIRMED" : order.status,
         paymentId: result.paymentReference ?? order.paymentId,
         // Momentul exact în care banca a confirmat banii.
         paidAt: new Date(),
       },
     });
+
+    if (wasPending) {
+      await adjustOrderStock(order.id, "decrement");
+    }
 
     // Notificările nu trebuie așteptate: pagina de plată doar întreabă „e gata?",
     // iar SMTP-ul poate dura secunde bune.

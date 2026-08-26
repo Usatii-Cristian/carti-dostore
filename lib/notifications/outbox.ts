@@ -102,6 +102,13 @@ async function markFailed(id: string, attempts: number, error: string): Promise<
 export async function deliverNotification(record: Enqueued): Promise<void> {
   if (!record) return;
   try {
+    // Claim atomic: dacă flushNotifications îl ia simultan, `count` e 0.
+    const claimed = await prisma.notification.updateMany({
+      where: { id: record.id, status: "PENDING" },
+      data: { status: "SENDING", attempts: 1 },
+    });
+    if (claimed.count === 0) return; // a fost deja preluat de flush
+
     const result = await deliver(record.channel, record.payload);
     if (result.ok) {
       await markSent(record.id);

@@ -51,6 +51,18 @@ export async function updateOrderStatus(id: string, formData: FormData) {
     },
   });
 
+  if (statusChanged) {
+    if (status === "CONFIRMED" && order.status === "PENDING") {
+      // S-a confirmat comanda (ex. plată ramburs), scădem stocul.
+      const { adjustOrderStock } = await import("@/lib/orders/stock");
+      await adjustOrderStock(order.id, "decrement");
+    } else if (status === "CANCELLED" && order.status !== "PENDING" && order.status !== "CANCELLED") {
+      // S-a anulat o comandă deja confirmată/procesată, readăugăm stocul.
+      const { adjustOrderStock } = await import("@/lib/orders/stock");
+      await adjustOrderStock(order.id, "increment");
+    }
+  }
+
   // Notificăm clientul prin email la schimbarea de status (doar stadiile
   // relevante — vezi STATUS_EMAIL; nu blochează dacă emailul eșuează).
   if (statusChanged) {

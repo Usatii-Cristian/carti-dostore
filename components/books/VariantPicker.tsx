@@ -6,7 +6,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/format";
 import type { BookCardData } from "@/lib/types";
 
-export type Variant = { label: string; price?: number | null };
+export type Variant = { label: string; price?: number | null; stock?: number };
 
 /**
  * Alegerea tipurilor pentru produsele care se vând în mai multe variante
@@ -33,8 +33,8 @@ export function VariantPicker({
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [justAdded, setJustAdded] = useState(false);
 
-  function setQuantity(label: string, value: number) {
-    setQuantities((current) => ({ ...current, [label]: Math.max(0, Math.min(99, value)) }));
+  function setQuantity(label: string, value: number, maxStock: number) {
+    setQuantities((current) => ({ ...current, [label]: Math.max(0, Math.min(maxStock, value)) }));
     setJustAdded(false);
   }
 
@@ -73,13 +73,22 @@ export function VariantPicker({
       <ul className="mt-4 divide-y divide-border">
         {variants.map((variant) => {
           const quantity = quantities[variant.label] ?? 0;
+          const maxStock = variant.stock ?? 0;
+          const isOutOfStock = maxStock === 0;
+
           return (
             <li
               key={variant.label}
-              className="flex flex-wrap items-center justify-between gap-3 py-2.5"
+              className={`flex flex-wrap items-center justify-between gap-3 py-2.5 ${isOutOfStock ? "opacity-50" : ""}`}
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-ink">{variant.label}</p>
+                <p className="text-sm font-medium text-ink">
+                  {variant.label}
+                  {isOutOfStock && <span className="ml-2 text-xs font-semibold text-red-600">Epuizat</span>}
+                  {!isOutOfStock && maxStock > 0 && maxStock <= 5 && (
+                    <span className="ml-2 text-xs text-orange-600">Doar {maxStock} în stoc</span>
+                  )}
+                </p>
                 {variant.price != null && (
                   <p className="text-xs text-ink-soft">{formatPrice(variant.price)}</p>
                 )}
@@ -92,8 +101,8 @@ export function VariantPicker({
               >
                 <button
                   type="button"
-                  onClick={() => setQuantity(variant.label, quantity - 1)}
-                  disabled={quantity === 0}
+                  onClick={() => setQuantity(variant.label, quantity - 1, maxStock)}
+                  disabled={quantity === 0 || isOutOfStock}
                   aria-label={`Scade cantitatea pentru ${variant.label}`}
                   className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink sm:h-8 sm:w-8 transition-colors hover:bg-cream-soft disabled:cursor-not-allowed disabled:opacity-40"
                 >
@@ -102,9 +111,10 @@ export function VariantPicker({
                 <span className="w-6 text-center text-sm font-semibold text-ink">{quantity}</span>
                 <button
                   type="button"
-                  onClick={() => setQuantity(variant.label, quantity + 1)}
+                  onClick={() => setQuantity(variant.label, quantity + 1, maxStock)}
+                  disabled={quantity >= maxStock || isOutOfStock}
                   aria-label={`Crește cantitatea pentru ${variant.label}`}
-                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink sm:h-8 sm:w-8 transition-colors hover:bg-cream-soft"
+                  className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-ink sm:h-8 sm:w-8 transition-colors hover:bg-cream-soft disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>

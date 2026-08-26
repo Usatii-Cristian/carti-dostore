@@ -42,6 +42,8 @@ model Book {
   // Un produs fără stoc se poate vedea, dar nu se poate adăuga în coș, iar
   // checkout-ul refuză comanda dacă totuși ajunge acolo (coș vechi).
   inStock        Boolean  @default(true)
+  // Stoc general pentru produsele fără variante.
+  stock          Int      @default(0)
   tags           String[]
   // Întrebări frecvente specifice produsului, administrate din panoul de admin.
   // Embedded (nu model separat): aparțin exclusiv produsului, se citesc mereu
@@ -174,6 +176,8 @@ type BookVariant {
   label String
   // Preț propriu, dacă varianta costă altfel decât produsul de bază.
   price Float?
+  // Stocul pentru această variantă.
+  stock Int?
 }
 
 // O specificație a produsului (etichetă + valoare), embedded.
@@ -211,6 +215,8 @@ model OrderItem {
   bookId   String @db.ObjectId
   book     Book   @relation(fields: [bookId], references: [id])
   title    String
+  // Titlul variantei (ex: "Suplimente"), ca să știm de unde scădem stocul.
+  variantLabel String?
   price    Float
   quantity Int
 

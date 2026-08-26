@@ -161,18 +161,41 @@ export async function createOrderAndPay(
   // pagină: coșul trăiește în localStorage, deci un produs adăugat acum o
   // săptămână poate fi între timp epuizat. Fără verificarea asta am fi luat
   // banii și am fi generat AWB pentru ceva ce nu avem.
-  const unavailable = await prisma.book.findMany({
-    where: { id: { in: items.map((item) => item.id) }, inStock: false },
-    select: { title: true },
+  const booksForStock = await prisma.book.findMany({
+    where: { id: { in: items.map((item) => item.id) } },
+    select: { id: true, title: true, stock: true, variants: true },
   });
-  if (unavailable.length > 0) {
-    const names = unavailable.map((book) => `„${book.title}"`).join(", ");
+
+  const unavailableNames: string[] = [];
+  for (const item of items) {
+    const bookInDb = booksForStock.find(b => b.id === item.id);
+    if (!bookInDb) {
+      unavailableNames.push(`„${item.title}" (eliminat din catalog)`);
+      continue;
+    }
+    
+    let availableStock = 0;
+    if (item.variantLabel) {
+      const variant = bookInDb.variants.find(v => v.label === item.variantLabel);
+      availableStock = variant?.stock ?? 0;
+    } else {
+      availableStock = bookInDb.stock ?? 0;
+    }
+
+    if (item.quantity > availableStock) {
+      const title = item.variantLabel ? `${bookInDb.title} — ${item.variantLabel}` : bookInDb.title;
+      unavailableNames.push(`„${title}" (stoc: ${availableStock}, cerut: ${item.quantity})`);
+    }
+  }
+
+  if (unavailableNames.length > 0) {
+    const names = unavailableNames.join(", ");
     return {
       status: "error",
       message:
-        unavailable.length === 1
-          ? `${names} nu mai este în stoc. Scoate-l din coș ca să poți continua.`
-          : `Aceste produse nu mai sunt în stoc: ${names}. Scoate-le din coș ca să poți continua.`,
+        unavailableNames.length === 1
+          ? `${names} depășește stocul disponibil. Modifică cantitatea din coș.`
+          : `Aceste produse depășesc stocul: ${names}. Modifică cantitățile din coș.`,
       values,
     };
   }
@@ -243,6 +266,7 @@ export async function createOrderAndPay(
         create: items.map((item) => ({
           bookId: item.id,
           title: cartItemTitle(item),
+          variantLabel: item.variantLabel || null,
           price: cartItemPrice(item),
           quantity: item.quantity,
         })),

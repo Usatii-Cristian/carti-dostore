@@ -13,7 +13,7 @@ export type BookCardData = {
    * știe DACĂ există: un produs cu variante nu se poate adăuga direct în coș,
    * fiindcă n-am ști ce tip vrea clientul — butonul duce la pagina produsului.
    */
-  variants?: { label: string }[];
+  variants?: { label: string; stock?: number }[];
   /**
    * Disponibilitatea, setată din admin. Opțional pentru compatibilitate cu
    * coșul salvat în localStorage înainte de introducerea câmpului: acolo lipsa
@@ -21,4 +21,5 @@ export type BookCardData = {
    * pe server, la plasarea comenzii.
    */
   inStock?: boolean;
+  stock?: number;
 };

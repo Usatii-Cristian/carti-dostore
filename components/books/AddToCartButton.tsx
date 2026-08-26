@@ -23,11 +23,10 @@ export function AddToCartButton({
   // o fereastră în care alegerea tipului e obligatorie.
   const hasVariants = (book.variants?.length ?? 0) > 0;
 
-  // Produsele marcate „nu este în stoc" din admin rămân vizibile în catalog,
-  // dar nu se pot comanda: butonul e inactiv, iar serverul refuză oricum
-  // comanda dacă produsul ajunge în coș pe altă cale (coș vechi din
-  // localStorage, dinainte ca produsul să se epuizeze).
-  const outOfStock = book.inStock === false;
+  // Dacă are variante, verificarea stocului se face în fereastra VariantDialog/VariantPicker
+  // Pentru produsele simple, verificăm dacă stocul e 0. 
+  // Păstrăm fallback la inStock pentru compatibilitate cu produse vechi neactualizate.
+  const outOfStock = book.inStock === false || (!hasVariants && book.stock === 0);
 
   function handleAdd() {
     addItem(book);

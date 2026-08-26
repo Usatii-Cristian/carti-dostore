@@ -64,18 +64,20 @@ function parseSpecs(value: FormDataEntryValue | null): { label: string; value: s
 // components/admin/VariantEditor). Prețul gol = costă cât produsul de bază.
 function parseVariants(
   value: FormDataEntryValue | null
-): { label: string; price?: number }[] {
+): { label: string; price?: number; stock: number }[] {
   if (typeof value !== "string" || !value.trim()) return [];
   try {
     const parsed: unknown = JSON.parse(value);
     if (!Array.isArray(parsed)) return [];
     return parsed.flatMap((entry) => {
       if (typeof entry !== "object" || entry === null) return [];
-      const { label, price } = entry as Record<string, unknown>;
+      const { label, price, stock } = entry as Record<string, unknown>;
       const l = typeof label === "string" ? label.trim() : "";
       if (!l) return [];
       const p = typeof price === "string" ? Number(price.replace(",", ".")) : Number(price);
-      return [Number.isFinite(p) && p > 0 ? { label: l, price: p } : { label: l }];
+      const s = typeof stock === "string" ? Number(stock) : Number(stock);
+      const stockVal = Number.isFinite(s) && s > 0 ? Math.round(s) : 0;
+      return [Number.isFinite(p) && p > 0 ? { label: l, price: p, stock: stockVal } : { label: l, stock: stockVal }];
     });
   } catch {
     return [];
@@ -148,6 +150,7 @@ async function buildBookData(formData: FormData) {
   // Lista din formular trimite "1"/"0". Absența valorii (formular vechi în
   // cache-ul browserului) înseamnă disponibil, nu epuizat.
   const inStock = String(formData.get("inStock") ?? "1") !== "0";
+  const stock = parseNumber(formData.get("stock")) ?? 0;
 
   const errors: Record<string, string> = {};
   if (title.length < 2) errors.title = "Introdu titlul cărții.";
@@ -212,6 +215,7 @@ async function buildBookData(formData: FormData) {
       displayOrder,
       isNew,
       inStock,
+      stock,
       searchText,
     },
   };

@@ -287,9 +287,22 @@ export function BookForm({
             defaultValue={initialBook?.inStock === false ? "0" : "1"}
             className={inputClass}
           >
-            <option value="1">În stoc</option>
-            <option value="0">Nu este în stoc</option>
+            <option value="1">În stoc (Afișează)</option>
+            <option value="0">Nu este în stoc (Ascunde/Epuizat)</option>
           </select>
+        </Field>
+
+        <Field label="Stoc curent (dacă nu are variante)">
+          <input
+            type="number"
+            name="stock"
+            defaultValue={initialBook?.stock ?? 0}
+            min={0}
+            className={inputClass}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Dacă produsul are variante, stocul se editează la fiecare variantă în parte.
+          </p>
         </Field>
 
         <label className="flex items-center gap-2 text-sm font-medium text-slate-700">

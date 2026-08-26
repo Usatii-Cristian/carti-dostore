@@ -17,18 +17,30 @@ import { CACHE_TAGS } from "@/lib/cache-tags";
  */
 export const revalidate = 300;
 
-const getOutOfStockIds = unstable_cache(
+const getStockData = unstable_cache(
   async () => {
     const books = await prisma.book.findMany({
-      where: { inStock: false },
-      select: { id: true },
+      select: { id: true, inStock: true, stock: true, variants: true },
     });
-    return books.map((book) => book.id);
+    
+    const stockData: Record<string, { inStock: boolean; stock: number; variants: Record<string, number> }> = {};
+    for (const book of books) {
+      const variantsData: Record<string, number> = {};
+      for (const v of book.variants) {
+        variantsData[v.label] = v.stock ?? 0;
+      }
+      stockData[book.id] = {
+        inStock: book.inStock ?? true,
+        stock: book.stock ?? 0,
+        variants: variantsData,
+      };
+    }
+    return stockData;
   },
-  ["out-of-stock-ids"],
+  ["stock-data-v2"],
   { tags: [CACHE_TAGS.books], revalidate: 300 }
 );
 
 export async function GET() {
-  return NextResponse.json({ outOfStock: await getOutOfStockIds() });
+  return NextResponse.json({ stockData: await getStockData() });
 }
