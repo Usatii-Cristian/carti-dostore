@@ -160,7 +160,17 @@ export async function flushNotifications(limit = 20): Promise<FlushSummary> {
       // Și rândurile rămase „SENDING" cu lease-ul expirat: acelea aparțin unei
       // funcții care a murit între claim și rezultat. Lease-ul (nextTryAt, pus
       // în viitor la claim) e ce le deosebește de o trimitere în curs.
-      where: { status: { in: ["PENDING", "SENDING"] }, nextTryAt: { lte: new Date() } },
+      //
+      // `createdAt` mai vechi de un minut e a doua barieră, independentă de
+      // lease: flush-ul rulează în ACEEAȘI cerere care tocmai a pus la coadă
+      // notificarea comenzii curente, iar acolo s-a născut dublarea. Cu pragul
+      // ăsta, rândul proaspăt nici măcar nu intră în selecție — cele două căi
+      // nu se mai pot atinge, indiferent cum iese cursa pe lease.
+      where: {
+        status: { in: ["PENDING", "SENDING"] },
+        nextTryAt: { lte: new Date() },
+        createdAt: { lte: new Date(Date.now() - 60_000) },
+      },
       orderBy: { createdAt: "asc" },
       take: limit,
       select: { id: true, channel: true, payload: true, attempts: true },
