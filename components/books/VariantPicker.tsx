@@ -6,7 +6,7 @@ import { useCartStore } from "@/lib/store/cart";
 import { formatPrice } from "@/lib/format";
 import type { BookCardData } from "@/lib/types";
 
-export type Variant = { label: string; price?: number | null; stock?: number };
+export type Variant = { label: string; price?: number | null; stock?: number | null };
 
 /**
  * Alegerea tipurilor pentru produsele care se vând în mai multe variante

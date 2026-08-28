@@ -69,6 +69,16 @@ export function AwbPanel({
         )}
       </dl>
 
+      {awb && (
+        // Expediția se creează în starea „initial": e în contul FAN, dar nu e
+        // încă cerere de ridicare. Fără nota asta nimeni n-ar ști de ce nu vine
+        // curierul — sau, mai rău, s-ar aștepta să vină înainte de împachetare.
+        <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          Expediția intră în contul FAN cu statusul <strong>Initial</strong>. Curierul vine abia
+          după ce apeși bifa verde din aplicația FAN — fă-o când coletul e împachetat.
+        </p>
+      )}
+
       {(state.status === "error" || cancelState.status === "error") && (
         <p className="mb-3 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />

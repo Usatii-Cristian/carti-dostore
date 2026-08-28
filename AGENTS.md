@@ -162,6 +162,15 @@ FAN, apelat din trei părți:
   atunci comanda poate fi abandonată și n-are rost o cerere de ridicare;
 - **butonul din admin** — pentru reîncercări sau localități pe care nu le-am putut potrivi.
 
+**Expediția se creează în starea `initial`, NU gata de ridicare.** `create_shipment` e
+apelat INTENȚIONAT fără `service_type`: cu el, FAN pune expediția direct în „neridicat",
+adică o cerere reală de ridicare, și curierul poate veni după un colet neîmpachetat (s-a
+întâmplat). Fără el, expediția apare în cont cu toate datele dar în starea „initial", iar
+magazinul apasă bifa verde din aplicația FAN când coletul e gata. Verificat A/B pe API;
+`pickup_requested: false` NU e suficient. Consecință: pe o expediție „initial" FAN refuză
+eticheta și `cancel` — de aceea `cancelShipment` are al doilea drum, prin `change_status`
+cu „anulat".
+
 Garanții: nu aruncă niciodată (rulează în `Promise.allSettled`, un FAN picat nu strică
 comanda), e idempotent (dacă există deja `trackingNumber`, nu face nimic) și pune ramburs
 doar dacă nu s-a încasat deja online. ⚠️ Consecință de business: **fiecare comandă cu plata

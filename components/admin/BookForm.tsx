@@ -255,6 +255,7 @@ export function BookForm({
               initialVariants={(initialBook?.variants ?? []).map((v) => ({
                 label: v.label,
                 price: v.price == null ? "" : String(v.price),
+                stock: v.stock == null ? "" : String(v.stock),
               }))}
             />
           </Field>

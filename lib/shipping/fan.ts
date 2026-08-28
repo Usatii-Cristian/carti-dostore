@@ -273,10 +273,23 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
     from_zipcode: SENDER.zipcode,
     from_phone: SENDER.phone,
     type: "package",
-    // ⚠️ OBLIGATORIU. Fără `service_type`, FAN creează AWB-ul dar îl lasă
-    // NEFINALIZAT: eticheta răspunde „Shipment is not finalized yet" și
-    // anularea „forbidden". Verificat A/B direct pe API — cu el, ambele merg.
-    service_type: "Standard",
+    // ⚠️ `service_type` e LĂSAT INTENȚIONAT AFARĂ.
+    //
+    // Cu el, FAN creează expediția direct în starea „neridicat" — adică o
+    // cerere reală de ridicare: curierul poate veni imediat. S-a întâmplat exact
+    // asta, curierul a venit după un colet care nu era încă împachetat.
+    //
+    // Fără el, expediția se creează în starea „initial": apare în contul FAN cu
+    // toate datele, dar NU e cerere de ridicare. Magazinul apasă bifa verde din
+    // aplicația FAN când coletul e gata, iar de-abia atunci trece în „neridicat"
+    // și vine curierul.
+    //
+    // Verificat A/B direct pe API (28.08.2026): cu `service_type` → status
+    // „neridicat"; fără → „initial". `pickup_requested: false` NU e suficient,
+    // lasă tot „neridicat".
+    //
+    // Consecință: cât timp e „initial", eticheta și `cancel` sunt refuzate de
+    // FAN — vezi `cancelShipment`, care trece atunci prin `change_status`.
     to_name: input.toName,
     to_contact: input.toName,
     to_phone: input.toPhone,
@@ -315,11 +328,26 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
   return { awb: String(awb) };
 }
 
+/**
+ * Anulează expediția, indiferent în ce stare e.
+ *
+ * FAN are două căi și fiecare merge doar pe jumătate din cazuri: `cancel`
+ * funcționează pe expedițiile finalizate („neridicat") și răspunde `forbidden`
+ * pe cele „initial"; `change_status` cu „anulat" le rezolvă pe cele „initial".
+ * Le încercăm pe rând, ca butonul din admin să meargă în ambele situații —
+ * altfel o comandă falsă rămasă în „initial" n-ar putea fi ștearsă din panou.
+ */
 export async function cancelShipment(awb: string): Promise<boolean> {
   if (!isFanConfigured) return false;
   try {
     const res = await fanRequest<unknown>("cancel", { awbno: awb });
-    return res.status === "done";
+    if (res.status === "done") return true;
+
+    const fallback = await fanRequest<unknown>("change_status", {
+      awbno: awb,
+      status: "anulat",
+    });
+    return fallback.status === "done";
   } catch (error) {
     console.error("[fan] cancel a eșuat:", error);
     return false;

@@ -79,7 +79,7 @@ export function VariantEditor({ initialVariants = [] }: { initialVariants?: Vari
 
       <button
         type="button"
-        onClick={() => setVariants((c) => [...c, { label: "", price: "" }])}
+        onClick={() => setVariants((c) => [...c, { label: "", price: "", stock: "" }])}
         className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:border-slate-900 hover:text-slate-900"
       >
         <Plus className="h-4 w-4" aria-hidden="true" />
