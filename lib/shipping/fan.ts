@@ -339,17 +339,23 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
  */
 export async function cancelShipment(awb: string): Promise<boolean> {
   if (!isFanConfigured) return false;
+
+  // Prima cale, pentru expedițiile finalizate. Pe cele „initial" FAN răspunde
+  // cu 200 și corpul „forbidden" — text simplu, nu JSON, deci `fanRequest`
+  // ARUNCĂ. De aceea apelul stă în propriul try: fără el, excepția ar sări
+  // peste a doua cale și butonul de anulare n-ar merge deloc pe „initial".
   try {
     const res = await fanRequest<unknown>("cancel", { awbno: awb });
     if (res.status === "done") return true;
+  } catch {
+    // mergem pe a doua cale
+  }
 
-    const fallback = await fanRequest<unknown>("change_status", {
-      awbno: awb,
-      status: "anulat",
-    });
-    return fallback.status === "done";
+  try {
+    const res = await fanRequest<unknown>("change_status", { awbno: awb, status: "anulat" });
+    return res.status === "done";
   } catch (error) {
-    console.error("[fan] cancel a eșuat:", error);
+    console.error("[fan] anularea a eșuat:", error);
     return false;
   }
 }
