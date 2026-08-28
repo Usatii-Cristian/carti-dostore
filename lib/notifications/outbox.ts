@@ -103,9 +103,13 @@ export async function deliverNotification(record: Enqueued): Promise<void> {
   if (!record) return;
   try {
     // Claim atomic: dacă flushNotifications îl ia simultan, `count` e 0.
+    // `nextTryAt` împins în viitor ține loc de LEASE: cât timp e valabil,
+    // nimeni altcineva nu atinge rândul. Fără el, un rând rămas „SENDING"
+    // (funcție tăiată la jumătatea trimiterii) n-ar mai fi reluat NICIODATĂ —
+    // exact tăcerea pe care coada trebuia s-o elimine.
     const claimed = await prisma.notification.updateMany({
       where: { id: record.id, status: "PENDING" },
-      data: { status: "SENDING", attempts: 1 },
+      data: { status: "SENDING", attempts: 1, nextTryAt: nextTry(1) },
     });
     if (claimed.count === 0) return; // a fost deja preluat de flush
 
@@ -153,7 +157,10 @@ export async function flushNotifications(limit = 20): Promise<FlushSummary> {
   let due: { id: string; channel: string; payload: string; attempts: number }[];
   try {
     due = await prisma.notification.findMany({
-      where: { status: "PENDING", nextTryAt: { lte: new Date() } },
+      // Și rândurile rămase „SENDING" cu lease-ul expirat: acelea aparțin unei
+      // funcții care a murit între claim și rezultat. Lease-ul (nextTryAt, pus
+      // în viitor la claim) e ce le deosebește de o trimitere în curs.
+      where: { status: { in: ["PENDING", "SENDING"] }, nextTryAt: { lte: new Date() } },
       orderBy: { createdAt: "asc" },
       take: limit,
       select: { id: true, channel: true, payload: true, attempts: true },
@@ -165,8 +172,14 @@ export async function flushNotifications(limit = 20): Promise<FlushSummary> {
 
   for (const item of due) {
     // Claim atomic: dacă altcineva a luat rândul între timp, `count` e 0.
+    // Condiția repetă `nextTryAt` ca să nu putem fura un rând al cărui lease e
+    // încă valabil (o trimitere chiar în curs, în altă instanță).
     const claimed = await prisma.notification.updateMany({
-      where: { id: item.id, status: "PENDING" },
+      where: {
+        id: item.id,
+        status: { in: ["PENDING", "SENDING"] },
+        nextTryAt: { lte: new Date() },
+      },
       data: {
         status: "SENDING",
         attempts: { increment: 1 },
