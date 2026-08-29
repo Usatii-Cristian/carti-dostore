@@ -288,7 +288,7 @@ export function BookForm({
             className={inputClass}
           />
           <p className="mt-1 text-xs text-slate-500">
-            0 = produsul apare „Stoc epuizat" și nu poate fi comandat. La produsele cu variante
+            0 = produsul apare „Stoc epuizat&rdquo; și nu poate fi comandat. La produsele cu variante
             contează stocul fiecărei variante, nu acesta.
           </p>
         </Field>
