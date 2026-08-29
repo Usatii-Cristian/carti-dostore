@@ -156,7 +156,11 @@ async function buildBookData(formData: FormData) {
 
   const errors: Record<string, string> = {};
   if (title.length < 2) errors.title = "Introdu titlul cărții.";
-  if (author.length < 2) errors.author = "Introdu autorul.";
+  // Autorul e OPȚIONAL. Catalogul nu e format doar din cărți: etichete,
+  // cartonașe, pliante, manuale — pentru ele „autor" n-are sens. Cât timp a
+  // fost obligatoriu, 18 din 19 produse nu puteau fi salvate deloc din admin:
+  // deschideai produsul, schimbai stocul, apăsai Salvează și primeai
+  // „Introdu autorul", fără ca modificarea să intre.
   if (description.length < 10) errors.description = "Descrierea e prea scurtă.";
   if (!coverImage) errors.coverImage = "Încarcă o copertă.";
   if (!categoryId) errors.categoryId = "Alege o categorie.";
