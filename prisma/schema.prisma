@@ -145,6 +145,11 @@ model Order {
   // plătește clientul (acela vine din regula proprie) — se salvează ca să se
   // vadă marja reală pe fiecare comandă în admin.
   fanCost           Float?
+  // Momentul in care stocul a fost scazut pentru comanda asta. Optional, deci
+  // nu cere backfill pe documentele existente. Rolul lui e sa faca scaderea
+  // IDEMPOTENTA: comanda cu plata la livrare isi ia stocul la plasare, iar daca
+  // adminul o trece apoi pe „Confirmata", nu se scade a doua oara.
+  stockTakenAt      DateTime?
   statusHistory     OrderStatusEvent[] // istoricul stadiilor, cu timestamp
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt

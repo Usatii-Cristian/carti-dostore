@@ -14,6 +14,7 @@ import { cartItemPrice, cartItemTitle, getShippingCost, getCodFee } from "@/lib/
 import { getShippingPrice, resolveCityAndCounty } from "@/lib/shipping/fan";
 import { createAwbForOrder } from "@/lib/shipping/create-awb";
 import { runAfterResponse } from "@/lib/after-response";
+import { adjustOrderStock } from "@/lib/orders/stock";
 import { reconcilePendingPayments } from "@/lib/payments/reconcile";
 import { calculateParcelWeightKg } from "@/lib/shipping/weight";
 import { createQrPayment } from "@/lib/payments/victoriabank";
@@ -303,6 +304,16 @@ export async function createOrderAndPay(
   // sau funcția e tăiată înainte s-o termine, rândurile rămân în coadă și se
   // reîncearcă singure. Așa nu se mai poate întâmpla ca o comandă reală să
   // intre fără ca nimeni să afle (vezi lib/notifications/outbox.ts).
+  // Stocul se ia ACUM pentru comenzile cu plata la livrare: sunt finale in
+  // acest moment (AWB-ul se creeaza pe loc, coletul pleaca). Pana acum stocul
+  // scadea doar la plata online sau daca cineva marca manual comanda
+  // „Confirmata" in admin — ceea ce nu se intampla niciodata, deci sapte comenzi
+  // reale expediate n-au scazut nimic si magazinul putea vinde peste stoc.
+  // Comenzile online isi iau stocul la confirmarea platii (lib/payments/confirm.ts).
+  if (paymentMethod !== "ONLINE") {
+    await adjustOrderStock(order.id, "decrement");
+  }
+
   const queued = await Promise.all([
     enqueueNotification({
       channel: "telegram",
