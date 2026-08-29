@@ -51,7 +51,6 @@ export function CartView() {
       if (item.variantLabel) {
         return item.quantity > (bookStock.variants[item.variantLabel] ?? 0);
       }
-      if (bookStock.inStock === false) return true;
       const hasVariants = Object.keys(bookStock.variants).length > 0;
       return !hasVariants && item.quantity > bookStock.stock;
     });
@@ -87,7 +86,7 @@ export function CartView() {
                   isOutOfStock = false; // Fallback
                 } else {
                   maxStock = bookStock.stock;
-                  isOutOfStock = bookStock.inStock === false || maxStock === 0;
+                  isOutOfStock = maxStock === 0;
                   isExceedingStock = !isOutOfStock && item.quantity > maxStock;
                 }
               }

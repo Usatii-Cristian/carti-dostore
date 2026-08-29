@@ -224,18 +224,27 @@ nimeni să afle. Eșecul nu era problema; **tăcerea** era.
   o adresă inexistentă rămasă de la instalare, deci notificările de comandă nu ajungeau
   nicăieri. Ultimul refugiu în cod e `SMTP_USER`.
 
-### Disponibilitate: `inStock`, fără cantități
+### Disponibilitate: o singură sursă — stocul
 
-Produsele au doar două stări, setate manual din admin (listă cu două opțiuni, nu bifă — o
-bifă nebifată era ambiguă). Un produs epuizat rămâne vizibil în catalog, dar nu se poate
-comanda. Verificat pe patru niveluri: cardul din catalog, pagina produsului, coșul +
-checkout-ul (prin `/api/stock`, fiindcă un coș din localStorage poate fi vechi de o
-săptămână) și, decisiv, Server Action-ul de checkout, care refuză comanda. Primele trei
-sunt doar ca vizitatorul să afle mai devreme; garanția e ultima.
+Produsele au un număr de bucăți (`stock`), setat din admin; produsele cu variante își țin
+stocul pe fiecare tip. Disponibilitatea se calculează într-un SINGUR loc,
+`lib/orders/availability.ts`: pentru produsele cu variante e suma stocurilor lor, altfel
+`stock`. Zero = nu se poate comanda.
 
-⚠️ MongoDB n-are migrări: un câmp nou lipsește din documentele existente, iar Prisma refuză
-să citească un câmp obligatoriu absent. La orice câmp non-opțional adăugat pe un model cu
-date, rulează un backfill (vezi `scripts/backfill-in-stock.mts`) după `prisma db push`.
+⚠️ A existat o perioadă cu DOUĂ surse care se puteau contrazice: un comutator boolean
+`inStock` și numărul. Cardul din catalog și pagina produsului citeau comutatorul, iar coșul
+și checkout-ul numărul — așa au ajuns două produse reale să se afișeze disponibile deși
+toate variantele lor erau pe 0, iar comanda era refuzată abia la ultimul pas. `inStock` a
+fost eliminat; nu-l reintroduce. Dacă e nevoie de „ascunde din vânzare", pune stocul pe 0.
+
+Verificat pe patru niveluri: cardul din catalog, pagina produsului, coșul + checkout-ul
+(prin `/api/stock`, fiindcă un coș din localStorage poate fi vechi de o săptămână) și,
+decisiv, Server Action-ul de checkout, care refuză comanda. Primele trei sunt doar ca
+vizitatorul să afle mai devreme; garanția e ultima.
+
+⚠️ MongoDB n-are migrări: un câmp nou lipsește din documentele existente, iar unul șters
+rămâne în ele. La orice schimbare de câmp pe un model cu date, rulează un script de migrare
+(vezi `scripts/migrate-stock-single-source.mts`) după `prisma db push`.
 
 ### Email tranzacțional — SMTP (nodemailer) în spatele unei abstracții
 

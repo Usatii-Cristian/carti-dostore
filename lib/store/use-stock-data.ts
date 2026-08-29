@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 export type StockData = {
   [bookId: string]: {
-    inStock: boolean;
     stock: number;
     variants: Record<string, number>;
   };

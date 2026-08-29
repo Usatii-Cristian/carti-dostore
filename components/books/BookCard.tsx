@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { BookCardData } from "@/lib/types";
+import { isAvailable } from "@/lib/orders/availability";
 import { StarRating } from "./StarRating";
 import { PriceTag } from "./PriceTag";
 import { FavoriteButton } from "./FavoriteButton";
@@ -37,7 +38,7 @@ export function BookCard({ book, priority = false }: { book: BookCardData; prior
           <FavoriteButton book={book} />
         </div>
 
-        {book.inStock === false ? (
+        {!isAvailable(book) ? (
           // Produsul epuizat rămâne în listă (poate reveni în stoc), dar se vede
           // din prima că nu se poate comanda — altfel clientul ar afla abia la
           // butonul inactiv.

@@ -5,6 +5,7 @@ import { ShoppingCart, Check, PackageX } from "lucide-react";
 import { useCartStore } from "@/lib/store/cart";
 import { VariantDialog } from "./VariantDialog";
 import type { BookCardData } from "@/lib/types";
+import { isAvailable } from "@/lib/orders/availability";
 
 export function AddToCartButton({
   book,
@@ -23,10 +24,10 @@ export function AddToCartButton({
   // o fereastră în care alegerea tipului e obligatorie.
   const hasVariants = (book.variants?.length ?? 0) > 0;
 
-  // Dacă are variante, verificarea stocului se face în fereastra VariantDialog/VariantPicker
-  // Pentru produsele simple, verificăm dacă stocul e 0. 
-  // Păstrăm fallback la inStock pentru compatibilitate cu produse vechi neactualizate.
-  const outOfStock = book.inStock === false || (!hasVariants && book.stock === 0);
+  // Un singur criteriu, calculat în lib/orders/availability.ts: stocul. La
+  // produsele cu variante e suma lor — dacă niciun tip nu mai există, butonul
+  // n-are ce fereastră să deschidă.
+  const outOfStock = !isAvailable(book);
 
   function handleAdd() {
     addItem(book);

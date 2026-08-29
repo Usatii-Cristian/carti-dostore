@@ -37,11 +37,6 @@ model Book {
   // manuală a produselor dintr-o categorie, independent de data adăugării.
   displayOrder    Int     @default(0)
   isNew          Boolean  @default(false)
-  // Disponibilitatea, setată manual din admin. Nu ținem cantități: magazinul
-  // lucrează pe loturi mici și are nevoie doar de „în stoc / stoc epuizat".
-  // Un produs fără stoc se poate vedea, dar nu se poate adăuga în coș, iar
-  // checkout-ul refuză comanda dacă totuși ajunge acolo (coș vechi).
-  inStock        Boolean  @default(true)
   // Stoc general pentru produsele fără variante.
   stock          Int      @default(0)
   tags           String[]

@@ -21,6 +21,7 @@ import { ImageGallery } from "@/components/books/ImageGallery";
 import { BookGrid } from "@/components/books/BookGrid";
 import { AddToCartButton } from "@/components/books/AddToCartButton";
 import { VariantPicker } from "@/components/books/VariantPicker";
+import { isAvailable } from "@/lib/orders/availability";
 import { FaqAccordion } from "@/components/books/FaqAccordion";
 import { Reviews } from "@/components/books/Reviews";
 import { FavoriteButton } from "@/components/books/FavoriteButton";
@@ -54,6 +55,7 @@ export default async function BookPage({ params }: PageProps) {
 
   if (!book) notFound();
 
+  const available = isAvailable(book);
   const galleryImages = [book.coverImage, ...book.images.filter((img) => img !== book.coverImage)];
   const similarBooks = await getSimilarBooks(book.categoryId, book.id, 4);
 
@@ -102,24 +104,26 @@ export default async function BookPage({ params }: PageProps) {
             <PriceTag price={book.price} discountPrice={book.discountPrice} size="lg" />
           </div>
 
-          {/* Disponibilitatea, setată din admin. Nu afișăm cantități — doar cele
-              două stări pe care le are magazinul cu adevărat. */}
+          {/* Disponibilitatea vine DIN STOC (vezi lib/orders/availability.ts),
+              nu dintr-un comutator separat care putea să-l contrazică. Nu
+              afișăm cantitatea: clientului îi folosește doar dacă poate comanda
+              sau nu. */}
           <p
             className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold ${
-              book.inStock ? "bg-emerald-50 text-emerald-700" : "bg-ink/10 text-ink-soft"
+              available ? "bg-emerald-50 text-emerald-700" : "bg-ink/10 text-ink-soft"
             }`}
           >
             <span
               aria-hidden="true"
-              className={`h-2 w-2 rounded-full ${book.inStock ? "bg-emerald-500" : "bg-ink-soft"}`}
+              className={`h-2 w-2 rounded-full ${available ? "bg-emerald-500" : "bg-ink-soft"}`}
             />
-            {book.inStock ? "În stoc" : "Nu este în stoc"}
+            {available ? "În stoc" : "Nu este în stoc"}
           </p>
 
           {/* Produsele cu mai multe tipuri (etichete, cărți în mai multe limbi)
               se adaugă în coș din tabelul de variante, cu cantitate pe fiecare
               tip. Restul păstrează butonul simplu. */}
-          {!book.inStock ? (
+          {!available ? (
             <div className="mt-6 flex flex-wrap gap-3">
               <AddToCartButton book={book} variant="full" />
               <FavoriteButton book={book} variant="full" />

@@ -147,9 +147,6 @@ async function buildBookData(formData: FormData) {
   const bestsellerOrder = parseNumber(formData.get("bestsellerOrder")) ?? 0;
   const displayOrder = parseNumber(formData.get("displayOrder")) ?? 0;
   const isNew = formData.get("isNew") === "on";
-  // Lista din formular trimite "1"/"0". Absența valorii (formular vechi în
-  // cache-ul browserului) înseamnă disponibil, nu epuizat.
-  const inStock = String(formData.get("inStock") ?? "1") !== "0";
   const stock = parseNumber(formData.get("stock")) ?? 0;
 
   const errors: Record<string, string> = {};
@@ -214,7 +211,6 @@ async function buildBookData(formData: FormData) {
       bestsellerOrder,
       displayOrder,
       isNew,
-      inStock,
       stock,
       searchText,
     },

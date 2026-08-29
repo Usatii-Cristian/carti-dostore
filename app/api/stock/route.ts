@@ -20,17 +20,16 @@ export const revalidate = 300;
 const getStockData = unstable_cache(
   async () => {
     const books = await prisma.book.findMany({
-      select: { id: true, inStock: true, stock: true, variants: true },
+      select: { id: true, stock: true, variants: true },
     });
     
-    const stockData: Record<string, { inStock: boolean; stock: number; variants: Record<string, number> }> = {};
+    const stockData: Record<string, { stock: number; variants: Record<string, number> }> = {};
     for (const book of books) {
       const variantsData: Record<string, number> = {};
       for (const v of book.variants) {
         variantsData[v.label] = v.stock ?? 0;
       }
       stockData[book.id] = {
-        inStock: book.inStock ?? true,
         stock: book.stock ?? 0,
         variants: variantsData,
       };
