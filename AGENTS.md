@@ -242,6 +242,22 @@ Verificat pe patru niveluri: cardul din catalog, pagina produsului, coșul + che
 decisiv, Server Action-ul de checkout, care refuză comanda. Primele trei sunt doar ca
 vizitatorul să afle mai devreme; garanția e ultima.
 
+### Când „ia" o comandă stocul
+
+`adjustOrderStock()` (`lib/orders/stock.ts`) e chemată în momentul în care comanda devine
+sigură — aceeași regulă ca la AWB: **plata la livrare** → la plasare (`lib/actions/checkout.ts`),
+**plata online** → la confirmarea de la bancă (`lib/payments/confirm.ts`), **din admin** → la
+schimbarea manuală de status. Înainte scădea DOAR în ultimele două cazuri, iar nimeni nu
+marchează comenzile „Confirmată": șapte comenzi reale, expediate, n-au scăzut nimic, deci
+stocul nu ajungea niciodată la 0.
+
+E **idempotentă**, prin `stockTakenAt` pe comandă — altfel aceeași comandă pierdea stocul de
+două ori (o dată la plasare, încă o dată la trecerea pe „Confirmată").
+
+⚠️ Claim-ul verifică ȘI `isSet: false`, nu doar `null`: pe MongoDB, comenzile create înainte
+de adăugarea câmpului nu îl au deloc în document, iar Prisma NU le potrivește cu `null`.
+Fără asta, claim-ul întorcea mereu 0 și stocul nu se atingea niciodată.
+
 ⚠️ MongoDB n-are migrări: un câmp nou lipsește din documentele existente, iar unul șters
 rămâne în ele. La orice schimbare de câmp pe un model cu date, rulează un script de migrare
 (vezi `scripts/migrate-stock-single-source.mts`) după `prisma db push`.
