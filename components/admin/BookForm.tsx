@@ -279,6 +279,20 @@ export function BookForm({
           </Field>
         </div>
 
+        <Field label="Stoc (bucăți)">
+          <input
+            type="number"
+            name="stock"
+            defaultValue={initialBook?.stock ?? 0}
+            min={0}
+            className={inputClass}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            0 = produsul apare „Stoc epuizat" și nu poate fi comandat. La produsele cu variante
+            contează stocul fiecărei variante, nu acesta.
+          </p>
+        </Field>
+
         <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
           <input
             type="checkbox"

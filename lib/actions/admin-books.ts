@@ -147,7 +147,12 @@ async function buildBookData(formData: FormData) {
   const bestsellerOrder = parseNumber(formData.get("bestsellerOrder")) ?? 0;
   const displayOrder = parseNumber(formData.get("displayOrder")) ?? 0;
   const isNew = formData.get("isNew") === "on";
-  const stock = parseNumber(formData.get("stock")) ?? 0;
+  // Dacă formularul NU trimite deloc câmpul (a fost scos din greșeală la o
+  // modificare de interfață — s-a întâmplat), NU punem 0: asta ar goli stocul
+  // tuturor produselor la prima salvare, tăcut. Absența câmpului lasă valoarea
+  // din baza de date neatinsă; doar un câmp trimis gol înseamnă 0.
+  const stockRaw = formData.get("stock");
+  const stock = stockRaw === null ? undefined : (parseNumber(stockRaw) ?? 0);
 
   const errors: Record<string, string> = {};
   if (title.length < 2) errors.title = "Introdu titlul cărții.";
