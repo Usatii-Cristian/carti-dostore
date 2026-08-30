@@ -13,6 +13,18 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Server Actions primesc obligatoriu `prevState` ca prim parametru, chiar
+      // când nu-l folosesc. Îl numim `_prev` prin convenție; fără regula asta
+      // ESLint se plânge la fiecare, iar zgomotul acoperă avertismentele reale
+      // (am împins de două ori cod cu eroare de lint fiindcă se pierdea în ele).
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

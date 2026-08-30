@@ -242,6 +242,23 @@ Verificat pe patru niveluri: cardul din catalog, pagina produsului, coșul + che
 decisiv, Server Action-ul de checkout, care refuză comanda. Primele trei sunt doar ca
 vizitatorul să afle mai devreme; garanția e ultima.
 
+### Starea comenzii vine de la FAN, nu de la om
+
+`syncShipmentStatuses()` (`lib/shipping/sync-status.ts`) citește starea reală a coletului și
+o pune pe comandă, la fiecare rulare de cron și la deschiderea panoului de admin. Fără ea,
+comenzile rămâneau la „în așteptare" pe veci (nimeni nu le schimbă manual), iar clientul nu
+primea niciodată „coletul e pe drum" / „a fost livrată" — deși textele acelor emailuri erau
+scrise și așteptau degeaba.
+
+Nu dă comanda înapoi, marchează plata la livrare ca încasată la predare și readaugă stocul
+dacă expediția a fost anulată.
+
+⚠️ **Pragul de anunțare (14 zile) nu e de prisos.** Prima sincronizare ar fi trimis 14
+emailuri către clienți reali despre comenzi de acum până la 17 zile, inclusiv „comanda a fost
+livrată" unor oameni care primiseră coletul cu două săptămâni înainte. Peste prag, starea se
+corectează tăcut. Dacă mai apare vreodată o recuperare de istoric, folosește
+`scripts/sync-shipment-history.mts` (rulează în gol implicit, scrie doar cu `--scrie`).
+
 ### Când „ia" o comandă stocul
 
 `adjustOrderStock()` (`lib/orders/stock.ts`) e chemată în momentul în care comanda devine
