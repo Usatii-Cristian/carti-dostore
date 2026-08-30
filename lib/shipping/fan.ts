@@ -273,23 +273,23 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
     from_zipcode: SENDER.zipcode,
     from_phone: SENDER.phone,
     type: "package",
-    // ⚠️ `service_type` e LĂSAT INTENȚIONAT AFARĂ.
+    // ⚠️ `service_type` e OBLIGATORIU. Fără el expediția chiar se creează, și
+    // chiar rămâne în starea „initial" (ce ne doream), DAR e invalidă: FAN o
+    // marchează „Serviciu lipsă. Serviciul este incorect." și magazinul nu poate
+    // lucra cu ea. S-a întâmplat pe o comandă reală. Singura valoare acceptată
+    // pe contul nostru e „Standard" (`list_services?type=main`).
+    service_type: "Standard",
+    // Cererea de ridicare e ce aducea curierul după un colet neîmpachetat.
+    // Cu `false`, expediția intră în cont completă și validă, dar FAN NU
+    // trimite curierul: magazinul cere ridicarea din aplicație când e gata
+    // (`pickup_date` rămâne 0).
+    pickup_requested: false,
     //
-    // Cu el, FAN creează expediția direct în starea „neridicat" — adică o
-    // cerere reală de ridicare: curierul poate veni imediat. S-a întâmplat exact
-    // asta, curierul a venit după un colet care nu era încă împachetat.
-    //
-    // Fără el, expediția se creează în starea „initial": apare în contul FAN cu
-    // toate datele, dar NU e cerere de ridicare. Magazinul apasă bifa verde din
-    // aplicația FAN când coletul e gata, iar de-abia atunci trece în „neridicat"
-    // și vine curierul.
-    //
-    // Verificat A/B direct pe API (28.08.2026): cu `service_type` → status
-    // „neridicat"; fără → „initial". `pickup_requested: false` NU e suficient,
-    // lasă tot „neridicat".
-    //
-    // Consecință: cât timp e „initial", eticheta și `cancel` sunt refuzate de
-    // FAN — vezi `cancelShipment`, care trece atunci prin `change_status`.
+    // De ce nu obținem starea „Initial" din cod: verificat A/B pe API
+    // (30.08.2026) — cu `service_type` → „neridicat"; fără → „initial" dar fără
+    // serviciu; `update_shipment` acceptă doar `cnt`, deci serviciul nu se mai
+    // poate pune după creare. Starea inițială a expedițiilor din API se schimbă
+    // DOAR din setările contului FAN (`Initial_api_status`), nu prin API.
     to_name: input.toName,
     to_contact: input.toName,
     to_phone: input.toPhone,
