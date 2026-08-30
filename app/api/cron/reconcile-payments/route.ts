@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { reconcilePendingPayments } from "@/lib/payments/reconcile";
 import { flushNotifications } from "@/lib/notifications/outbox";
+import { syncShipmentStatuses } from "@/lib/shipping/sync-status";
 
 /**
  * Aceeași reconciliere, rulată de cron-ul Vercel (vezi `vercel.json`), ca să
@@ -25,9 +26,12 @@ export async function GET(request: Request) {
 
   // Ultima plasă de siguranță pentru notificări: chiar dacă nu mai intră nicio
   // comandă și nimeni nu deschide adminul, coada se golește o dată pe zi.
-  const [summary, notifications] = await Promise.all([
+  const [summary, notifications, shipments] = await Promise.all([
     reconcilePendingPayments(),
     flushNotifications(50),
+    // Starea reala a coletelor, de la FAN: fara asta comenzile raman „in
+    // asteptare" pe veci si clientul nu afla niciodata ca i s-a expediat.
+    syncShipmentStatuses(40),
   ]);
-  return NextResponse.json({ ...summary, notifications });
+  return NextResponse.json({ ...summary, notifications, shipments });
 }
