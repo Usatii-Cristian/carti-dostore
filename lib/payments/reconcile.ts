@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { confirmOrderPayment } from "@/lib/payments/confirm";
 import { tgPaymentExpired } from "@/lib/telegram";
+import { sendPaymentExpiredEmail } from "@/lib/email/notifications";
 
 /**
  * Închide comenzile online rămase „în aer", întrebând banca ce s-a întâmplat.
@@ -81,12 +82,24 @@ export async function reconcilePendingPayments(limit = 25): Promise<ReconcileSum
       },
     });
 
-    await tgPaymentExpired({
-      orderNumber: order.orderNumber,
-      customerName: order.customerName,
-      customerPhone: order.customerPhone,
-      total: order.total,
-    });
+    // Magazinul află pe Telegram ca să poată suna. Clientul afla NIMIC: comanda
+    // se anula tăcut, iar el rămânea convins că a comandat. Aproape 6000 de lei
+    // s-au pierdut așa. Pagina de plată știe deja să elibereze un cod nou și să
+    // reactiveze comanda — emailul e singurul care îi spune că se poate.
+    await Promise.allSettled([
+      tgPaymentExpired({
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        customerPhone: order.customerPhone,
+        total: order.total,
+      }),
+      sendPaymentExpiredEmail({
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        orderNumber: order.orderNumber,
+        total: order.total,
+      }),
+    ]);
 
     summary.failed++;
   }

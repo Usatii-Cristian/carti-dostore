@@ -8,6 +8,7 @@ import {
   type PaymentReceiptData,
 } from "./templates/PaymentReceiptEmail";
 import { NewsletterWelcomeEmail } from "./templates/NewsletterWelcomeEmail";
+import { PaymentExpiredEmail } from "./templates/PaymentExpiredEmail";
 import { OrderStatusUpdateEmail } from "./templates/OrderStatusUpdateEmail";
 import { NewBookAnnouncementEmail } from "./templates/NewBookAnnouncementEmail";
 import { buildReceiptPdf } from "./pdf/receipt-pdf";
@@ -73,6 +74,30 @@ export async function sendPaymentReceiptEmail(receipt: PaymentReceiptData): Prom
     subject: `Bon electronic — comanda ${receipt.orderNumber} (${receipt.total.toFixed(2)} lei)`,
     react: PaymentReceiptEmail({ receipt }),
     attachments,
+  });
+}
+
+/**
+ * Comanda online rămasă neachitată, cu codul MIA expirat. Clientul nu afla
+ * nimic: comanda se anula tăcut, iar el rămânea convins că a comandat. Pagina
+ * de plată eliberează un cod nou și reactivează comanda — emailul ăsta e
+ * singurul care îi spune că se poate.
+ */
+export async function sendPaymentExpiredEmail(input: {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  total: number;
+}): Promise<void> {
+  await sendEmail({
+    to: input.customerEmail,
+    subject: `Comanda ${input.orderNumber} te mai așteaptă — plata n-a fost finalizată`,
+    react: PaymentExpiredEmail({
+      customerName: input.customerName,
+      orderNumber: input.orderNumber,
+      total: input.total,
+      paymentUrl: `${SITE_URL}/checkout/plata?order=${encodeURIComponent(input.orderNumber)}`,
+    }),
   });
 }
 
