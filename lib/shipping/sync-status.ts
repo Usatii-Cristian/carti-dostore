@@ -23,9 +23,12 @@ import { adjustOrderStock } from "@/lib/orders/stock";
 
 /** Starea de la FAN → starea comenzii la noi. */
 const MAPARE: Record<string, OrderStatus> = {
-  // „initial" = expediția e creată dar magazinul n-a apăsat încă bifa verde;
-  // coletul nu e nici măcar cerut la ridicare, deci comanda rămâne cum e.
-  neridicat: "PROCESSING", // pregătit, curierul urmează să-l ia
+  // „neridicat" NU e aici intenționat. Expedițiile se creează cu
+  // `pickup_requested: false`, deci „neridicat" e pur și simplu starea de după
+  // creare — nu spune nimic despre colet. Mapat pe PROCESSING, trimitea
+  // clientului „îți ambalăm comanda" în secunda în care comanda intra, înainte
+  // ca depozitul să vadă ceva. Momentul real în care coletul e gata e cererea
+  // de ridicare, făcută din admin (vezi `requestPickup`).
   in_curs: "SHIPPED",
   avizat: "SHIPPED",
   livrat: "DELIVERED",

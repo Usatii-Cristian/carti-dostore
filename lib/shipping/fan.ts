@@ -337,6 +337,43 @@ export async function createShipment(input: CreateShipmentInput): Promise<Create
  * Le încercăm pe rând, ca butonul din admin să meargă în ambele situații —
  * altfel o comandă falsă rămasă în „initial" n-ar putea fi ștearsă din panou.
  */
+/**
+ * Cheamă curierul pentru un colet deja pregătit.
+ *
+ * Expedițiile se creează cu `pickup_requested: false` — apar complete în contul
+ * FAN, dar NU trimit curierul. Asta a fost problema reală: curierul ajungea la
+ * poartă înainte ca depozitul să apuce să vadă comanda. Ridicarea e o cerere
+ * separată, făcută abia când coletul e împachetat.
+ *
+ * Nu aruncă: butonul din admin trebuie să arate motivul, nu să crape.
+ */
+export async function orderPickup(
+  awb: string,
+  options: { weightKg?: number; parcels?: number; comments?: string } = {}
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  if (!isFanConfigured) return { ok: false, message: "FAN_API_KEY nu e configurat." };
+
+  try {
+    const res = await fanRequest<unknown>("order_pickup", {
+      awbno: awb,
+      weight: options.weightKg,
+      cnt: options.parcels ?? 1,
+      comments: options.comments,
+    });
+    if (res.status === "done") return { ok: true };
+    return {
+      ok: false,
+      message: res.message ?? res.error ?? "FAN n-a acceptat cererea de ridicare.",
+    };
+  } catch (error) {
+    console.error("[fan] order_pickup a eșuat:", error);
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Cererea de ridicare a eșuat.",
+    };
+  }
+}
+
 export async function cancelShipment(awb: string): Promise<boolean> {
   if (!isFanConfigured) return false;
 

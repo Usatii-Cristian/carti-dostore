@@ -149,6 +149,10 @@ model Order {
   // nu cere backfill pe documentele existente. Rolul lui e sa faca scaderea
   // IDEMPOTENTA: comanda cu plata la livrare isi ia stocul la plasare, iar daca
   // adminul o trece apoi pe „Confirmata", nu se scade a doua oara.
+  // Momentul in care s-a cerut ridicarea la FAN. Expeditia se creeaza fara
+  // cerere de ridicare (pickup_requested: false), ca sa nu vina curierul peste
+  // un colet neimpachetat; magazinul cheama curierul din admin cand e gata.
+  pickupRequestedAt DateTime?
   stockTakenAt      DateTime?
   statusHistory     OrderStatusEvent[] // istoricul stadiilor, cu timestamp
   createdAt         DateTime           @default(now())

@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Truck, ExternalLink, AlertTriangle, Printer, XCircle } from "lucide-react";
+import { Truck, ExternalLink, AlertTriangle, Printer, XCircle, PackageCheck } from "lucide-react";
 import {
   generateAwb,
   cancelAwb,
+  requestPickup,
   fetchLabelUrl,
   type AwbState,
 } from "@/lib/actions/admin-shipping";
@@ -14,11 +15,13 @@ export function AwbPanel({
   existingAwb,
   county,
   fanCost,
+  pickupRequestedAt,
 }: {
   orderId: string;
   existingAwb: string | null;
   county: string | null;
   fanCost: number | null;
+  pickupRequestedAt: Date | null;
 }) {
   const [state, action, pending] = useActionState(generateAwb.bind(null, orderId), {
     status: "idle",
@@ -27,7 +30,12 @@ export function AwbPanel({
     cancelAwb.bind(null, orderId),
     { status: "idle" } as AwbState
   );
+  const [pickupState, pickupAction, pickupPending] = useActionState(
+    requestPickup.bind(null, orderId),
+    { status: "idle" } as AwbState
+  );
   const [labelLoading, setLabelLoading] = useState(false);
+  const curierChemat = Boolean(pickupRequestedAt) || pickupState.status === "success";
 
   // AWB-ul curent: cel proaspăt generat, sau cel salvat — dar dispare după anulare.
   const awb = cancelState.status === "success" ? null : (state.awb ?? existingAwb);
@@ -69,20 +77,34 @@ export function AwbPanel({
         )}
       </dl>
 
-      {awb && (
-        // Expediția se creează în starea „initial": e în contul FAN, dar nu e
-        // încă cerere de ridicare. Fără nota asta nimeni n-ar ști de ce nu vine
-        // curierul — sau, mai rău, s-ar aștepta să vină înainte de împachetare.
+      {awb && !curierChemat && (
+        // Expediția intră în contul FAN completă, dar FĂRĂ cerere de ridicare
+        // (`pickup_requested: false`). Fără nota asta nimeni n-ar ști de ce nu
+        // vine curierul — sau, mai rău, l-ar aștepta peste un colet neîmpachetat.
         <p className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-          Expediția intră în contul FAN cu statusul <strong>Initial</strong>. Curierul vine abia
-          după ce apeși bifa verde din aplicația FAN — fă-o când coletul e împachetat.
+          Expediția e în contul FAN, dar <strong>curierul nu a fost chemat</strong>. Apasă butonul
+          de mai jos abia când coletul e împachetat și gata de predat.
+        </p>
+      )}
+      {awb && curierChemat && (
+        <p className="mb-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+          <PackageCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Curierul a fost chemat
+          {pickupRequestedAt
+            ? ` pe ${new Date(pickupRequestedAt).toLocaleString("ro-MD", { timeZone: "Europe/Chisinau", dateStyle: "short", timeStyle: "short" })}`
+            : ""}
+          .
         </p>
       )}
 
-      {(state.status === "error" || cancelState.status === "error") && (
+      {(state.status === "error" || cancelState.status === "error" || pickupState.status === "error") && (
         <p className="mb-3 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          {state.status === "error" ? state.message : cancelState.message}
+          {state.status === "error"
+            ? state.message
+            : cancelState.status === "error"
+              ? cancelState.message
+              : pickupState.message}
         </p>
       )}
       {(state.status === "success" || cancelState.status === "success") && (
@@ -93,6 +115,19 @@ export function AwbPanel({
 
       {awb ? (
         <div className="flex flex-wrap items-center gap-2">
+          {!curierChemat && (
+            <form action={pickupAction}>
+              <button
+                type="submit"
+                disabled={pickupPending}
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:opacity-60"
+              >
+                <PackageCheck className="h-4 w-4" aria-hidden="true" />
+                {pickupPending ? "Se cheamă…" : "Coletul e gata — cheamă curierul"}
+              </button>
+            </form>
+          )}
+
           <button
             type="button"
             onClick={openLabel}

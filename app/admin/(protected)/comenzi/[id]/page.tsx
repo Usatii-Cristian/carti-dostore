@@ -161,6 +161,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
             existingAwb={order.trackingNumber}
             county={order.county}
             fanCost={order.fanCost}
+            pickupRequestedAt={order.pickupRequestedAt}
           />
         </div>
 
